@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorkGami - Kinerja & Gamifikasi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Amiri:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        arabic: ['Amiri', 'serif']
+                    },
+                    colors: {
+                        wahdah: {
+                            50: '#eefaf4', 100: '#d6f1e2', 200: '#aee2c8', 300: '#7ccca9', 400: '#48ac83',
+                            500: '#25906a', 600: '#177355', 700: '#145c46', 800: '#124a3a', 900: '#0e3a2e', 950: '#07211a'
+                        },
+                        gold: {
+                            400: '#dcb96a', 500: '#c9a24b', 600: '#a9843a'
+                        }
+                    },
+                    boxShadow: {
+                        soft: '0 2px 10px -2px rgba(14,58,46,0.08), 0 8px 24px -8px rgba(14,58,46,0.10)',
+                        softer: '0 1px 4px rgba(14,58,46,0.06)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        #sidebar { transition: transform 0.35s cubic-bezier(.4,0,.2,1), width 0.35s cubic-bezier(.4,0,.2,1); }
+        #mainArea { transition: margin-left 0.35s cubic-bezier(.4,0,.2,1); }
+
+        .view-fade { animation: viewFade 0.4s ease both; }
+        @keyframes viewFade {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-thumb { background: #aee2c8; border-radius: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+
+        .pattern-bg {
+            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0);
+            background-size: 18px 18px;
+        }
+
+        .icon-badge {
+            width: 48px; height: 48px;
+            background: rgba(255,255,255,0.92);
+            border: 2px solid #e6c65c; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; padding: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body class="bg-wahdah-50/40 text-wahdah-950 min-h-screen">
+
+<div class="flex min-h-screen">
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside id="sidebar" class="fixed z-30 md:sticky md:top-0 w-72 -translate-x-full md:translate-x-0 h-screen bg-wahdah-800 text-white flex flex-col shadow-soft">
+        <div class="px-6 py-6 border-b border-white/10 flex items-center gap-3">
+            <div class="icon-badge text-wahdah-600 text-xl"><i class="fa-solid fa-gamepad"></i></div>
+            <div>
+                <p class="font-bold leading-tight text-[15px]">WorkGam</p>
+                <p class="text-wahdah-200 text-[10px] tracking-wide uppercase">Sistem Kinerja</p>
+            </div>
+        </div>
+
+        <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+            <p class="px-3 text-[11px] uppercase tracking-wider text-wahdah-300 font-semibold mb-2 user-only hidden">Menu Karyawan</p>
+            
+            <button type="button" id="navUserDashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors user-only hidden" onclick="switchView('viewUserDashboard', this)">
+                <i class="fa-solid fa-briefcase w-5 text-center"></i>
+                <span>Ruang Kerja Saya</span>
+            </button>
+
+            <button type="button" id="navUserHistory" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors user-only hidden" onclick="switchView('viewUserHistory', this)">
+                <i class="fa-solid fa-clock-rotate-left w-5 text-center"></i>
+                <span>Riwayat Aktivitas</span>
+            </button>
+
+            <p class="px-3 text-[11px] uppercase tracking-wider text-wahdah-300 font-semibold mt-6 mb-2 admin-only hidden">Menu Admin</p>
+            
+            <button type="button" id="navAdminDashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewAdminDashboard', this)">
+                <i class="fa-solid fa-clipboard-check w-5 text-center"></i>
+                <span>Antrean Persetujuan</span>
+            </button>
+            
+            <button type="button" id="navAdminHistory" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewAdminHistory', this)">
+                <i class="fa-solid fa-list-check w-5 text-center"></i>
+                <span>Riwayat Kinerja</span>
+            </button>
+
+            <button type="button" id="navLeaderboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewLeaderboard', this)">
+                <i class="fa-solid fa-ranking-star w-5 text-center"></i>
+                <span>Leaderboard Poin</span>
+            </button>
+        </nav>
+
+        <div class="px-6 py-5 border-t border-white/10 flex items-center justify-between">
+            <div class="min-w-0 flex-1 pr-2">
+                <p id="sidebarUserName" class="text-sm font-bold truncate">Belum Login</p>
+                <p id="sidebarUserRole" class="text-[10px] text-wahdah-300">-</p>
+            </div>
+            <button id="btnLogout" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-red-500/80 text-white flex items-center justify-center transition-colors hidden" title="Logout" onclick="logout()">
+                <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+            </button>
+        </div>
+    </aside>
+
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 z-20 hidden md:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- ============ MAIN AREA ============ -->
+    <div id="mainArea" class="flex-1 flex flex-col min-w-0 relative">
+
+        <header class="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-wahdah-100 px-4 md:px-8 py-4 flex items-center gap-4 shadow-softer">
+            <button id="hamburgerBtn" class="w-10 h-10 rounded-lg hover:bg-wahdah-50 text-wahdah-700 flex items-center justify-center transition-colors" onclick="toggleSidebar()">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+            <div>
+                <h1 id="pageTitle" class="font-bold text-wahdah-900 text-lg leading-tight">Selamat Datang</h1>
+                <p id="pageSubtitle" class="text-wahdah-500 text-xs">Sistem Kinerja & Gamifikasi</p>
+            </div>
+        </header>
+
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto h-[calc(100vh-73px)] relative">
+
+            <!-- Loading Overlay -->
+            <div id="loadingOverlay" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+                <div class="w-10 h-10 border-4 border-wahdah-100 border-t-wahdah-600 rounded-full animate-spin mb-4"></div>
+                <h2 class="text-wahdah-900 font-bold text-sm">Menghubungkan Database...</h2>
+                <p class="text-xs text-wahdah-500 mt-1">Mohon tunggu sebentar</p>
+            </div>
+
+            <!-- ================= VIEW: LOGIN ================= -->
+            <section id="viewLogin" class="view-fade flex flex-col items-center justify-center h-full hidden">
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-8 w-full max-w-sm text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-wahdah-50 text-wahdah-600 flex items-center justify-center mx-auto mb-4 text-2xl shadow-softer border border-wahdah-100">
+                        <i class="fa-solid fa-fingerprint"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-wahdah-900 mb-1">Akses Sistem</h2>
+                    <p class="text-xs text-wahdah-500 mb-6">Masukkan kredensial Anda</p>
+                    
+                    <form id="formLogin" class="space-y-4" onsubmit="handleLogin(event)">
+                        <div class="text-left">
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">User ID</label>
+                            <input type="text" id="inpUserId" required placeholder="Contoh: USR-01" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white transition-shadow">
+                        </div>
+                        <div class="text-left">
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">PIN Rahasia</label>
+                            <input type="password" id="inpPin" required placeholder="&bull;&bull;&bull;&bull;" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white tracking-widest transition-shadow">
+                        </div>
+                        <button type="submit" class="w-full bg-wahdah-700 hover:bg-wahdah-800 text-white font-medium text-sm rounded-xl py-3 mt-2 shadow-sm transition-colors">
+                            Masuk <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </form>
+                    
+                    <div class="mt-6 p-3 bg-wahdah-50 rounded-xl text-left border border-wahdah-100">
+                        <p class="text-[10px] font-bold text-wahdah-600 mb-1 uppercase tracking-wider"><i class="fa-solid fa-circle-info mr-1"></i> Mode Simulasi</p>
+                        <p class="text-xs text-wahdah-500 font-mono">Admin: <span class="font-bold text-wahdah-800">ADM-01</span> / <span class="font-bold text-wahdah-800">1234</span></p>
+                        <p class="text-xs text-wahdah-500 font-mono">User: <span class="font-bold text-wahdah-800">USR-01</span> / <span class="font-bold text-wahdah-800">1234</span></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VIEW: KARYAWAN (RUANG KERJA SAYA) ================= -->
+            <section id="viewUserDashboard" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
+                <!-- Info Papan Atas -->
+                <div class="bg-gradient-to-br from-wahdah-700 to-wahdah-900 rounded-2xl shadow-soft p-6 text-white pattern-bg flex items-center justify-between">
+                    <div>
+                        <p class="text-wahdah-200 text-xs font-medium mb-1">Total Poin Kinerja Anda</p>
+                        <div class="flex items-baseline gap-2">
+                            <span id="userTotalPoin" class="text-4xl font-bold">0</span>
+                            <span class="text-sm text-wahdah-300">Poin</span>
+                        </div>
+                    </div>
+                    <div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center text-3xl text-gold-400 border-2 border-white/20 backdrop-blur-sm">
+                        <i class="fa-solid fa-medal"></i>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Form Input Jobdesk -->
+                    <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5 md:p-6 flex flex-col">
+                        <h3 class="text-sm font-bold text-wahdah-900 mb-4 flex items-center gap-2 border-b border-wahdah-50 pb-3">
+                            <div class="w-8 h-8 rounded-lg bg-wahdah-50 text-wahdah-600 flex items-center justify-center"><i class="fa-solid fa-keyboard"></i></div> 
+                            Catat Tugas Harian
+                        </h3>
+                        <form id="formJobdesk" class="flex-1 flex flex-col space-y-4" onsubmit="submitJobdesk(event)">
+                            <div class="flex-1 space-y-3">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1">Deskripsi Tugas Selesai</label>
+                                
+                                <!-- Container Input Dinamis -->
+                                <div id="jobdeskInputsContainer" class="space-y-3">
+                                    <div class="jobdesk-input-group relative flex items-start gap-2">
+                                        <textarea rows="2" required placeholder="Contoh: Menyusun laporan keuangan bulanan..." class="flex-1 rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white resize-none transition-colors"></textarea>
+                                        <!-- Tombol Hapus (Disembunyikan di elemen pertama) -->
+                                        <button type="button" class="hidden btn-hapus-tugas shrink-0 mt-1 w-8 h-8 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors" onclick="removeJobdeskInput(this)" title="Hapus baris ini">
+                                            <i class="fa-solid fa-trash-can text-sm"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between mt-2">
+                                    <button type="button" onclick="addJobdeskInput()" class="text-xs font-bold text-wahdah-600 hover:text-wahdah-800 hover:underline flex items-center gap-1 transition-colors">
+                                        <i class="fa-solid fa-plus"></i> Tambah Tugas Lainnya
+                                    </button>
+                                    <p class="text-[10px] text-wahdah-400">Minimal 10 karakter/tugas.</p>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="w-full bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-sm rounded-xl py-2.5 transition-colors flex items-center justify-center gap-2 shadow-sm mt-auto">
+                                <i class="fa-solid fa-paper-plane"></i> Kirim Laporan Tugas
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Form Input Piket -->
+                    <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5 md:p-6">
+                        <h3 class="text-sm font-bold text-wahdah-900 mb-4 flex items-center gap-2 border-b border-wahdah-50 pb-3">
+                            <div class="w-8 h-8 rounded-lg bg-gold-50 text-gold-600 flex items-center justify-center"><i class="fa-solid fa-broom"></i></div> 
+                            Laporan Piket Kebersihan
+                        </h3>
+                        <form id="formPiket" class="space-y-4" onsubmit="submitPiket(event)">
+                            <div>
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1">Tanggal Piket</label>
+                                <input type="date" id="inpPiketTanggal" required class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1">Area Piket</label>
+                                <select id="inpPiketJenis" required class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white">
+                                    <option value="" disabled selected>Pilih Area...</option>
+                                    <option value="Ruang Utama">Ruang Utama</option>
+                                    <option value="Dapur & Pantry">Dapur & Pantry</option>
+                                    <option value="Toilet">Toilet</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1">Unggah Bukti (Opsional di Simulasi)</label>
+                                <input type="file" id="inpPiketFoto" accept="image/*" class="w-full text-sm text-wahdah-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-wahdah-50 file:text-wahdah-700 hover:file:bg-wahdah-100 cursor-pointer">
+                            </div>
+                            <button type="submit" class="w-full bg-gold-500 hover:bg-gold-600 text-white font-medium text-sm rounded-xl py-2.5 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                                <i class="fa-solid fa-upload"></i> Kirim Laporan Piket
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VIEW: KARYAWAN (RIWAYAT AKTIVITAS) ================= -->
+            <section id="viewUserHistory" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
+                    <div class="px-5 py-4 border-b border-wahdah-100 flex items-center justify-between bg-wahdah-50/50">
+                        <h3 class="text-sm font-bold text-wahdah-900 flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-wahdah-600"></i> Daftar Laporan & Aktivitas Anda
+                        </h3>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-wahdah-50 border-b border-wahdah-100">
+                                <tr class="text-wahdah-700 text-xs uppercase tracking-wide">
+                                    <th class="text-left font-semibold px-5 py-3.5 whitespace-nowrap">Tanggal</th>
+                                    <th class="text-left font-semibold px-5 py-3.5 min-w-[250px]">Rincian Aktivitas</th>
+                                    <th class="text-center font-semibold px-5 py-3.5 whitespace-nowrap">Status</th>
+                                    <th class="text-right font-semibold px-5 py-3.5 whitespace-nowrap">Poin Reward</th>
+                                    <th class="text-center font-semibold px-5 py-3.5 whitespace-nowrap">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-history-tbody" class="divide-y divide-wahdah-50 bg-white">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VIEW: ADMIN (ANTREAN PERSETUJUAN) ================= -->
+            <section id="viewAdminDashboard" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
+                    <div class="px-5 py-4 border-b border-wahdah-100 bg-wahdah-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-sm font-bold text-wahdah-900 flex items-center gap-2">
+                                <i class="fa-solid fa-clipboard-list text-wahdah-600"></i> Menunggu Persetujuan
+                            </h3>
+                            <span class="bg-red-100 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-full" id="adminPendingCount">0</span>
+                        </div>
+                        
+                        <!-- Wrapper Filter & Tombol Action -->
+                        <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                            <!-- Dropdown Filter Nama Karyawan -->
+                            <div class="flex items-center gap-2 w-full sm:w-auto">
+                                <i class="fa-solid fa-filter text-wahdah-400 text-xs"></i>
+                                <select id="adminQueueFilterNama" class="w-full sm:w-48 text-xs border border-wahdah-200 rounded-lg px-2 py-1.5 focus:ring-1 focus:ring-wahdah-400 outline-none bg-white" onchange="renderAdminQueue()">
+                                    <option value="ALL">Semua Karyawan</option>
+                                    <!-- Option list dari JS -->
+                                </select>
+                            </div>
+
+                            <!-- Tombol Approve Semua -->
+                            <button id="btnApproveAll" class="hidden text-xs bg-wahdah-600 hover:bg-wahdah-700 text-white px-3.5 py-1.5 rounded-lg font-bold transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap" onclick="promptApproveAll()">
+                                <i class="fa-solid fa-check-double"></i> Setujui Semua
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-wahdah-50 border-b border-wahdah-100">
+                                <tr class="text-wahdah-700 text-xs uppercase tracking-wide">
+                                    <th class="text-left font-semibold px-5 py-3.5 whitespace-nowrap">Tanggal</th>
+                                    <th class="text-left font-semibold px-5 py-3.5 whitespace-nowrap">Karyawan</th>
+                                    <th class="text-left font-semibold px-5 py-3.5 min-w-[200px]">Laporan</th>
+                                    <th class="text-center font-semibold px-5 py-3.5 whitespace-nowrap">Aksi / Poin</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-queue-tbody" class="divide-y divide-wahdah-50 bg-white">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VIEW: ADMIN (RIWAYAT KINERJA) ================= -->
+            <section id="viewAdminHistory" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
+                    <div class="px-5 py-4 border-b border-wahdah-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-wahdah-50/50">
+                        <h3 class="text-sm font-bold text-wahdah-900 flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-wahdah-600"></i> Riwayat Seluruh Laporan
+                        </h3>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <i class="fa-solid fa-filter text-wahdah-400 text-xs"></i>
+                            <select id="adminFilterNama" class="w-full sm:w-48 text-xs border border-wahdah-200 rounded-lg px-2 py-1.5 focus:ring-1 focus:ring-wahdah-400 outline-none bg-white" onchange="renderAdminHistory()">
+                                <option value="ALL">Semua Karyawan</option>
+                                <!-- Option list dari JS -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto h-80">
+                        <table class="w-full text-sm relative">
+                            <thead class="bg-wahdah-50 border-b border-wahdah-100 sticky top-0 z-10 shadow-sm">
+                                <tr class="text-wahdah-700 text-xs uppercase tracking-wide">
+                                    <th class="text-left font-semibold px-5 py-3.5 whitespace-nowrap">Tanggal</th>
+                                    <th class="text-left font-semibold px-5 py-3.5 whitespace-nowrap">Karyawan</th>
+                                    <th class="text-left font-semibold px-5 py-3.5 min-w-[200px]">Aktivitas</th>
+                                    <th class="text-center font-semibold px-5 py-3.5 whitespace-nowrap">Status</th>
+                                    <th class="text-right font-semibold px-5 py-3.5 whitespace-nowrap">Poin</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-history-tbody" class="divide-y divide-wahdah-50 bg-white">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VIEW: LEADERBOARD ================= -->
+            <section id="viewLeaderboard" class="view-section hidden view-fade max-w-4xl mx-auto space-y-6">
+                <div class="bg-gradient-to-br from-gold-500 to-gold-600 rounded-2xl shadow-soft border border-gold-400 p-6 text-white text-center pattern-bg">
+                    <h2 class="text-2xl font-bold mb-1"><i class="fa-solid fa-trophy mr-2"></i> Leaderboard Karyawan</h2>
+                    <p class="text-xs text-gold-100 opacity-90">Peringkat berdasarkan akumulasi poin kinerja dan kebersihan</p>
+                </div>
+
+                <!-- Leaderboard Filter -->
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-4 flex flex-col md:flex-row gap-4 items-end">
+                    <div class="flex-1 w-full">
+                        <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Mulai Tanggal</label>
+                        <input type="date" id="lbFilterStart" class="w-full rounded-xl border border-wahdah-200 px-3 py-2 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none">
+                    </div>
+                    <div class="flex-1 w-full">
+                        <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Sampai Tanggal</label>
+                        <input type="date" id="lbFilterEnd" class="w-full rounded-xl border border-wahdah-200 px-3 py-2 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none">
+                    </div>
+                    <button type="button" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-sm rounded-xl px-4 py-2 transition-colors shadow-sm" onclick="renderLeaderboard()">
+                        Terapkan
+                    </button>
+                    <button type="button" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-sm rounded-xl px-4 py-2 transition-colors border border-gray-200" onclick="resetLeaderboardFilter()">
+                        Reset
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
+                    <table class="w-full text-sm">
+                        <thead class="bg-wahdah-50 border-b border-wahdah-100">
+                            <tr class="text-wahdah-700 text-xs uppercase tracking-wide">
+                                <th class="text-center font-semibold px-5 py-4 w-20">Peringkat</th>
+                                <th class="text-left font-semibold px-5 py-4">Karyawan</th>
+                                <th class="text-right font-semibold px-5 py-4 w-32">Total Poin</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-tbody" class="divide-y divide-wahdah-50">
+                            <!-- Injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // 1. STATE & INISIALISASI
+    // ==========================================
+    let db = { users: [], jobdesk: [], piket: [] };
+    let currentUser = null;
+
+    window.addEventListener('DOMContentLoaded', loadData);
+
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.toggle('-translate-x-full');
+        overlay.classList.toggle('hidden');
+    }
+
+    function loadData() {
+        const overlay = document.getElementById('loadingOverlay');
+        const viewLogin = document.getElementById('viewLogin');
+        
+        if (typeof google === 'undefined') {
+            setTimeout(() => {
+                db = getDummyData();
+                overlay.classList.add('hidden');
+                viewLogin.classList.remove('hidden');
+            }, 800);
+        } else {
+            google.script.run
+                .withSuccessHandler(res => {
+                    db = res;
+                    overlay.classList.add('hidden');
+                    viewLogin.classList.remove('hidden');
+                })
+                .withFailureHandler(err => {
+                    console.error(err);
+                    Swal.fire('Error', 'Gagal memuat data dari database!', 'error');
+                    overlay.classList.add('hidden');
+                    viewLogin.classList.remove('hidden');
+                })
+                .getAllData();
+        }
+    }
+
+    function getDummyData() {
+        const today = new Date().toISOString().split('T')[0];
+        return {
+            users: [
+                { User_ID: 'ADM-01', Nama: 'Admin Master', Role: 'Admin', PIN: '1234' },
+                { User_ID: 'USR-01', Nama: 'Ahmad Karyawan', Role: 'User', PIN: '1234' },
+                { User_ID: 'USR-02', Nama: 'Budi Karyawan', Role: 'User', PIN: '1234' }
+            ],
+            jobdesk: [
+                { Task_ID: 'TSK-1', User_ID: 'USR-01', Tanggal: today, Deskripsi_Tugas: 'Menyusun laporan bulanan keuangan', Status: 'Approved', Poin: 10 },
+                { Task_ID: 'TSK-2', User_ID: 'USR-01', Tanggal: today, Deskripsi_Tugas: 'Menelepon 5 klien baru', Status: 'Pending', Poin: 0 },
+                { Task_ID: 'TSK-3', User_ID: 'USR-02', Tanggal: today, Deskripsi_Tugas: 'Memperbaiki bug di aplikasi internal', Status: 'Pending', Poin: 0 }
+            ],
+            piket: [
+                { Schedule_ID: 'PKT-1', User_ID: 'USR-01', Tanggal: today, Jenis_Piket: 'Ruang Utama', Status: 'Approved', Bukti_Foto_URL: '#', Poin: 5 }
+            ]
+        };
+    }
+
+    // ==========================================
+    // 2. AUTENTIKASI & NAVIGASI
+    // ==========================================
+    function handleLogin(e) {
+        e.preventDefault();
+        const id = document.getElementById('inpUserId').value.trim();
+        const pin = document.getElementById('inpPin').value.trim();
+        
+        const user = db.users.find(u => u.User_ID === id && String(u.PIN) === pin);
+        
+        if(user) {
+            currentUser = user;
+            setupDashboard();
+        } else {
+            Swal.fire({ icon: 'error', title: 'Login Gagal', text: 'User ID atau PIN salah.', confirmButtonColor: '#25906a' });
+        }
+    }
+
+    function setupDashboard() {
+        document.getElementById('sidebarUserName').textContent = currentUser.Nama;
+        document.getElementById('sidebarUserRole').textContent = currentUser.Role;
+        document.getElementById('btnLogout').classList.remove('hidden');
+        document.getElementById('viewLogin').classList.add('hidden');
+
+        document.querySelectorAll('.user-only').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+        
+        if(currentUser.Role === 'User') {
+            document.querySelectorAll('.user-only').forEach(el => el.classList.remove('hidden'));
+            
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('inpPiketTanggal').value = todayStr;
+            
+            document.getElementById('navUserDashboard').click();
+            updateUserPoints();
+        } else if (currentUser.Role === 'Admin') {
+            document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+            populateAdminFilter();
+            document.getElementById('navAdminDashboard').click();
+        }
+    }
+
+    function logout() {
+        currentUser = null;
+        document.getElementById('sidebarUserName').textContent = 'Belum Login';
+        document.getElementById('sidebarUserRole').textContent = '-';
+        document.getElementById('btnLogout').classList.add('hidden');
+        
+        document.querySelectorAll('.user-only, .admin-only').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+        
+        document.getElementById('formLogin').reset();
+        document.getElementById('viewLogin').classList.remove('hidden');
+        document.getElementById('pageTitle').textContent = 'Selamat Datang';
+        document.getElementById('pageSubtitle').textContent = 'Sistem Kinerja & Gamifikasi';
+    }
+
+    function switchView(viewId, btnElement) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+        
+        const targetView = document.getElementById(viewId);
+        if(targetView) {
+            targetView.classList.remove('hidden');
+            targetView.classList.remove('view-fade');
+            void targetView.offsetWidth;
+            targetView.classList.add('view-fade');
+        }
+
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.classList.remove('bg-white/10', 'text-white');
+            btn.classList.add('text-wahdah-100');
+        });
+        if(btnElement) {
+            btnElement.classList.add('bg-white/10', 'text-white');
+            btnElement.classList.remove('text-wahdah-100');
+            
+            document.getElementById('pageTitle').textContent = btnElement.querySelector('span').textContent;
+            document.getElementById('pageSubtitle').textContent = currentUser.Role === 'Admin' ? 'Mode Administrator' : 'Mode Karyawan';
+        }
+
+        if(window.innerWidth < 768) {
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.add('hidden');
+        }
+
+        if(viewId === 'viewUserHistory') renderUserHistory();
+        if(viewId === 'viewAdminDashboard') renderAdminQueue();
+        if(viewId === 'viewAdminHistory') renderAdminHistory();
+        if(viewId === 'viewLeaderboard') {
+            resetLeaderboardFilter();
+        }
+    }
+
+    // ==========================================
+    // 3. FUNGSI KARYAWAN (USER)
+    // ==========================================
+    function addJobdeskInput() {
+        const container = document.getElementById('jobdeskInputsContainer');
+        const newGroup = document.createElement('div');
+        newGroup.className = 'jobdesk-input-group relative flex items-start gap-2 view-fade';
+        newGroup.innerHTML = `
+            <textarea rows="2" required placeholder="Contoh: Menyusun laporan keuangan bulanan..." class="flex-1 rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white resize-none transition-colors"></textarea>
+            <button type="button" class="btn-hapus-tugas shrink-0 mt-1 w-8 h-8 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors" onclick="removeJobdeskInput(this)" title="Hapus baris ini">
+                <i class="fa-solid fa-trash-can text-sm"></i>
+            </button>
+        `;
+        container.appendChild(newGroup);
+        // Tampilkan tombol hapus untuk semua baris jika lebih dari 1
+        toggleDeleteButtons();
+    }
+
+    function removeJobdeskInput(btn) {
+        const group = btn.closest('.jobdesk-input-group');
+        group.remove();
+        toggleDeleteButtons();
+    }
+
+    function toggleDeleteButtons() {
+        const groups = document.querySelectorAll('#jobdeskInputsContainer .jobdesk-input-group');
+        groups.forEach((g, idx) => {
+            const delBtn = g.querySelector('.btn-hapus-tugas');
+            if (groups.length > 1) {
+                delBtn.classList.remove('hidden');
+            } else {
+                delBtn.classList.add('hidden');
+            }
+        });
+    }
+
+    function resetJobdeskForm() {
+        const container = document.getElementById('jobdeskInputsContainer');
+        const groups = container.querySelectorAll('.jobdesk-input-group');
+        groups.forEach((group, index) => {
+            if (index > 0) group.remove();
+            else group.querySelector('textarea').value = '';
+        });
+        toggleDeleteButtons();
+    }
+    
+    function submitJobdesk(e) {
+        e.preventDefault();
+        
+        const textareas = document.querySelectorAll('#jobdeskInputsContainer textarea');
+        const todayStr = new Date().toISOString().split('T')[0];
+        let tasksData = [];
+        let isValid = true;
+        const timestampBase = Date.now();
+
+        textareas.forEach((ta, index) => {
+            const desc = ta.value.trim();
+            if(desc.length < 10) {
+                isValid = false;
+                ta.classList.add('border-red-400', 'focus:ring-red-400', 'bg-red-50');
+            } else {
+                ta.classList.remove('border-red-400', 'focus:ring-red-400', 'bg-red-50');
+                tasksData.push({
+                    id: 'TSK-' + timestampBase + '-' + index,
+                    userId: currentUser.User_ID,
+                    tanggal: todayStr,
+                    deskripsi: desc,
+                    status: 'Pending',
+                    poin: 0
+                });
+            }
+        });
+
+        if(!isValid) {
+            return Swal.fire('Perhatian', 'Pastikan semua deskripsi tugas diisi dengan minimal 10 karakter.', 'warning');
+        }
+
+        if (typeof google === 'undefined') {
+            tasksData.forEach(task => {
+                db.jobdesk.push({ Task_ID: task.id, User_ID: task.userId, Tanggal: task.tanggal, Deskripsi_Tugas: task.deskripsi, Status: task.status, Poin: task.poin });
+            });
+            postSubmitAction('formJobdesk', `${tasksData.length} Tugas berhasil dicatat!`);
+            resetJobdeskForm();
+        } else {
+            Swal.fire({title: 'Mengirim Laporan...', text: 'Mohon tunggu', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+            google.script.run.withSuccessHandler(res => { 
+                db = res; 
+                postSubmitAction('formJobdesk', `${tasksData.length} Tugas berhasil dicatat!`); 
+                resetJobdeskForm();
+                Swal.close(); 
+            }).saveMultipleJobdesk(tasksData);
+        }
+    }
+
+    function submitPiket(e) {
+        e.preventDefault();
+        const jenis = document.getElementById('inpPiketJenis').value;
+        const tglPiket = document.getElementById('inpPiketTanggal').value;
+        
+        const data = {
+            id: 'PKT-' + Date.now(),
+            userId: currentUser.User_ID,
+            tanggal: tglPiket,
+            jenis: jenis,
+            status: 'Pending',
+            poin: 0,
+            imageBase64: ''
+        };
+
+        if (typeof google === 'undefined') {
+            db.piket.push({ Schedule_ID: data.id, User_ID: data.userId, Tanggal: data.tanggal, Jenis_Piket: data.jenis, Status: data.status, Bukti_Foto_URL: '#', Poin: data.poin });
+            postSubmitAction('formPiket', 'Laporan piket terkirim!');
+        } else {
+            Swal.fire({title: 'Menyimpan...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+            google.script.run.withSuccessHandler(res => { db = res; postSubmitAction('formPiket', 'Laporan piket terkirim!'); Swal.close(); }).uploadPiket(data);
+        }
+    }
+
+    function postSubmitAction(formId, msg) {
+        document.getElementById(formId).reset();
+        
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (formId === 'formPiket') document.getElementById('inpPiketTanggal').value = todayStr;
+
+        Swal.fire({ icon: 'success', title: 'Sukses', text: msg, timer: 1500, showConfirmButton: false });
+        if(formId === 'formJobdesk' || formId === 'formPiket') updateUserPoints();
+    }
+
+    function updateUserPoints() {
+        let total = 0;
+        const myJobs = db.jobdesk.filter(t => t.User_ID === currentUser.User_ID && t.Status === 'Approved');
+        const myPikets = db.piket.filter(p => p.User_ID === currentUser.User_ID && p.Status === 'Approved');
+        
+        myJobs.forEach(t => total += (t.Poin || 0));
+        myPikets.forEach(p => total += (p.Poin || 0));
+        
+        document.getElementById('userTotalPoin').textContent = total;
+    }
+
+    function renderUserHistory() {
+        const tbody = document.getElementById('user-history-tbody');
+        let history = [];
+        
+        db.jobdesk.filter(t => t.User_ID === currentUser.User_ID).forEach(t => {
+            history.push({ type: 'Task', id: t.Task_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin });
+        });
+        db.piket.filter(p => p.User_ID === currentUser.User_ID).forEach(p => {
+            history.push({ type: 'Piket', id: p.Schedule_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, status: p.Status, poin: p.Poin });
+        });
+
+        history.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        if(history.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-wahdah-400">Belum ada riwayat aktivitas.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = history.map(h => {
+            let statusBadge = h.status === 'Approved' ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold">Approved</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[10px] font-bold">Pending</span>';
+            let icon = h.type === 'Task' ? '<i class="fa-solid fa-briefcase text-wahdah-400 mr-2"></i>' : '<i class="fa-solid fa-broom text-gold-500 mr-2"></i>';
+            
+            let rawDesc = h.desc.replace(/^Piket: /, '');
+            let escDesc = rawDesc.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            let actionBtns = h.status === 'Pending' 
+                ? `<button onclick="editUserTask('${h.type}', '${h.id}', '${escDesc}')" class="text-blue-500 hover:bg-blue-50 p-1.5 rounded-lg transition-colors mr-1" title="Edit Tugas"><i class="fa-solid fa-pen-to-square"></i></button>
+                   <button onclick="deleteUserTask('${h.id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Hapus Tugas"><i class="fa-solid fa-trash-can"></i></button>`
+                : `<span class="text-wahdah-300 text-[10px] italic"><i class="fa-solid fa-lock mr-1"></i>Terkunci</span>`;
+
+            return `
+                <tr class="hover:bg-wahdah-50/50 transition-colors">
+                    <td class="px-5 py-3 whitespace-nowrap text-wahdah-600">${h.date}</td>
+                    <td class="px-5 py-3 font-medium text-wahdah-900">${icon} ${h.desc}</td>
+                    <td class="px-5 py-3 text-center">${statusBadge}</td>
+                    <td class="px-5 py-3 text-right font-bold ${h.poin > 0 ? 'text-wahdah-600' : 'text-wahdah-300'}">${h.poin > 0 ? '+'+h.poin : '-'}</td>
+                    <td class="px-5 py-3 text-center">${actionBtns}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function deleteUserTask(id) {
+        Swal.fire({
+            title: 'Hapus Aktivitas?',
+            text: "Data yang dihapus tidak dapat dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e3342f',
+            cancelButtonColor: '#9ca3af',
+            confirmButtonText: '<i class="fa-solid fa-trash-can mr-1"></i> Ya, Hapus',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if (typeof google === 'undefined') {
+                    db.jobdesk = db.jobdesk.filter(t => t.Task_ID !== id);
+                    db.piket = db.piket.filter(p => p.Schedule_ID !== id);
+                    renderUserHistory();
+                    updateUserPoints();
+                    Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Tugas terhapus!', showConfirmButton: false, timer: 1500});
+                } else {
+                    Swal.fire({title: 'Menghapus...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+                    google.script.run.withSuccessHandler(res => {
+                        db = res;
+                        renderUserHistory();
+                        updateUserPoints();
+                        Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Tugas terhapus!', showConfirmButton: false, timer: 1500});
+                    }).deleteTask(id);
+                }
+            }
+        });
+    }
+
+    function editUserTask(type, id, oldVal) {
+        if(type === 'Task') {
+            Swal.fire({
+                title: 'Edit Deskripsi Tugas',
+                input: 'textarea',
+                inputValue: oldVal,
+                inputPlaceholder: 'Contoh: Menyusun laporan keuangan bulanan...',
+                showCancelButton: true,
+                confirmButtonColor: '#25906a',
+                confirmButtonText: '<i class="fa-solid fa-save mr-1"></i> Simpan',
+                cancelButtonText: 'Batal',
+                inputValidator: (value) => {
+                    if (!value || value.trim().length < 10) return 'Deskripsi minimal 10 karakter!';
+                }
+            }).then((result) => {
+                if (result.isConfirmed) processEditTask({id: id, type: type, val: result.value.trim()});
+            });
+        } else {
+            Swal.fire({
+                title: 'Edit Area Piket',
+                input: 'select',
+                inputOptions: {
+                    'Ruang Utama': 'Ruang Utama',
+                    'Dapur & Pantry': 'Dapur & Pantry',
+                    'Toilet': 'Toilet'
+                },
+                inputValue: oldVal,
+                showCancelButton: true,
+                confirmButtonColor: '#25906a',
+                confirmButtonText: '<i class="fa-solid fa-save mr-1"></i> Simpan'
+            }).then((result) => {
+                if (result.isConfirmed) processEditTask({id: id, type: type, val: result.value});
+            });
+        }
+    }
+
+    function processEditTask(data) {
+        if (typeof google === 'undefined') {
+            if (data.type === 'Task') {
+                let task = db.jobdesk.find(t => t.Task_ID === data.id);
+                if (task) task.Deskripsi_Tugas = data.val;
+            } else {
+                let piket = db.piket.find(p => p.Schedule_ID === data.id);
+                if (piket) piket.Jenis_Piket = data.val;
+            }
+            renderUserHistory();
+            Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Perubahan tersimpan!', showConfirmButton: false, timer: 1500});
+        } else {
+            Swal.fire({title: 'Menyimpan...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+            google.script.run.withSuccessHandler(res => {
+                db = res;
+                renderUserHistory();
+                Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Perubahan tersimpan!', showConfirmButton: false, timer: 1500});
+            }).updateTask(data);
+        }
+    }
+
+    // ==========================================
+    // 4. FUNGSI ADMIN
+    // ==========================================
+    function getUserName(userId) {
+        const u = db.users.find(x => x.User_ID === userId);
+        return u ? u.Nama : 'Unknown';
+    }
+
+    function renderAdminQueue() {
+        const tbody = document.getElementById('admin-queue-tbody');
+        const btnApproveAll = document.getElementById('btnApproveAll');
+        const filterUserId = document.getElementById('adminQueueFilterNama').value;
+        let queue = [];
+        
+        db.jobdesk.filter(t => t.Status === 'Pending').forEach(t => {
+            if (filterUserId === 'ALL' || t.User_ID === filterUserId) {
+                queue.push({ type: 'Task', id: t.Task_ID, userId: t.User_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas });
+            }
+        });
+        
+        db.piket.filter(p => p.Status === 'Pending').forEach(p => {
+            if (filterUserId === 'ALL' || p.User_ID === filterUserId) {
+                queue.push({ type: 'Piket', id: p.Schedule_ID, userId: p.User_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}` });
+            }
+        });
+
+        document.getElementById('adminPendingCount').textContent = queue.length;
+        
+        if (queue.length > 0) {
+            btnApproveAll.classList.remove('hidden');
+        } else {
+            btnApproveAll.classList.add('hidden');
+        }
+
+        if(queue.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-wahdah-400">Tidak ada antrean persetujuan saat ini.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = queue.map(q => {
+            let icon = q.type === 'Task' ? '<i class="fa-solid fa-briefcase text-wahdah-400 mr-2"></i>' : '<i class="fa-solid fa-broom text-gold-500 mr-2"></i>';
+            return `
+                <tr class="hover:bg-wahdah-50/50 transition-colors">
+                    <td class="px-5 py-3 text-wahdah-600 text-xs">${q.date}</td>
+                    <td class="px-5 py-3 font-semibold text-wahdah-800">${getUserName(q.userId)}</td>
+                    <td class="px-5 py-3 text-wahdah-700">${icon} ${q.desc}</td>
+                    <td class="px-5 py-3">
+                        <div class="flex items-center gap-1.5 justify-center">
+                            <select id="tingkat-${q.id}" onchange="document.getElementById('poin-${q.id}').value = this.value" class="w-[90px] text-[10px] border border-wahdah-200 rounded-lg px-1.5 py-1.5 outline-none bg-white focus:border-wahdah-400 cursor-pointer">
+                                <option value="2" selected>Mudah</option>
+                                <option value="3">Sedang</option>
+                                <option value="5">Sulit</option>
+                            </select>
+                            
+                            <input type="number" id="poin-${q.id}" class="w-12 border border-wahdah-200 rounded-lg px-1 py-1.5 text-center text-sm outline-none focus:border-wahdah-400 font-bold text-wahdah-700" value="2">
+                            
+                            <button onclick="approveItem('${q.id}')" class="bg-wahdah-600 hover:bg-wahdah-700 text-white rounded-lg p-1.5 transition-colors shadow-sm" title="Setujui">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function approveItem(id) {
+        const poinInput = document.getElementById(`poin-${id}`);
+        const poin = parseInt(poinInput.value) || 0;
+
+        const data = { id: id, poin: poin };
+
+        if (typeof google === 'undefined') {
+            let found = db.jobdesk.find(t => t.Task_ID === id);
+            if(found) { found.Status = 'Approved'; found.Poin = poin; }
+            else {
+                found = db.piket.find(p => p.Schedule_ID === id);
+                if(found) { found.Status = 'Approved'; found.Poin = poin; }
+            }
+            renderAdminQueue();
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Tugas disetujui', showConfirmButton: false, timer: 1500 });
+        } else {
+            poinInput.disabled = true;
+            document.getElementById(`tingkat-${id}`).disabled = true;
+            google.script.run.withSuccessHandler(res => { 
+                db = res; 
+                renderAdminQueue(); 
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Tugas disetujui', showConfirmButton: false, timer: 1500 });
+            }).approveTask(data);
+        }
+    }
+
+    function promptApproveAll() {
+        Swal.fire({
+            title: 'Setujui Semua Antrean',
+            text: 'Tentukan poin default untuk semua tugas di antrean ini:',
+            icon: 'question',
+            input: 'select',
+            inputOptions: {
+                '2': 'Mudah (2 Poin)',
+                '3': 'Sedang (3 Poin)',
+                '5': 'Sulit (5 Poin)'
+            },
+            inputPlaceholder: 'Pilih Poin Default',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fa-solid fa-check-double mr-1"></i> Approve Semua',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#25906a',
+            inputValidator: (value) => {
+                if (!value) return 'Anda harus memilih poin default!'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                executeApproveAll(parseInt(result.value));
+            }
+        });
+    }
+
+    function executeApproveAll(defaultPoint) {
+        const filterUserId = document.getElementById('adminQueueFilterNama').value;
+        let queue = [];
+        
+        db.jobdesk.filter(t => t.Status === 'Pending').forEach(t => {
+            if (filterUserId === 'ALL' || t.User_ID === filterUserId) {
+                queue.push({ id: t.Task_ID, poin: defaultPoint });
+            }
+        });
+        db.piket.filter(p => p.Status === 'Pending').forEach(p => {
+            if (filterUserId === 'ALL' || p.User_ID === filterUserId) {
+                queue.push({ id: p.Schedule_ID, poin: defaultPoint });
+            }
+        });
+
+        if (queue.length === 0) return;
+
+        if (typeof google === 'undefined') {
+            queue.forEach(q => {
+                let found = db.jobdesk.find(t => t.Task_ID === q.id);
+                if(found) { found.Status = 'Approved'; found.Poin = q.poin; }
+                else {
+                    found = db.piket.find(p => p.Schedule_ID === q.id);
+                    if(found) { found.Status = 'Approved'; found.Poin = q.poin; }
+                }
+            });
+            renderAdminQueue();
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: queue.length + ' tugas berhasil disetujui!', showConfirmButton: false, timer: 2000 });
+        } else {
+            Swal.fire({title: 'Memproses ' + queue.length + ' tugas...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+            google.script.run.withSuccessHandler(res => {
+                db = res;
+                renderAdminQueue();
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: queue.length + ' tugas berhasil disetujui!', showConfirmButton: false, timer: 2000 });
+            }).approveAllTasks(queue);
+        }
+    }
+
+    function populateAdminFilter() {
+        const selectHistory = document.getElementById('adminFilterNama');
+        const selectQueue = document.getElementById('adminQueueFilterNama');
+        
+        const users = db.users.filter(u => u.Role === 'User');
+        const optionsHtml = `<option value="ALL">Semua Karyawan</option>` + 
+            users.map(u => `<option value="${u.User_ID}">${u.Nama}</option>`).join('');
+            
+        if (selectHistory) selectHistory.innerHTML = optionsHtml;
+        if (selectQueue) selectQueue.innerHTML = optionsHtml;
+    }
+
+    function renderAdminHistory() {
+        const tbody = document.getElementById('admin-history-tbody');
+        const filterUserId = document.getElementById('adminFilterNama').value;
+        let history = [];
+        
+        db.jobdesk.forEach(t => {
+            if(filterUserId === 'ALL' || t.User_ID === filterUserId)
+                history.push({ type: 'Task', userId: t.User_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin });
+        });
+        db.piket.forEach(p => {
+            if(filterUserId === 'ALL' || p.User_ID === filterUserId)
+                history.push({ type: 'Piket', userId: p.User_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, status: p.Status, poin: p.Poin });
+        });
+
+        history.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        if(history.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-wahdah-400">Belum ada riwayat aktivitas.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = history.map(h => {
+            let statusBadge = h.status === 'Approved' ? '<span class="text-emerald-600 font-bold"><i class="fa-solid fa-check"></i></span>' : '<span class="text-amber-500 font-bold"><i class="fa-solid fa-clock"></i></span>';
+            let icon = h.type === 'Task' ? '<i class="fa-solid fa-briefcase text-wahdah-400"></i>' : '<i class="fa-solid fa-broom text-gold-500"></i>';
+            return `
+                <tr class="hover:bg-wahdah-50/50 transition-colors">
+                    <td class="px-5 py-3 text-wahdah-600 text-xs">${h.date}</td>
+                    <td class="px-5 py-3 font-semibold text-wahdah-900">${getUserName(h.userId)}</td>
+                    <td class="px-5 py-3 text-wahdah-700"><span class="mr-2">${icon}</span> ${h.desc}</td>
+                    <td class="px-5 py-3 text-center">${statusBadge}</td>
+                    <td class="px-5 py-3 text-right font-bold ${h.poin > 0 ? 'text-wahdah-600' : 'text-wahdah-300'}">${h.poin > 0 ? h.poin : '-'}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function resetLeaderboardFilter() {
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
+        
+        document.getElementById('lbFilterStart').value = firstDay;
+        document.getElementById('lbFilterEnd').value = lastDay;
+        renderLeaderboard();
+    }
+
+    function renderLeaderboard() {
+        const boardBody = document.getElementById('leaderboard-tbody');
+        const startDateStr = document.getElementById('lbFilterStart').value;
+        const endDateStr = document.getElementById('lbFilterEnd').value;
+
+        let startDate = startDateStr ? new Date(startDateStr) : new Date('2000-01-01');
+        let endDate = endDateStr ? new Date(endDateStr) : new Date('2100-01-01');
+        endDate.setHours(23, 59, 59, 999);
+
+        const userScores = {};
+        
+        db.users.filter(u => u.Role === 'User').forEach(u => {
+            userScores[u.User_ID] = { nama: u.Nama, total: 0 };
+        });
+
+        const calculatePoints = (dataArray) => {
+            dataArray.forEach(item => {
+                if(item.Status === 'Approved') {
+                    const itemDate = new Date(item.Tanggal);
+                    if(itemDate >= startDate && itemDate <= endDate) {
+                        if(userScores[item.User_ID]) {
+                            userScores[item.User_ID].total += (item.Poin || 0);
+                        }
+                    }
+                }
+            });
+        };
+        
+        calculatePoints(db.jobdesk);
+        calculatePoints(db.piket);
+        
+        const sortedBoard = Object.values(userScores).sort((a,b) => b.total - a.total);
+        
+        if(sortedBoard.length === 0) {
+            boardBody.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-wahdah-400">Belum ada data untuk periode ini.</td></tr>`;
+            return;
+        }
+
+        boardBody.innerHTML = sortedBoard.map((item, index) => {
+            const rank = index + 1;
+            let badgeClass = 'bg-wahdah-100 text-wahdah-600';
+            if(rank === 1) badgeClass = 'bg-gold-500 text-white shadow-md scale-110';
+            else if(rank === 2) badgeClass = 'bg-slate-300 text-slate-800';
+            else if(rank === 3) badgeClass = 'bg-amber-600/40 text-amber-900';
+
+            return `
+            <tr class="hover:bg-wahdah-50/30 transition-colors">
+                <td class="px-5 py-4 text-center">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs ${badgeClass} transition-transform">${rank}</span>
+                </td>
+                <td class="px-5 py-4 font-bold text-wahdah-900 text-base">${item.nama}</td>
+                <td class="px-5 py-4 text-right">
+                    <span class="font-bold text-emerald-600 text-lg">${item.total}</span> <span class="text-[10px] text-wahdah-400 font-medium">pts</span>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+</script>
+</body>
+</html>
