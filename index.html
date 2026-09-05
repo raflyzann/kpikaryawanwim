@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WorkGami - Kinerja & Gamifikasi</title>
+    <title>Kinerja Karyawan Wahdah Islamiyah Makassar</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Amiri:wght@700&display=swap" rel="stylesheet">
@@ -37,9 +38,6 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         
-        #sidebar { transition: transform 0.35s cubic-bezier(.4,0,.2,1), width 0.35s cubic-bezier(.4,0,.2,1); }
-        #mainArea { transition: margin-left 0.35s cubic-bezier(.4,0,.2,1); }
-
         .view-fade { animation: viewFade 0.4s ease both; }
         @keyframes viewFade {
             from { opacity: 0; transform: translateY(10px); }
@@ -62,19 +60,22 @@
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0; padding: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
+        .icon-badge img {
+            width: 100%; height: 100%; object-fit: contain;
+        }
     </style>
 </head>
-<body class="bg-wahdah-50/40 text-wahdah-950 min-h-screen">
+<body class="bg-wahdah-50/40 text-wahdah-950 h-[100dvh] w-full overflow-hidden flex">
 
-<div class="flex min-h-screen">
-
-    <!-- ============ SIDEBAR ============ -->
-    <aside id="sidebar" class="fixed z-30 md:sticky md:top-0 w-72 -translate-x-full md:translate-x-0 h-screen bg-wahdah-800 text-white flex flex-col shadow-soft">
+    <!-- ============ SIDEBAR (Drawer Style) ============ -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 -translate-x-full transition-transform duration-300 ease-in-out bg-wahdah-800 text-white flex flex-col shadow-soft">
         <div class="px-6 py-6 border-b border-white/10 flex items-center gap-3">
-            <div class="icon-badge text-wahdah-600 text-xl"><i class="fa-solid fa-gamepad"></i></div>
+            <div class="icon-badge">
+                <img src="data:image/png;base64,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" alt="Logo Wahdah Islamiyah" width="100%" height="100%">
+            </div>
             <div>
-                <p class="font-bold leading-tight text-[15px]">WorkGam</p>
-                <p class="text-wahdah-200 text-[10px] tracking-wide uppercase">Sistem Kinerja</p>
+                <p class="font-bold leading-tight text-[15px]">Wahdah Islamiyah Makassar</p>
+                <p class="text-wahdah-200 text-[10px] tracking-wide uppercase">Kinerja Karyawan</p>
             </div>
         </div>
 
@@ -100,7 +101,7 @@
             
             <button type="button" id="navAdminHistory" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewAdminHistory', this)">
                 <i class="fa-solid fa-list-check w-5 text-center"></i>
-                <span>Riwayat Kinerja</span>
+                <span>Riwayat Kinerja Karyawan</span>
             </button>
 
             <button type="button" id="navLeaderboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewLeaderboard', this)">
@@ -120,13 +121,14 @@
         </div>
     </aside>
 
-    <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 z-20 hidden md:hidden" onclick="toggleSidebar()"></div>
+    <!-- Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 z-30 hidden transition-opacity duration-300" onclick="toggleSidebar()"></div>
 
     <!-- ============ MAIN AREA ============ -->
-    <div id="mainArea" class="flex-1 flex flex-col min-w-0 relative">
+    <div id="mainArea" class="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative">
 
-        <header class="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-wahdah-100 px-4 md:px-8 py-4 flex items-center gap-4 shadow-softer">
-            <button id="hamburgerBtn" class="w-10 h-10 rounded-lg hover:bg-wahdah-50 text-wahdah-700 flex items-center justify-center transition-colors" onclick="toggleSidebar()">
+        <header class="shrink-0 sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-wahdah-100 px-4 md:px-8 py-4 flex items-center gap-4 shadow-softer">
+            <button id="hamburgerBtn" class="hidden w-10 h-10 rounded-lg hover:bg-wahdah-50 text-wahdah-700 flex items-center justify-center transition-colors" onclick="toggleSidebar()">
                 <i class="fa-solid fa-bars text-lg"></i>
             </button>
             <div>
@@ -135,10 +137,10 @@
             </div>
         </header>
 
-        <main class="flex-1 p-4 md:p-8 overflow-y-auto h-[calc(100vh-73px)] relative">
+        <main class="flex-1 overflow-y-auto p-4 md:p-8 relative">
 
             <!-- Loading Overlay -->
-            <div id="loadingOverlay" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+            <div id="loadingOverlay" class="absolute inset-0 bg-white/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
                 <div class="w-10 h-10 border-4 border-wahdah-100 border-t-wahdah-600 rounded-full animate-spin mb-4"></div>
                 <h2 class="text-wahdah-900 font-bold text-sm">Menghubungkan Database...</h2>
                 <p class="text-xs text-wahdah-500 mt-1">Mohon tunggu sebentar</p>
@@ -151,27 +153,21 @@
                         <i class="fa-solid fa-fingerprint"></i>
                     </div>
                     <h2 class="text-xl font-bold text-wahdah-900 mb-1">Akses Sistem</h2>
-                    <p class="text-xs text-wahdah-500 mb-6">Masukkan kredensial Anda</p>
+                    <p class="text-xs text-wahdah-500 mb-6">Masukkan Akun Anda</p>
                     
                     <form id="formLogin" class="space-y-4" onsubmit="handleLogin(event)">
                         <div class="text-left">
-                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">User ID</label>
-                            <input type="text" id="inpUserId" required placeholder="Contoh: USR-01" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white transition-shadow">
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Email</label>
+                            <input type="email" id="inpUserId" required placeholder="user@email.com" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white transition-shadow">
                         </div>
                         <div class="text-left">
-                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">PIN Rahasia</label>
-                            <input type="password" id="inpPin" required placeholder="&bull;&bull;&bull;&bull;" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white tracking-widest transition-shadow">
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">PIN</label>
+                            <input type="password" id="inpPin" required maxlength="6" inputmode="numeric" placeholder="••••••" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white tracking-[0.3em] transition-shadow text-left font-bold">
                         </div>
-                        <button type="submit" class="w-full bg-wahdah-700 hover:bg-wahdah-800 text-white font-medium text-sm rounded-xl py-3 mt-2 shadow-sm transition-colors">
-                            Masuk <i class="fa-solid fa-arrow-right ml-1"></i>
+                        <button type="submit" id="btnLoginSubmit" class="w-full bg-wahdah-700 hover:bg-wahdah-800 text-white font-medium text-sm rounded-xl py-3 mt-2 shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                            <span id="btnLoginSubmitLabel">Masuk</span> <i id="btnLoginSubmitIcon" class="fa-solid fa-arrow-right"></i>
                         </button>
                     </form>
-                    
-                    <div class="mt-6 p-3 bg-wahdah-50 rounded-xl text-left border border-wahdah-100">
-                        <p class="text-[10px] font-bold text-wahdah-600 mb-1 uppercase tracking-wider"><i class="fa-solid fa-circle-info mr-1"></i> Mode Simulasi</p>
-                        <p class="text-xs text-wahdah-500 font-mono">Admin: <span class="font-bold text-wahdah-800">ADM-01</span> / <span class="font-bold text-wahdah-800">1234</span></p>
-                        <p class="text-xs text-wahdah-500 font-mono">User: <span class="font-bold text-wahdah-800">USR-01</span> / <span class="font-bold text-wahdah-800">1234</span></p>
-                    </div>
                 </div>
             </section>
 
@@ -191,7 +187,8 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Form Stack: Jobdesk berada di Atas, Piket di Bawah -->
+                <div class="flex flex-col gap-6">
                     <!-- Form Input Jobdesk -->
                     <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5 md:p-6 flex flex-col">
                         <h3 class="text-sm font-bold text-wahdah-900 mb-4 flex items-center gap-2 border-b border-wahdah-50 pb-3">
@@ -200,21 +197,22 @@
                         </h3>
                         <form id="formJobdesk" class="flex-1 flex flex-col space-y-4" onsubmit="submitJobdesk(event)">
                             <div class="flex-1 space-y-3">
-                                <label class="block text-xs font-semibold text-wahdah-700 mb-1">Deskripsi Tugas Selesai</label>
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1">Deskripsi Tugas (Otomatis: Belum Selesai)</label>
                                 
                                 <!-- Container Input Dinamis -->
                                 <div id="jobdeskInputsContainer" class="space-y-3">
-                                    <div class="jobdesk-input-group relative flex items-start gap-2">
-                                        <textarea rows="2" required placeholder="Contoh: Menyusun laporan keuangan bulanan..." class="flex-1 rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white resize-none transition-colors"></textarea>
-                                        <!-- Tombol Hapus (Disembunyikan di elemen pertama) -->
-                                        <button type="button" class="hidden btn-hapus-tugas shrink-0 mt-1 w-8 h-8 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors" onclick="removeJobdeskInput(this)" title="Hapus baris ini">
-                                            <i class="fa-solid fa-trash-can text-sm"></i>
-                                        </button>
+                                    <div class="jobdesk-input-group relative flex flex-col gap-2 bg-wahdah-50/50 border border-wahdah-100 rounded-xl p-3 view-fade">
+                                        <div class="flex items-start gap-2">
+                                            <textarea rows="2" required placeholder="Contoh: Menyusun laporan keuangan bulanan..." class="flex-1 rounded-lg border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white resize-none transition-colors"></textarea>
+                                            <button type="button" class="hidden btn-hapus-tugas shrink-0 mt-1 w-8 h-8 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors" onclick="removeJobdeskInput(this)" title="Hapus baris ini">
+                                                <i class="fa-solid fa-trash-can text-sm"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                                 
                                 <div class="flex items-center justify-between mt-2">
-                                    <button type="button" onclick="addJobdeskInput()" class="text-xs font-bold text-wahdah-600 hover:text-wahdah-800 hover:underline flex items-center gap-1 transition-colors">
+                                    <button type="button" onclick="addJobdeskInput()" class="text-xs font-bold text-wahdah-600 hover:text-wahdah-800 flex items-center gap-1 transition-colors px-2 py-1 rounded hover:bg-wahdah-50">
                                         <i class="fa-solid fa-plus"></i> Tambah Tugas Lainnya
                                     </button>
                                     <p class="text-[10px] text-wahdah-400">Minimal 10 karakter/tugas.</p>
@@ -228,30 +226,34 @@
                     </div>
 
                     <!-- Form Input Piket -->
-                    <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5 md:p-6">
+                    <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5 md:p-6 flex flex-col">
                         <h3 class="text-sm font-bold text-wahdah-900 mb-4 flex items-center gap-2 border-b border-wahdah-50 pb-3">
                             <div class="w-8 h-8 rounded-lg bg-gold-50 text-gold-600 flex items-center justify-center"><i class="fa-solid fa-broom"></i></div> 
                             Laporan Piket Kebersihan
                         </h3>
-                        <form id="formPiket" class="space-y-4" onsubmit="submitPiket(event)">
-                            <div>
-                                <label class="block text-xs font-semibold text-wahdah-700 mb-1">Tanggal Piket</label>
-                                <input type="date" id="inpPiketTanggal" required class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white">
+                        <form id="formPiket" class="flex-1 flex flex-col space-y-4" onsubmit="submitPiket(event)">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-wahdah-700 mb-1">Tanggal Piket</label>
+                                    <input type="date" id="inpPiketTanggal" required class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-wahdah-700 mb-1">Area Piket (Otomatis: Selesai)</label>
+                                    <select id="inpPiketJenis" required class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white">
+                                        <option value="" disabled selected>Pilih Area...</option>
+                                        <option value="Lantai 1">Lantai 1</option>
+                                        <option value="Lantai 2">Lantai 2</option>
+                                        <option value="Tangga & Wc">Tangga & Wc</option>
+                                        <option value="Cuci Piring & Buang Sampah">Cuci Piring & Buang Sampah</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-wahdah-700 mb-1">Unggah Bukti Foto (Wajib, Maks 10MB JPG/PNG)</label>
+                                    <input type="file" id="inpPiketFoto" accept=".jpg,.jpeg,.png" required class="w-full text-sm text-wahdah-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-wahdah-50 file:text-wahdah-700 hover:file:bg-wahdah-100 cursor-pointer">
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-wahdah-700 mb-1">Area Piket</label>
-                                <select id="inpPiketJenis" required class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white">
-                                    <option value="" disabled selected>Pilih Area...</option>
-                                    <option value="Ruang Utama">Ruang Utama</option>
-                                    <option value="Dapur & Pantry">Dapur & Pantry</option>
-                                    <option value="Toilet">Toilet</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-wahdah-700 mb-1">Unggah Bukti (Opsional di Simulasi)</label>
-                                <input type="file" id="inpPiketFoto" accept="image/*" class="w-full text-sm text-wahdah-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-wahdah-50 file:text-wahdah-700 hover:file:bg-wahdah-100 cursor-pointer">
-                            </div>
-                            <button type="submit" class="w-full bg-gold-500 hover:bg-gold-600 text-white font-medium text-sm rounded-xl py-2.5 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                            
+                            <button type="submit" class="w-full bg-gold-500 hover:bg-gold-600 text-white font-medium text-sm rounded-xl py-2.5 transition-colors flex items-center justify-center gap-2 shadow-sm mt-auto">
                                 <i class="fa-solid fa-upload"></i> Kirim Laporan Piket
                             </button>
                         </form>
@@ -267,16 +269,32 @@
                             <i class="fa-solid fa-clock-rotate-left text-wahdah-600"></i> Daftar Laporan & Aktivitas Anda
                         </h3>
                     </div>
+
+                    <!-- Bulk Actions Bar User -->
+                    <div id="bulkActionsBar" class="hidden px-5 py-3 border-b border-wahdah-100 bg-wahdah-50/80 flex items-center justify-between transition-all">
+                        <span class="text-xs font-semibold text-wahdah-700"><span id="selectedCount" class="font-bold text-wahdah-900 text-sm">0</span> tugas dipilih</span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="bulkMarkDone()" class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-bold transition-colors shadow-sm flex items-center gap-1.5">
+                                <i class="fa-solid fa-check-double"></i> Tandai Selesai
+                            </button>
+                            <button onclick="bulkDelete()" class="text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg font-bold transition-colors shadow-sm flex items-center gap-1.5">
+                                <i class="fa-solid fa-trash-can"></i> Hapus
+                            </button>
+                        </div>
+                    </div>
                     
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto min-h-[300px]">
                         <table class="w-full text-sm">
                             <thead class="bg-wahdah-50 border-b border-wahdah-100">
                                 <tr class="text-wahdah-700 text-xs uppercase tracking-wide">
-                                    <th class="text-left font-semibold px-5 py-3.5 whitespace-nowrap">Tanggal</th>
-                                    <th class="text-left font-semibold px-5 py-3.5 min-w-[250px]">Rincian Aktivitas</th>
-                                    <th class="text-center font-semibold px-5 py-3.5 whitespace-nowrap">Status</th>
-                                    <th class="text-right font-semibold px-5 py-3.5 whitespace-nowrap">Poin Reward</th>
-                                    <th class="text-center font-semibold px-5 py-3.5 whitespace-nowrap">Aksi</th>
+                                    <th class="text-center font-semibold px-4 py-3.5 w-10">
+                                        <input type="checkbox" id="selectAllCheckbox" onchange="toggleAllCheckboxes(this.checked)" class="w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer">
+                                    </th>
+                                    <th class="text-left font-semibold px-3 py-3.5 whitespace-nowrap">Tanggal</th>
+                                    <th class="text-left font-semibold px-3 py-3.5 min-w-[250px]">Rincian Aktivitas</th>
+                                    <th class="text-center font-semibold px-3 py-3.5 whitespace-nowrap">Status Admin</th>
+                                    <th class="text-right font-semibold px-3 py-3.5 whitespace-nowrap">Poin Reward</th>
+                                    <th class="text-center font-semibold px-3 py-3.5 whitespace-nowrap">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="user-history-tbody" class="divide-y divide-wahdah-50 bg-white">
@@ -284,6 +302,7 @@
                             </tbody>
                         </table>
                     </div>
+                    <div id="user-history-pagination" class="flex items-center justify-between px-5 py-3 border-t border-wahdah-100 bg-white"></div>
                 </div>
             </section>
 
@@ -298,32 +317,41 @@
                             <span class="bg-red-100 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-full" id="adminPendingCount">0</span>
                         </div>
                         
-                        <!-- Wrapper Filter & Tombol Action -->
                         <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                            <!-- Dropdown Filter Nama Karyawan -->
                             <div class="flex items-center gap-2 w-full sm:w-auto">
                                 <i class="fa-solid fa-filter text-wahdah-400 text-xs"></i>
-                                <select id="adminQueueFilterNama" class="w-full sm:w-48 text-xs border border-wahdah-200 rounded-lg px-2 py-1.5 focus:ring-1 focus:ring-wahdah-400 outline-none bg-white" onchange="renderAdminQueue()">
+                                <select id="adminQueueFilterNama" class="w-full sm:w-48 text-xs border border-wahdah-200 rounded-lg px-2 py-1.5 focus:ring-1 focus:ring-wahdah-400 outline-none bg-white" onchange="paginationState.adminQueue.page = 1; renderAdminQueue()">
                                     <option value="ALL">Semua Karyawan</option>
-                                    <!-- Option list dari JS -->
                                 </select>
                             </div>
+                        </div>
+                    </div>
 
-                            <!-- Tombol Approve Semua -->
-                            <button id="btnApproveAll" class="hidden text-xs bg-wahdah-600 hover:bg-wahdah-700 text-white px-3.5 py-1.5 rounded-lg font-bold transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap" onclick="promptApproveAll()">
-                                <i class="fa-solid fa-check-double"></i> Setujui Semua
+                    <!-- Bulk Actions Bar Admin -->
+                    <div id="adminBulkActionsBar" class="hidden px-5 py-3 border-b border-wahdah-100 bg-wahdah-50/80 flex items-center justify-between transition-all">
+                        <span class="text-xs font-semibold text-wahdah-700"><span id="adminSelectedCount" class="font-bold text-wahdah-900 text-sm">0</span> laporan dipilih</span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="bulkAdminApprove()" class="text-xs bg-wahdah-600 hover:bg-wahdah-700 text-white px-3 py-1.5 rounded-lg font-bold transition-colors shadow-sm flex items-center gap-1.5">
+                                <i class="fa-solid fa-check-double"></i> Setujui
+                            </button>
+                            <button onclick="bulkAdminDelete()" class="text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg font-bold transition-colors shadow-sm flex items-center gap-1.5">
+                                <i class="fa-solid fa-trash-can"></i> Hapus
                             </button>
                         </div>
                     </div>
                     
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto min-h-[300px]">
                         <table class="w-full text-sm">
                             <thead class="bg-wahdah-50 border-b border-wahdah-100">
                                 <tr class="text-wahdah-700 text-xs uppercase tracking-wide">
-                                    <th class="text-left font-semibold px-5 py-3.5 whitespace-nowrap">Tanggal</th>
-                                    <th class="text-left font-semibold px-5 py-3.5 whitespace-nowrap">Karyawan</th>
-                                    <th class="text-left font-semibold px-5 py-3.5 min-w-[200px]">Laporan</th>
-                                    <th class="text-center font-semibold px-5 py-3.5 whitespace-nowrap">Aksi / Poin</th>
+                                    <th class="text-center font-semibold px-4 py-3.5 w-10">
+                                        <input type="checkbox" id="selectAllAdminCheckbox" onchange="toggleAllAdminCheckboxes(this.checked)" class="w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer">
+                                    </th>
+                                    <th class="text-left font-semibold px-3 py-3.5 whitespace-nowrap">Tanggal</th>
+                                    <th class="text-left font-semibold px-3 py-3.5 whitespace-nowrap">Karyawan</th>
+                                    <th class="text-left font-semibold px-3 py-3.5 min-w-[200px]">Laporan</th>
+                                    <th class="text-center font-semibold px-3 py-3.5 whitespace-nowrap">Lihat Foto</th>
+                                    <th class="text-center font-semibold px-3 py-3.5 whitespace-nowrap">Aksi / Poin</th>
                                 </tr>
                             </thead>
                             <tbody id="admin-queue-tbody" class="divide-y divide-wahdah-50 bg-white">
@@ -331,34 +359,54 @@
                             </tbody>
                         </table>
                     </div>
+                    <div id="admin-queue-pagination" class="flex items-center justify-between px-5 py-3 border-t border-wahdah-100 bg-white"></div>
                 </div>
             </section>
 
             <!-- ================= VIEW: ADMIN (RIWAYAT KINERJA) ================= -->
             <section id="viewAdminHistory" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
                 <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
-                    <div class="px-5 py-4 border-b border-wahdah-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-wahdah-50/50">
+                    
+                    <div class="px-5 py-4 border-b border-wahdah-100 bg-wahdah-50/50 flex flex-col gap-3">
                         <h3 class="text-sm font-bold text-wahdah-900 flex items-center gap-2">
                             <i class="fa-solid fa-list-check text-wahdah-600"></i> Riwayat Seluruh Laporan
                         </h3>
-                        <div class="flex items-center gap-2 w-full sm:w-auto">
-                            <i class="fa-solid fa-filter text-wahdah-400 text-xs"></i>
-                            <select id="adminFilterNama" class="w-full sm:w-48 text-xs border border-wahdah-200 rounded-lg px-2 py-1.5 focus:ring-1 focus:ring-wahdah-400 outline-none bg-white" onchange="renderAdminHistory()">
-                                <option value="ALL">Semua Karyawan</option>
-                                <!-- Option list dari JS -->
-                            </select>
+                        
+                        <div class="flex flex-col md:flex-row gap-3 items-end">
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Nama Karyawan</label>
+                                <select id="adminFilterNama" class="w-full text-xs border border-wahdah-200 rounded-lg px-2 py-2 focus:ring-1 focus:ring-wahdah-400 outline-none bg-white" onchange="paginationState.adminHistory.page = 1; renderAdminHistory()">
+                                    <option value="ALL">Semua Karyawan</option>
+                                </select>
+                            </div>
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Mulai Tanggal</label>
+                                <input type="date" id="ahFilterStart" class="w-full rounded-lg border border-wahdah-200 px-3 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
+                            </div>
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Sampai Tanggal</label>
+                                <input type="date" id="ahFilterEnd" class="w-full rounded-lg border border-wahdah-200 px-3 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
+                            </div>
+                            <button type="button" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-xs rounded-lg px-4 py-2 transition-colors shadow-sm" onclick="paginationState.adminHistory.page = 1; renderAdminHistory()">
+                                Terapkan
+                            </button>
+                            <button type="button" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-xs rounded-lg px-4 py-2 transition-colors border border-gray-200" onclick="resetAdminHistoryFilter()">
+                                Reset
+                            </button>
                         </div>
                     </div>
                     
-                    <div class="overflow-x-auto h-80">
+                    <div class="overflow-x-auto min-h-[300px]">
                         <table class="w-full text-sm relative">
                             <thead class="bg-wahdah-50 border-b border-wahdah-100 sticky top-0 z-10 shadow-sm">
                                 <tr class="text-wahdah-700 text-xs uppercase tracking-wide">
                                     <th class="text-left font-semibold px-5 py-3.5 whitespace-nowrap">Tanggal</th>
                                     <th class="text-left font-semibold px-5 py-3.5 whitespace-nowrap">Karyawan</th>
                                     <th class="text-left font-semibold px-5 py-3.5 min-w-[200px]">Aktivitas</th>
-                                    <th class="text-center font-semibold px-5 py-3.5 whitespace-nowrap">Status</th>
+                                    <th class="text-center font-semibold px-5 py-3.5 whitespace-nowrap">Lihat Foto</th>
+                                    <th class="text-center font-semibold px-5 py-3.5 whitespace-nowrap">Status Admin</th>
                                     <th class="text-right font-semibold px-5 py-3.5 whitespace-nowrap">Poin</th>
+                                    <th class="text-center font-semibold px-5 py-3.5 whitespace-nowrap">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="admin-history-tbody" class="divide-y divide-wahdah-50 bg-white">
@@ -366,17 +414,27 @@
                             </tbody>
                         </table>
                     </div>
+                    <div id="admin-history-pagination" class="flex items-center justify-between px-5 py-3 border-t border-wahdah-100 bg-white"></div>
                 </div>
             </section>
 
             <!-- ================= VIEW: LEADERBOARD ================= -->
-            <section id="viewLeaderboard" class="view-section hidden view-fade max-w-4xl mx-auto space-y-6">
-                <div class="bg-gradient-to-br from-gold-500 to-gold-600 rounded-2xl shadow-soft border border-gold-400 p-6 text-white text-center pattern-bg">
-                    <h2 class="text-2xl font-bold mb-1"><i class="fa-solid fa-trophy mr-2"></i> Leaderboard Karyawan</h2>
-                    <p class="text-xs text-gold-100 opacity-90">Peringkat berdasarkan akumulasi poin kinerja dan kebersihan</p>
+            <section id="viewLeaderboard" class="view-section hidden view-fade max-w-5xl mx-auto space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5">
+                        <p class="text-xs font-semibold text-wahdah-500 mb-1">Total Karyawan Aktif</p>
+                        <p id="lbSummaryTotalKaryawan" class="text-3xl font-bold text-wahdah-900">0</p>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5">
+                        <p class="text-xs font-semibold text-wahdah-500 mb-1">Total Tugas Aktivitas Tercatat</p>
+                        <p id="lbSummaryTotalAktivitas" class="text-3xl font-bold text-wahdah-900">0</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-wahdah-700 to-wahdah-900 rounded-2xl shadow-soft p-5 text-white pattern-bg">
+                        <p class="text-xs font-semibold text-wahdah-200 mb-1">Peraih Skor Tertinggi</p>
+                        <p id="lbSummaryTopScorer" class="text-xl font-bold truncate">-</p>
+                    </div>
                 </div>
 
-                <!-- Leaderboard Filter -->
                 <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-4 flex flex-col md:flex-row gap-4 items-end">
                     <div class="flex-1 w-full">
                         <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Mulai Tanggal</label>
@@ -386,7 +444,7 @@
                         <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Sampai Tanggal</label>
                         <input type="date" id="lbFilterEnd" class="w-full rounded-xl border border-wahdah-200 px-3 py-2 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none">
                     </div>
-                    <button type="button" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-sm rounded-xl px-4 py-2 transition-colors shadow-sm" onclick="renderLeaderboard()">
+                    <button type="button" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-sm rounded-xl px-4 py-2 transition-colors shadow-sm" onclick="paginationState.leaderboard.page = 1; renderLeaderboard()">
                         Terapkan
                     </button>
                     <button type="button" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-sm rounded-xl px-4 py-2 transition-colors border border-gray-200" onclick="resetLeaderboardFilter()">
@@ -394,12 +452,22 @@
                     </button>
                 </div>
                 
-                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5">
+                    <h3 class="text-sm font-bold text-wahdah-900 mb-4">Grafik Peringkat Karyawan</h3>
+                    <div class="relative h-64 md:h-80">
+                        <canvas id="leaderboardChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-x-auto min-h-[300px]">
                     <table class="w-full text-sm">
                         <thead class="bg-wahdah-50 border-b border-wahdah-100">
                             <tr class="text-wahdah-700 text-xs uppercase tracking-wide">
                                 <th class="text-center font-semibold px-5 py-4 w-20">Peringkat</th>
                                 <th class="text-left font-semibold px-5 py-4">Karyawan</th>
+                                <th class="text-center font-semibold px-5 py-4 whitespace-nowrap">Total Aktivitas</th>
+                                <th class="text-center font-semibold px-5 py-4 whitespace-nowrap">Total Selesai</th>
+                                <th class="text-center font-semibold px-5 py-4 whitespace-nowrap">Total Belum Selesai</th>
                                 <th class="text-right font-semibold px-5 py-4 w-32">Total Poin</th>
                             </tr>
                         </thead>
@@ -407,19 +475,115 @@
                             <!-- Injected via JS -->
                         </tbody>
                     </table>
+                    <div id="leaderboard-pagination" class="flex items-center justify-between px-5 py-3 border-t border-wahdah-100 bg-white"></div>
                 </div>
             </section>
 
         </main>
     </div>
-</div>
 
 <script>
+    // ==========================================
+    // 0. KONEKSI KE BACKEND GOOGLE APPS SCRIPT
+    // ==========================================
+    // Halaman ini sekarang di-hosting di GitHub Pages (bukan lagi dari
+    // Apps Script), sedangkan seluruh logika & database tetap di code.gs
+    // (Google Apps Script + Google Sheets).
+    //
+    // >>> WAJIB DIISI: ganti dengan URL Web App hasil "Deploy > New deployment"
+    // dari project Apps Script Anda (yang berakhiran /exec). <<<
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyPMqkHV7pETxrcqUOOQDmCdDthAQ4eCd43CVabXv9_zhpGPOunyCUB0iry-24stqg/exec';
+
+    // Shim (penyesuaian) supaya SELURUH pemanggilan google.script.run(...)
+    // yang sudah ada di file ini (di bawah) tetap berjalan tanpa diubah,
+    // tapi sebenarnya diarahkan lewat fetch() ke Web App Apps Script di atas.
+    // Jika file ini suatu saat dijalankan LANGSUNG dari dalam Apps Script,
+    // shim ini otomatis tidak aktif karena google.script.run asli sudah ada.
+    (function () {
+        if (typeof google !== 'undefined' && google.script && google.script.run) return;
+
+        function callAppsScript(fnName, args) {
+            return fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                // Pakai text/plain supaya browser TIDAK mengirim preflight
+                // OPTIONS (yang tidak didukung Apps Script) sebelum request asli.
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ fn: fnName, args: args })
+            }).then(res => {
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return res.json();
+            });
+        }
+
+        function createRunner() {
+            let successHandler = null;
+            let failureHandler = null;
+
+            const runner = new Proxy(function () {}, {
+                get(_target, prop) {
+                    if (prop === 'withSuccessHandler') {
+                        return function (fn) { successHandler = fn; return runner; };
+                    }
+                    if (prop === 'withFailureHandler') {
+                        return function (fn) { failureHandler = fn; return runner; };
+                    }
+                    // Properti lain dianggap sebagai nama fungsi server yang dipanggil,
+                    // persis seperti google.script.run.namaFungsi(arg1, arg2, ...)
+                    return function (...args) {
+                        const onSuccess = successHandler;
+                        const onFailure = failureHandler;
+                        successHandler = null;
+                        failureHandler = null;
+
+                        callAppsScript(String(prop), args)
+                            .then(data => {
+                                if (data && data.ok) {
+                                    if (onSuccess) onSuccess(data.result);
+                                } else {
+                                    const msg = (data && data.error) || 'Terjadi kesalahan pada server.';
+                                    if (onFailure) onFailure({ message: msg });
+                                    else console.error(msg);
+                                }
+                            })
+                            .catch(err => {
+                                if (onFailure) onFailure({ message: 'Tidak dapat menghubungi server: ' + err.message });
+                                else console.error(err);
+                            });
+
+                        return runner;
+                    };
+                }
+            });
+
+            return runner;
+        }
+
+        window.google = { script: { run: createRunner() } };
+    })();
+
     // ==========================================
     // 1. STATE & INISIALISASI
     // ==========================================
     let db = { users: [], jobdesk: [], piket: [] };
     let currentUser = null;
+    let sessionToken = null; // token sesi dari server, dikirim di setiap aksi penting
+
+    // Mencegah XSS: selalu escape teks bebas dari user sebelum dimasukkan ke innerHTML
+    function escapeHtml(str) {
+        return String(str == null ? '' : str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    const paginationState = {
+        userHistory: { page: 1, pageSize: 10 },
+        adminQueue: { page: 1, pageSize: 10 },
+        adminHistory: { page: 1, pageSize: 10 },
+        leaderboard: { page: 1, pageSize: 10 }
+    };
 
     window.addEventListener('DOMContentLoaded', loadData);
 
@@ -431,47 +595,35 @@
     }
 
     function loadData() {
+        // PENTING: tidak lagi memanggil getAllData() di sini.
+        // Sebelum login, client tidak butuh (dan tidak boleh) menerima data apa pun
+        // dari server -- termasuk daftar user -- karena belum ada sesi yang tervalidasi.
+        // Data baru diambil lewat getAllData(token) setelah login() berhasil.
         const overlay = document.getElementById('loadingOverlay');
         const viewLogin = document.getElementById('viewLogin');
-        
-        if (typeof google === 'undefined') {
-            setTimeout(() => {
-                db = getDummyData();
-                overlay.classList.add('hidden');
-                viewLogin.classList.remove('hidden');
-            }, 800);
-        } else {
-            google.script.run
-                .withSuccessHandler(res => {
-                    db = res;
-                    overlay.classList.add('hidden');
-                    viewLogin.classList.remove('hidden');
-                })
-                .withFailureHandler(err => {
-                    console.error(err);
-                    Swal.fire('Error', 'Gagal memuat data dari database!', 'error');
-                    overlay.classList.add('hidden');
-                    viewLogin.classList.remove('hidden');
-                })
-                .getAllData();
-        }
+
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            viewLogin.classList.remove('hidden');
+        }, typeof google === 'undefined' ? 800 : 300);
     }
 
     function getDummyData() {
         const today = new Date().toISOString().split('T')[0];
         return {
             users: [
-                { User_ID: 'ADM-01', Nama: 'Admin Master', Role: 'Admin', PIN: '1234' },
-                { User_ID: 'USR-01', Nama: 'Ahmad Karyawan', Role: 'User', PIN: '1234' },
-                { User_ID: 'USR-02', Nama: 'Budi Karyawan', Role: 'User', PIN: '1234' }
+                { User_ID: 'admin@mail.com', Nama: 'Admin Master', Role: 'Admin', PIN: '123456' },
+                { User_ID: 'user@mail.com', Nama: 'Ahmad Karyawan', Role: 'User', PIN: '123456' },
+                { User_ID: 'budi@mail.com', Nama: 'Budi Karyawan', Role: 'User', PIN: '123456' }
             ],
             jobdesk: [
-                { Task_ID: 'TSK-1', User_ID: 'USR-01', Tanggal: today, Deskripsi_Tugas: 'Menyusun laporan bulanan keuangan', Status: 'Approved', Poin: 10 },
-                { Task_ID: 'TSK-2', User_ID: 'USR-01', Tanggal: today, Deskripsi_Tugas: 'Menelepon 5 klien baru', Status: 'Pending', Poin: 0 },
-                { Task_ID: 'TSK-3', User_ID: 'USR-02', Tanggal: today, Deskripsi_Tugas: 'Memperbaiki bug di aplikasi internal', Status: 'Pending', Poin: 0 }
+                { Task_ID: 'TSK-1', User_ID: 'user@mail.com', Tanggal: today, Deskripsi_Tugas: 'Menyusun laporan bulanan keuangan', Status: 'Approved', Poin: 10, Status_Kerja: 'Selesai' },
+                { Task_ID: 'TSK-2', User_ID: 'user@mail.com', Tanggal: today, Deskripsi_Tugas: 'Menelepon 5 klien baru', Status: 'Pending', Poin: 0, Status_Kerja: 'Belum Selesai' },
+                { Task_ID: 'TSK-3', User_ID: 'budi@mail.com', Tanggal: today, Deskripsi_Tugas: 'Memperbaiki bug di aplikasi internal', Status: 'Pending', Poin: 0, Status_Kerja: 'Selesai' }
             ],
             piket: [
-                { Schedule_ID: 'PKT-1', User_ID: 'USR-01', Tanggal: today, Jenis_Piket: 'Ruang Utama', Status: 'Approved', Bukti_Foto_URL: '#', Poin: 5 }
+                { Schedule_ID: 'PKT-1', User_ID: 'user@mail.com', Tanggal: today, Jenis_Piket: 'Lantai 1', Status: 'Approved', Bukti_Foto_URL: '#', Poin: 5, Status_Kerja: 'Selesai' },
+                { Schedule_ID: 'PKT-2', User_ID: 'budi@mail.com', Tanggal: today, Jenis_Piket: 'Dapur & Pantry', Status: 'Pending', Bukti_Foto_URL: 'https://google.com', Poin: 0, Status_Kerja: 'Selesai' }
             ]
         };
     }
@@ -479,19 +631,73 @@
     // ==========================================
     // 2. AUTENTIKASI & NAVIGASI
     // ==========================================
+    function setLoginButtonProcessing(isProcessing) {
+        const btn = document.getElementById('btnLoginSubmit');
+        const label = document.getElementById('btnLoginSubmitLabel');
+        const icon = document.getElementById('btnLoginSubmitIcon');
+        if (!btn) return;
+        btn.disabled = isProcessing;
+        if (isProcessing) {
+            label.textContent = 'Memproses...';
+            icon.className = 'fa-solid fa-circle-notch fa-spin';
+        } else {
+            label.textContent = 'Masuk';
+            icon.className = 'fa-solid fa-arrow-right';
+        }
+    }
+
     function handleLogin(e) {
         e.preventDefault();
-        const id = document.getElementById('inpUserId').value.trim();
+        const email = document.getElementById('inpUserId').value.trim().toLowerCase();
         const pin = document.getElementById('inpPin').value.trim();
-        
-        const user = db.users.find(u => u.User_ID === id && String(u.PIN) === pin);
-        
-        if(user) {
-            currentUser = user;
-            setupDashboard();
-        } else {
-            Swal.fire({ icon: 'error', title: 'Login Gagal', text: 'User ID atau PIN salah.', confirmButtonColor: '#25906a' });
+
+        setLoginButtonProcessing(true);
+
+        if (typeof google === 'undefined') {
+            // Mode pratinjau lokal (di luar Apps Script) - pakai data dummy di memori saja.
+            const dummy = getDummyData();
+            const user = dummy.users.find(u => String(u.User_ID).toLowerCase() === email && String(u.PIN) === pin);
+            if (user) {
+                db = dummy;
+                sessionToken = 'DUMMY-TOKEN';
+                currentUser = { User_ID: user.User_ID, Nama: user.Nama, Role: user.Role };
+                setupDashboard();
+            } else {
+                setLoginButtonProcessing(false);
+                Swal.fire({ icon: 'error', title: 'Login Gagal', text: 'Email atau PIN salah.', confirmButtonColor: '#177355' });
+            }
+            return;
         }
+
+        google.script.run
+            .withSuccessHandler(res => {
+                if (res && res.token) {
+                    sessionToken = res.token;
+                    currentUser = res.user; // tidak mengandung PIN, karena server tidak pernah mengirimkannya
+                    // Muat data setelah sesi tervalidasi
+                    google.script.run
+                        .withSuccessHandler(allData => {
+                            db = allData;
+                            setLoginButtonProcessing(false);
+                            setupDashboard();
+                        })
+                        .withFailureHandler(err => {
+                            setLoginButtonProcessing(false);
+                            console.error(err);
+                            Swal.fire('Error', 'Gagal memuat data dari database.', 'error');
+                        })
+                        .getAllData(sessionToken);
+                } else {
+                    setLoginButtonProcessing(false);
+                    Swal.fire({ icon: 'error', title: 'Login Gagal', text: (res && res.error) || 'Email atau PIN salah.', confirmButtonColor: '#177355' });
+                }
+            })
+            .withFailureHandler(err => {
+                setLoginButtonProcessing(false);
+                console.error(err);
+                Swal.fire('Error', 'Tidak dapat menghubungi server. Coba lagi.', 'error');
+            })
+            .login(email, pin);
     }
 
     function setupDashboard() {
@@ -499,6 +705,7 @@
         document.getElementById('sidebarUserRole').textContent = currentUser.Role;
         document.getElementById('btnLogout').classList.remove('hidden');
         document.getElementById('viewLogin').classList.add('hidden');
+        document.getElementById('hamburgerBtn').classList.remove('hidden');
 
         document.querySelectorAll('.user-only').forEach(el => el.classList.add('hidden'));
         document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
@@ -506,6 +713,7 @@
         if(currentUser.Role === 'User') {
             document.querySelectorAll('.user-only').forEach(el => el.classList.remove('hidden'));
             
+            // Set input "Tanggal Piket" ke hari ini secara otomatis saat login
             const todayStr = new Date().toISOString().split('T')[0];
             document.getElementById('inpPiketTanggal').value = todayStr;
             
@@ -519,18 +727,28 @@
     }
 
     function logout() {
+        if (typeof google !== 'undefined' && sessionToken && sessionToken !== 'DUMMY-TOKEN') {
+            google.script.run.logoutSession(sessionToken);
+        }
         currentUser = null;
+        sessionToken = null;
+        db = { users: [], jobdesk: [], piket: [] };
         document.getElementById('sidebarUserName').textContent = 'Belum Login';
         document.getElementById('sidebarUserRole').textContent = '-';
         document.getElementById('btnLogout').classList.add('hidden');
+        document.getElementById('hamburgerBtn').classList.add('hidden'); 
         
         document.querySelectorAll('.user-only, .admin-only').forEach(el => el.classList.add('hidden'));
         document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
         
         document.getElementById('formLogin').reset();
+        setLoginButtonProcessing(false);
         document.getElementById('viewLogin').classList.remove('hidden');
         document.getElementById('pageTitle').textContent = 'Selamat Datang';
         document.getElementById('pageSubtitle').textContent = 'Sistem Kinerja & Gamifikasi';
+        
+        document.getElementById('sidebar').classList.add('-translate-x-full');
+        document.getElementById('sidebarOverlay').classList.add('hidden');
     }
 
     function switchView(viewId, btnElement) {
@@ -556,14 +774,20 @@
             document.getElementById('pageSubtitle').textContent = currentUser.Role === 'Admin' ? 'Mode Administrator' : 'Mode Karyawan';
         }
 
-        if(window.innerWidth < 768) {
-            document.getElementById('sidebar').classList.add('-translate-x-full');
-            document.getElementById('sidebarOverlay').classList.add('hidden');
-        }
+        document.getElementById('sidebar').classList.add('-translate-x-full');
+        document.getElementById('sidebarOverlay').classList.add('hidden');
 
-        if(viewId === 'viewUserHistory') renderUserHistory();
-        if(viewId === 'viewAdminDashboard') renderAdminQueue();
-        if(viewId === 'viewAdminHistory') renderAdminHistory();
+        if(viewId === 'viewUserHistory') {
+            paginationState.userHistory.page = 1;
+            renderUserHistory();
+        }
+        if(viewId === 'viewAdminDashboard') {
+            paginationState.adminQueue.page = 1;
+            renderAdminQueue();
+        }
+        if(viewId === 'viewAdminHistory') {
+            resetAdminHistoryFilter();
+        }
         if(viewId === 'viewLeaderboard') {
             resetLeaderboardFilter();
         }
@@ -575,15 +799,16 @@
     function addJobdeskInput() {
         const container = document.getElementById('jobdeskInputsContainer');
         const newGroup = document.createElement('div');
-        newGroup.className = 'jobdesk-input-group relative flex items-start gap-2 view-fade';
+        newGroup.className = 'jobdesk-input-group relative flex flex-col gap-2 bg-wahdah-50/50 border border-wahdah-100 rounded-xl p-3 view-fade';
         newGroup.innerHTML = `
-            <textarea rows="2" required placeholder="Contoh: Menyusun laporan keuangan bulanan..." class="flex-1 rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white resize-none transition-colors"></textarea>
-            <button type="button" class="btn-hapus-tugas shrink-0 mt-1 w-8 h-8 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors" onclick="removeJobdeskInput(this)" title="Hapus baris ini">
-                <i class="fa-solid fa-trash-can text-sm"></i>
-            </button>
+            <div class="flex items-start gap-2">
+                <textarea rows="2" required placeholder="Contoh: Menyusun laporan keuangan bulanan..." class="flex-1 rounded-lg border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white resize-none transition-colors"></textarea>
+                <button type="button" class="btn-hapus-tugas shrink-0 mt-1 w-8 h-8 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors" onclick="removeJobdeskInput(this)" title="Hapus baris ini">
+                    <i class="fa-solid fa-trash-can text-sm"></i>
+                </button>
+            </div>
         `;
         container.appendChild(newGroup);
-        // Tampilkan tombol hapus untuk semua baris jika lebih dari 1
         toggleDeleteButtons();
     }
 
@@ -595,12 +820,14 @@
 
     function toggleDeleteButtons() {
         const groups = document.querySelectorAll('#jobdeskInputsContainer .jobdesk-input-group');
-        groups.forEach((g, idx) => {
+        groups.forEach((g) => {
             const delBtn = g.querySelector('.btn-hapus-tugas');
-            if (groups.length > 1) {
-                delBtn.classList.remove('hidden');
-            } else {
-                delBtn.classList.add('hidden');
+            if (delBtn) {
+                if (groups.length > 1) {
+                    delBtn.classList.remove('hidden');
+                } else {
+                    delBtn.classList.add('hidden');
+                }
             }
         });
     }
@@ -610,7 +837,9 @@
         const groups = container.querySelectorAll('.jobdesk-input-group');
         groups.forEach((group, index) => {
             if (index > 0) group.remove();
-            else group.querySelector('textarea').value = '';
+            else {
+                group.querySelector('textarea').value = '';
+            }
         });
         toggleDeleteButtons();
     }
@@ -618,14 +847,18 @@
     function submitJobdesk(e) {
         e.preventDefault();
         
-        const textareas = document.querySelectorAll('#jobdeskInputsContainer textarea');
+        const groups = document.querySelectorAll('#jobdeskInputsContainer .jobdesk-input-group');
         const todayStr = new Date().toISOString().split('T')[0];
         let tasksData = [];
         let isValid = true;
+        
         const timestampBase = Date.now();
 
-        textareas.forEach((ta, index) => {
+        groups.forEach((group, index) => {
+            const ta = group.querySelector('textarea');
             const desc = ta.value.trim();
+            const isSelesai = false; // Default input tugas harian = Belum Selesai
+
             if(desc.length < 10) {
                 isValid = false;
                 ta.classList.add('border-red-400', 'focus:ring-red-400', 'bg-red-50');
@@ -637,7 +870,8 @@
                     tanggal: todayStr,
                     deskripsi: desc,
                     status: 'Pending',
-                    poin: 0
+                    poin: 0,
+                    isSelesai: isSelesai
                 });
             }
         });
@@ -648,7 +882,7 @@
 
         if (typeof google === 'undefined') {
             tasksData.forEach(task => {
-                db.jobdesk.push({ Task_ID: task.id, User_ID: task.userId, Tanggal: task.tanggal, Deskripsi_Tugas: task.deskripsi, Status: task.status, Poin: task.poin });
+                db.jobdesk.push({ Task_ID: task.id, User_ID: task.userId, Tanggal: task.tanggal, Deskripsi_Tugas: task.deskripsi, Status: task.status, Poin: task.poin, Status_Kerja: task.isSelesai ? 'Selesai' : 'Belum Selesai' });
             });
             postSubmitAction('formJobdesk', `${tasksData.length} Tugas berhasil dicatat!`);
             resetJobdeskForm();
@@ -659,37 +893,81 @@
                 postSubmitAction('formJobdesk', `${tasksData.length} Tugas berhasil dicatat!`); 
                 resetJobdeskForm();
                 Swal.close(); 
-            }).saveMultipleJobdesk(tasksData);
+            }).withFailureHandler(err => {
+                console.error(err);
+                Swal.fire('Error', (err && err.message) || 'Gagal menyimpan tugas.', 'error');
+            }).saveMultipleJobdesk(sessionToken, tasksData);
         }
     }
 
     function submitPiket(e) {
         e.preventDefault();
         const jenis = document.getElementById('inpPiketJenis').value;
-        const tglPiket = document.getElementById('inpPiketTanggal').value;
-        
-        const data = {
-            id: 'PKT-' + Date.now(),
-            userId: currentUser.User_ID,
-            tanggal: tglPiket,
-            jenis: jenis,
-            status: 'Pending',
-            poin: 0,
-            imageBase64: ''
-        };
+        const tanggalStr = document.getElementById('inpPiketTanggal').value; // Mengambil nilai dari form input
+        const fileInput = document.getElementById('inpPiketFoto');
+        const file = fileInput.files[0];
 
-        if (typeof google === 'undefined') {
-            db.piket.push({ Schedule_ID: data.id, User_ID: data.userId, Tanggal: data.tanggal, Jenis_Piket: data.jenis, Status: data.status, Bukti_Foto_URL: '#', Poin: data.poin });
-            postSubmitAction('formPiket', 'Laporan piket terkirim!');
-        } else {
-            Swal.fire({title: 'Menyimpan...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
-            google.script.run.withSuccessHandler(res => { db = res; postSubmitAction('formPiket', 'Laporan piket terkirim!'); Swal.close(); }).uploadPiket(data);
+        // Validasi File
+        if (!file) {
+            return Swal.fire('Perhatian', 'Bukti foto piket wajib diunggah!', 'warning');
         }
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+            return Swal.fire('Perhatian', 'Ukuran foto terlalu besar! Maksimal 10MB.', 'warning');
+        }
+
+        const isSelesai = true; // Piket otomatis Selesai
+
+        Swal.fire({title: 'Mengunggah & Menyimpan...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+
+        // Proses membaca file gambar (Base64)
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            const dataUrl = evt.target.result;
+            const mimeType = dataUrl.split(';')[0].split(':')[1];
+            const base64 = dataUrl.split(',')[1];
+            
+            let ext = 'jpg';
+            if (mimeType === 'image/png') ext = 'png';
+            else if (mimeType === 'image/jpeg') ext = 'jpg';
+
+            const data = {
+                id: 'PKT-' + Date.now(),
+                userId: currentUser.User_ID,
+                tanggal: tanggalStr, // Tanggal yang dikirim sesuai inputan User
+                jenis: jenis,
+                status: 'Pending',
+                poin: 0,
+                imageBase64: base64,
+                mimeType: mimeType,
+                ext: ext,
+                isSelesai: isSelesai
+            };
+
+            if (typeof google === 'undefined') {
+                db.piket.push({ Schedule_ID: data.id, User_ID: data.userId, Tanggal: data.tanggal, Jenis_Piket: data.jenis, Status: data.status, Bukti_Foto_URL: dataUrl, Poin: data.poin, Status_Kerja: 'Selesai' });
+                postSubmitAction('formPiket', 'Laporan piket berhasil terkirim!');
+                Swal.close();
+            } else {
+                google.script.run
+                    .withSuccessHandler(res => { 
+                        db = res; 
+                        postSubmitAction('formPiket', 'Laporan piket berhasil terkirim!'); 
+                        Swal.close(); 
+                    })
+                    .withFailureHandler(err => {
+                        console.error(err);
+                        Swal.fire('Error', (err && err.message) || 'Gagal mengunggah laporan.', 'error');
+                    })
+                    .uploadPiket(sessionToken, data);
+            }
+        };
+        reader.readAsDataURL(file);
     }
 
     function postSubmitAction(formId, msg) {
         document.getElementById(formId).reset();
         
+        // Kembalikan form "Tanggal Piket" ke hari ini setelah di-reset
         const todayStr = new Date().toISOString().split('T')[0];
         if (formId === 'formPiket') document.getElementById('inpPiketTanggal').value = todayStr;
 
@@ -708,79 +986,167 @@
         document.getElementById('userTotalPoin').textContent = total;
     }
 
-    function renderUserHistory() {
-        const tbody = document.getElementById('user-history-tbody');
-        let history = [];
-        
-        db.jobdesk.filter(t => t.User_ID === currentUser.User_ID).forEach(t => {
-            history.push({ type: 'Task', id: t.Task_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin });
-        });
-        db.piket.filter(p => p.User_ID === currentUser.User_ID).forEach(p => {
-            history.push({ type: 'Piket', id: p.Schedule_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, status: p.Status, poin: p.Poin });
-        });
-
-        history.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        if(history.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-wahdah-400">Belum ada riwayat aktivitas.</td></tr>`;
-            return;
-        }
-
-        tbody.innerHTML = history.map(h => {
-            let statusBadge = h.status === 'Approved' ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold">Approved</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[10px] font-bold">Pending</span>';
-            let icon = h.type === 'Task' ? '<i class="fa-solid fa-briefcase text-wahdah-400 mr-2"></i>' : '<i class="fa-solid fa-broom text-gold-500 mr-2"></i>';
-            
-            let rawDesc = h.desc.replace(/^Piket: /, '');
-            let escDesc = rawDesc.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-            let actionBtns = h.status === 'Pending' 
-                ? `<button onclick="editUserTask('${h.type}', '${h.id}', '${escDesc}')" class="text-blue-500 hover:bg-blue-50 p-1.5 rounded-lg transition-colors mr-1" title="Edit Tugas"><i class="fa-solid fa-pen-to-square"></i></button>
-                   <button onclick="deleteUserTask('${h.id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Hapus Tugas"><i class="fa-solid fa-trash-can"></i></button>`
-                : `<span class="text-wahdah-300 text-[10px] italic"><i class="fa-solid fa-lock mr-1"></i>Terkunci</span>`;
-
-            return `
-                <tr class="hover:bg-wahdah-50/50 transition-colors">
-                    <td class="px-5 py-3 whitespace-nowrap text-wahdah-600">${h.date}</td>
-                    <td class="px-5 py-3 font-medium text-wahdah-900">${icon} ${h.desc}</td>
-                    <td class="px-5 py-3 text-center">${statusBadge}</td>
-                    <td class="px-5 py-3 text-right font-bold ${h.poin > 0 ? 'text-wahdah-600' : 'text-wahdah-300'}">${h.poin > 0 ? '+'+h.poin : '-'}</td>
-                    <td class="px-5 py-3 text-center">${actionBtns}</td>
-                </tr>
-            `;
-        }).join('');
+    // --- Bulk Action Logic (User History) ---
+    function toggleAllCheckboxes(checked) {
+        const checkboxes = document.querySelectorAll('.row-checkbox:not(:disabled)');
+        checkboxes.forEach(cb => cb.checked = checked);
+        updateBulkActionUI();
     }
 
-    function deleteUserTask(id) {
+    function updateBulkActionUI() {
+        const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+        const count = checkboxes.length;
+        const bar = document.getElementById('bulkActionsBar');
+        document.getElementById('selectedCount').textContent = count;
+        
+        if(count > 0) {
+            bar.classList.remove('hidden');
+        } else {
+            bar.classList.add('hidden');
+            document.getElementById('selectAllCheckbox').checked = false;
+        }
+    }
+
+    function getSelectedIds() {
+        const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+        return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    function bulkMarkDone() {
+        const ids = getSelectedIds();
+        if(ids.length === 0) return;
+        
         Swal.fire({
-            title: 'Hapus Aktivitas?',
-            text: "Data yang dihapus tidak dapat dikembalikan!",
-            icon: 'warning',
+            title: 'Tandai Selesai?',
+            text: `${ids.length} tugas akan ditandai sebagai Selesai.`,
+            icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#e3342f',
-            cancelButtonColor: '#9ca3af',
-            confirmButtonText: '<i class="fa-solid fa-trash-can mr-1"></i> Ya, Hapus',
-            cancelButtonText: 'Batal'
+            confirmButtonColor: '#2563eb',
+            confirmButtonText: 'Ya, Tandai Selesai'
         }).then((result) => {
             if (result.isConfirmed) {
-                if (typeof google === 'undefined') {
-                    db.jobdesk = db.jobdesk.filter(t => t.Task_ID !== id);
-                    db.piket = db.piket.filter(p => p.Schedule_ID !== id);
-                    renderUserHistory();
-                    updateUserPoints();
-                    Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Tugas terhapus!', showConfirmButton: false, timer: 1500});
+                if(typeof google === 'undefined') {
+                    ids.forEach(id => {
+                        let t = db.jobdesk.find(x => x.Task_ID === id);
+                        if(t) t.Status_Kerja = 'Selesai';
+                        let p = db.piket.find(x => x.Schedule_ID === id);
+                        if(p) p.Status_Kerja = 'Selesai';
+                    });
+                    finalizeBulkAction('Berhasil ditandai selesai!');
                 } else {
-                    Swal.fire({title: 'Menghapus...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+                    Swal.fire({title: 'Memproses...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
                     google.script.run.withSuccessHandler(res => {
-                        db = res;
-                        renderUserHistory();
-                        updateUserPoints();
-                        Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Tugas terhapus!', showConfirmButton: false, timer: 1500});
-                    }).deleteTask(id);
+                        db = res; finalizeBulkAction('Berhasil ditandai selesai!');
+                    }).withFailureHandler(err => {
+                        console.error(err);
+                        Swal.fire('Error', (err && err.message) || 'Gagal memproses.', 'error');
+                    }).updateMultipleTaskStatus(sessionToken, ids);
                 }
             }
         });
     }
 
-    function editUserTask(type, id, oldVal) {
+    function bulkDelete() {
+        const ids = getSelectedIds();
+        if(ids.length === 0) return;
+        
+        Swal.fire({
+            title: 'Hapus Tugas?',
+            text: `${ids.length} tugas akan dihapus permanen!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e3342f',
+            confirmButtonText: 'Ya, Hapus'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if(typeof google === 'undefined') {
+                    ids.forEach(id => {
+                        db.jobdesk = db.jobdesk.filter(x => x.Task_ID !== id);
+                        db.piket = db.piket.filter(x => x.Schedule_ID !== id);
+                    });
+                    finalizeBulkAction('Tugas berhasil dihapus!');
+                } else {
+                    Swal.fire({title: 'Menghapus...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+                    google.script.run.withSuccessHandler(res => {
+                        db = res; finalizeBulkAction('Tugas berhasil dihapus!');
+                    }).withFailureHandler(err => {
+                        console.error(err);
+                        Swal.fire('Error', (err && err.message) || 'Gagal menghapus.', 'error');
+                    }).deleteMultipleTasks(sessionToken, ids);
+                }
+            }
+        });
+    }
+
+    function finalizeBulkAction(msg) {
+        document.getElementById('selectAllCheckbox').checked = false;
+        document.getElementById('bulkActionsBar').classList.add('hidden');
+        renderUserHistory();
+        updateUserPoints();
+        Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: msg, showConfirmButton: false, timer: 1500});
+    }
+
+    function renderUserHistory() {
+        const tbody = document.getElementById('user-history-tbody');
+        document.getElementById('selectAllCheckbox').checked = false;
+        document.getElementById('bulkActionsBar').classList.add('hidden');
+
+        let history = [];
+        
+        db.jobdesk.filter(t => t.User_ID === currentUser.User_ID).forEach(t => {
+            history.push({ type: 'Task', id: t.Task_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai' });
+        });
+        db.piket.filter(p => p.User_ID === currentUser.User_ID).forEach(p => {
+            history.push({ type: 'Piket', id: p.Schedule_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, status: p.Status, poin: p.Poin, statusKerja: p.Status_Kerja || 'Selesai' });
+        });
+
+        history.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        if(history.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-wahdah-400">Belum ada riwayat aktivitas.</td></tr>`;
+            document.getElementById('user-history-pagination').innerHTML = '';
+            return;
+        }
+
+        const totalPages = Math.max(1, Math.ceil(history.length / paginationState.userHistory.pageSize));
+        if (paginationState.userHistory.page > totalPages) paginationState.userHistory.page = totalPages;
+        const start = (paginationState.userHistory.page - 1) * paginationState.userHistory.pageSize;
+        const pageData = history.slice(start, start + paginationState.userHistory.pageSize);
+
+        tbody.innerHTML = pageData.map(h => {
+            let statusBadge = h.status === 'Approved' ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold">Approved</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[10px] font-bold">Pending</span>';
+            let icon = h.type === 'Task' ? '<i class="fa-solid fa-briefcase text-wahdah-400 mr-2"></i>' : '<i class="fa-solid fa-broom text-gold-500 mr-2"></i>';
+            let kerjaBadge = h.statusKerja === 'Selesai' ? '<span class="ml-2 bg-blue-100 text-blue-600 text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-blue-200 uppercase">Selesai</span>' : '<span class="ml-2 bg-gray-100 text-gray-500 text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-gray-200 uppercase">Belum Selesai</span>';
+            
+            // Checkbox Update Completion
+            let disabledCb = h.status === 'Approved' ? 'disabled' : '';
+            let cbHtml = `<input type="checkbox" class="row-checkbox w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer" value="${h.id}" onchange="updateBulkActionUI()" ${disabledCb}>`;
+            
+            // Edit Action Button (Delete goes to Bulk Action)
+            let rawDesc = h.desc.replace(/^Piket: /, ''); 
+            let escDesc = rawDesc.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            let escStatusKerja = h.statusKerja;
+            let actionBtns = h.status === 'Pending' 
+                ? `<button onclick="editUserTask('${h.type}', '${h.id}', '${escDesc}', '${escStatusKerja}')" class="text-blue-500 hover:bg-blue-50 p-1.5 rounded-lg transition-colors mr-1" title="Edit Tugas"><i class="fa-solid fa-pen-to-square"></i></button>`
+                : `<span class="text-wahdah-300 text-[10px] italic"><i class="fa-solid fa-lock mr-1"></i>Terkunci</span>`;
+
+            return `
+                <tr class="hover:bg-wahdah-50/50 transition-colors">
+                    <td class="px-4 py-3 text-center">${cbHtml}</td>
+                    <td class="px-3 py-3 whitespace-nowrap text-wahdah-600 text-xs">${escapeHtml(h.date)}</td>
+                    <td class="px-3 py-3 font-medium text-wahdah-900">${icon} ${escapeHtml(h.desc)} ${kerjaBadge}</td>
+                    <td class="px-3 py-3 text-center">${statusBadge}</td>
+                    <td class="px-3 py-3 text-right font-bold ${h.poin > 0 ? 'text-wahdah-600' : 'text-wahdah-300'}">${h.poin > 0 ? '+'+h.poin : '-'}</td>
+                    <td class="px-3 py-3 text-center">${actionBtns}</td>
+                </tr>
+            `;
+        }).join('');
+        
+        renderPagination('user-history-pagination', paginationState.userHistory, totalPages, 'renderUserHistory');
+    }
+
+    // Fungsi Edit Tugas (Karyawan)
+    function editUserTask(type, id, oldVal, oldStatusKerja) {
         if(type === 'Task') {
             Swal.fire({
                 title: 'Edit Deskripsi Tugas',
@@ -802,9 +1168,10 @@
                 title: 'Edit Area Piket',
                 input: 'select',
                 inputOptions: {
-                    'Ruang Utama': 'Ruang Utama',
-                    'Dapur & Pantry': 'Dapur & Pantry',
-                    'Toilet': 'Toilet'
+                    'Lantai 1': 'Lantai 1',
+                    'Lantai 2': 'Lantai 2',
+                    'Tangga & Wc': 'Tangga & Wc',
+                    'Cuci Piring & Buang Sampah': 'Cuci Piring & Buang Sampah'
                 },
                 inputValue: oldVal,
                 showCancelButton: true,
@@ -816,6 +1183,7 @@
         }
     }
 
+    // Eksekutor Edit Tugas
     function processEditTask(data) {
         if (typeof google === 'undefined') {
             if (data.type === 'Task') {
@@ -826,14 +1194,17 @@
                 if (piket) piket.Jenis_Piket = data.val;
             }
             renderUserHistory();
-            Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Perubahan tersimpan!', showConfirmButton: false, timer: 1500});
+            Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: 'Perubahan tersimpan!', showConfirmButton: false, timer: 1500});
         } else {
             Swal.fire({title: 'Menyimpan...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
             google.script.run.withSuccessHandler(res => {
                 db = res;
                 renderUserHistory();
-                Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Perubahan tersimpan!', showConfirmButton: false, timer: 1500});
-            }).updateTask(data);
+                Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: 'Perubahan tersimpan!', showConfirmButton: false, timer: 1500});
+            }).withFailureHandler(err => {
+                console.error(err);
+                Swal.fire('Error', (err && err.message) || 'Gagal menyimpan perubahan.', 'error');
+            }).updateTask(sessionToken, data);
         }
     }
 
@@ -845,69 +1216,242 @@
         return u ? u.Nama : 'Unknown';
     }
 
+    function populateAdminFilter() {
+        const selectHistory = document.getElementById('adminFilterNama');
+        const selectQueue = document.getElementById('adminQueueFilterNama');
+        
+        const users = db.users.filter(u => u.Role === 'User');
+        const optionsHtml = `<option value="ALL">Semua Karyawan</option>` + 
+            users.map(u => `<option value="${escapeHtml(u.User_ID)}">${escapeHtml(u.Nama)}</option>`).join('');
+            
+        if (selectHistory) selectHistory.innerHTML = optionsHtml;
+        if (selectQueue) selectQueue.innerHTML = optionsHtml;
+    }
+
+    // --- Bulk Action Logic (Admin Queue) ---
+    function toggleAllAdminCheckboxes(checked) {
+        const checkboxes = document.querySelectorAll('.admin-row-checkbox:not(:disabled)');
+        checkboxes.forEach(cb => cb.checked = checked);
+        updateAdminBulkActionUI();
+    }
+
+    function updateAdminBulkActionUI() {
+        const checkboxes = document.querySelectorAll('.admin-row-checkbox:checked');
+        const count = checkboxes.length;
+        const bar = document.getElementById('adminBulkActionsBar');
+        document.getElementById('adminSelectedCount').textContent = count;
+        
+        if(count > 0) {
+            bar.classList.remove('hidden');
+        } else {
+            bar.classList.add('hidden');
+            document.getElementById('selectAllAdminCheckbox').checked = false;
+        }
+    }
+
+    function getAdminSelectedIds() {
+        return Array.from(document.querySelectorAll('.admin-row-checkbox:checked')).map(cb => cb.value);
+    }
+
+    function bulkAdminApprove() {
+        const ids = getAdminSelectedIds();
+        if(ids.length === 0) return;
+
+        // Check for unfinished tasks
+        let hasUnfinished = false;
+        let validIds = [];
+        ids.forEach(id => {
+            let found = db.jobdesk.find(t => t.Task_ID === id) || db.piket.find(p => p.Schedule_ID === id);
+            if (found && found.Status_Kerja === 'Selesai') {
+                validIds.push(id);
+            } else {
+                hasUnfinished = true;
+            }
+        });
+
+        if (validIds.length === 0) {
+            Swal.fire('Perhatian', 'Laporan yang dipilih belum selesai dikerjakan sehingga tidak dapat disetujui.', 'warning');
+            return;
+        }
+
+        let textMsg = `${validIds.length} laporan akan disetujui.`;
+        if (hasUnfinished) textMsg += ` (Beberapa laporan diabaikan karena belum selesai).`;
+
+        Swal.fire({
+            title: 'Setujui Laporan',
+            text: textMsg,
+            icon: 'question',
+            input: 'select',
+            inputOptions: { '2': 'Mudah (2 Poin)', '3': 'Sedang (3 Poin)', '5': 'Sulit (5 Poin)' },
+            inputPlaceholder: 'Pilih Poin Default',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fa-solid fa-check-double mr-1"></i> Setujui',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#25906a',
+            inputValidator: (value) => { if (!value) return 'Pilih poin default!' }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const defaultPoint = parseInt(result.value);
+                const queue = validIds.map(id => ({ id: id, poin: defaultPoint }));
+                executeAdminApprove(queue);
+            }
+        });
+    }
+
+    function executeAdminApprove(queue) {
+        if (typeof google === 'undefined') {
+            queue.forEach(q => {
+                let found = db.jobdesk.find(t => t.Task_ID === q.id) || db.piket.find(p => p.Schedule_ID === q.id);
+                if(found) { found.Status = 'Approved'; found.Poin = q.poin; }
+            });
+            finalizeAdminBulkAction(`${queue.length} laporan disetujui!`);
+        } else {
+            Swal.fire({title: 'Memproses...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+            google.script.run.withSuccessHandler(res => {
+                db = res; finalizeAdminBulkAction(`${queue.length} laporan disetujui!`);
+            }).withFailureHandler(err => {
+                console.error(err);
+                Swal.fire('Error', (err && err.message) || 'Gagal menyetujui laporan.', 'error');
+            }).approveAllTasks(sessionToken, queue);
+        }
+    }
+
+    function bulkAdminDelete() {
+        const ids = getAdminSelectedIds();
+        if(ids.length === 0) return;
+        
+        Swal.fire({
+            title: 'Hapus Laporan?',
+            text: `${ids.length} laporan akan dihapus permanen!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e3342f',
+            confirmButtonText: 'Ya, Hapus'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if(typeof google === 'undefined') {
+                    ids.forEach(id => {
+                        db.jobdesk = db.jobdesk.filter(x => x.Task_ID !== id);
+                        db.piket = db.piket.filter(x => x.Schedule_ID !== id);
+                    });
+                    finalizeAdminBulkAction('Laporan dihapus!');
+                } else {
+                    Swal.fire({title: 'Menghapus...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+                    google.script.run.withSuccessHandler(res => {
+                        db = res; finalizeAdminBulkAction('Laporan dihapus!');
+                    }).withFailureHandler(err => {
+                        console.error(err);
+                        Swal.fire('Error', (err && err.message) || 'Gagal menghapus laporan.', 'error');
+                    }).deleteMultipleTasks(sessionToken, ids);
+                }
+            }
+        });
+    }
+
+    function finalizeAdminBulkAction(msg) {
+        document.getElementById('selectAllAdminCheckbox').checked = false;
+        document.getElementById('adminBulkActionsBar').classList.add('hidden');
+        renderAdminQueue();
+        Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: msg, showConfirmButton: false, timer: 1500});
+    }
+
     function renderAdminQueue() {
         const tbody = document.getElementById('admin-queue-tbody');
-        const btnApproveAll = document.getElementById('btnApproveAll');
         const filterUserId = document.getElementById('adminQueueFilterNama').value;
+        
+        document.getElementById('selectAllAdminCheckbox').checked = false;
+        document.getElementById('adminBulkActionsBar').classList.add('hidden');
+
         let queue = [];
         
         db.jobdesk.filter(t => t.Status === 'Pending').forEach(t => {
             if (filterUserId === 'ALL' || t.User_ID === filterUserId) {
-                queue.push({ type: 'Task', id: t.Task_ID, userId: t.User_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas });
+                queue.push({ type: 'Task', id: t.Task_ID, userId: t.User_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, statusKerja: t.Status_Kerja || 'Selesai', fotoUrl: null });
             }
         });
         
         db.piket.filter(p => p.Status === 'Pending').forEach(p => {
             if (filterUserId === 'ALL' || p.User_ID === filterUserId) {
-                queue.push({ type: 'Piket', id: p.Schedule_ID, userId: p.User_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}` });
+                queue.push({ type: 'Piket', id: p.Schedule_ID, userId: p.User_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, statusKerja: p.Status_Kerja || 'Selesai', fotoUrl: p.Bukti_Foto_URL });
             }
         });
 
         document.getElementById('adminPendingCount').textContent = queue.length;
-        
-        if (queue.length > 0) {
-            btnApproveAll.classList.remove('hidden');
-        } else {
-            btnApproveAll.classList.add('hidden');
-        }
 
         if(queue.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-wahdah-400">Tidak ada antrean persetujuan saat ini.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-wahdah-400">Tidak ada antrean persetujuan saat ini.</td></tr>`;
+            document.getElementById('admin-queue-pagination').innerHTML = '';
             return;
         }
 
-        tbody.innerHTML = queue.map(q => {
+        const totalPages = Math.max(1, Math.ceil(queue.length / paginationState.adminQueue.pageSize));
+        if (paginationState.adminQueue.page > totalPages) paginationState.adminQueue.page = totalPages;
+        const start = (paginationState.adminQueue.page - 1) * paginationState.adminQueue.pageSize;
+        const pageData = queue.slice(start, start + paginationState.adminQueue.pageSize);
+
+        tbody.innerHTML = pageData.map(q => {
             let icon = q.type === 'Task' ? '<i class="fa-solid fa-briefcase text-wahdah-400 mr-2"></i>' : '<i class="fa-solid fa-broom text-gold-500 mr-2"></i>';
+            let kerjaBadge = q.statusKerja === 'Selesai' ? '<span class="ml-2 bg-blue-100 text-blue-600 text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-blue-200 uppercase">Selesai</span>' : '<span class="ml-2 bg-gray-100 text-gray-500 text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-gray-200 uppercase">Belum Selesai</span>';
+            
+            let fotoCell = `<span class="text-wahdah-300">-</span>`;
+            if (q.type === 'Piket') {
+                if (q.fotoUrl && q.fotoUrl !== '#' && q.fotoUrl.trim() !== '') {
+                    fotoCell = `<a href="${q.fotoUrl}" target="_blank" class="w-8 h-8 bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 rounded-full flex items-center justify-center mx-auto transition-colors" title="Lihat Foto Piket"><i class="fa-solid fa-eye"></i></a>`;
+                } else {
+                    fotoCell = `<span class="text-xs text-wahdah-400 italic">Tanpa Foto</span>`;
+                }
+            }
+
+            let cbHtml = `<input type="checkbox" class="admin-row-checkbox w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer" value="${q.id}" onchange="updateAdminBulkActionUI()">`;
+
+            let actionColumn = '';
+            if (q.statusKerja === 'Belum Selesai') {
+                actionColumn = `<span class="text-[11px] text-red-500 font-bold bg-red-50 px-2.5 py-1.5 rounded-lg border border-red-100 italic"><i class="fa-solid fa-lock mr-1"></i>Menunggu Selesai</span>`;
+            } else {
+                actionColumn = `
+                    <div class="flex items-center gap-1.5 justify-center">
+                        <select id="tingkat-${q.id}" onchange="document.getElementById('poin-${q.id}').value = this.value" class="w-[90px] text-[10px] border border-wahdah-200 rounded-lg px-1.5 py-1.5 outline-none bg-white focus:border-wahdah-400 cursor-pointer">
+                            <option value="2" selected>Mudah</option>
+                            <option value="3">Sedang</option>
+                            <option value="5">Sulit</option>
+                        </select>
+                        <input type="number" id="poin-${q.id}" class="w-12 border border-wahdah-200 rounded-lg px-1 py-1.5 text-center text-sm outline-none focus:border-wahdah-400 font-bold text-wahdah-700" value="2">
+                        <button id="btnApprove-${q.id}" onclick="approveItem('${q.id}')" class="bg-wahdah-600 hover:bg-wahdah-700 text-white rounded-lg p-1.5 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed" title="Setujui">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                    </div>`;
+            }
+            
             return `
                 <tr class="hover:bg-wahdah-50/50 transition-colors">
-                    <td class="px-5 py-3 text-wahdah-600 text-xs">${q.date}</td>
-                    <td class="px-5 py-3 font-semibold text-wahdah-800">${getUserName(q.userId)}</td>
-                    <td class="px-5 py-3 text-wahdah-700">${icon} ${q.desc}</td>
-                    <td class="px-5 py-3">
-                        <div class="flex items-center gap-1.5 justify-center">
-                            <select id="tingkat-${q.id}" onchange="document.getElementById('poin-${q.id}').value = this.value" class="w-[90px] text-[10px] border border-wahdah-200 rounded-lg px-1.5 py-1.5 outline-none bg-white focus:border-wahdah-400 cursor-pointer">
-                                <option value="2" selected>Mudah</option>
-                                <option value="3">Sedang</option>
-                                <option value="5">Sulit</option>
-                            </select>
-                            
-                            <input type="number" id="poin-${q.id}" class="w-12 border border-wahdah-200 rounded-lg px-1 py-1.5 text-center text-sm outline-none focus:border-wahdah-400 font-bold text-wahdah-700" value="2">
-                            
-                            <button onclick="approveItem('${q.id}')" class="bg-wahdah-600 hover:bg-wahdah-700 text-white rounded-lg p-1.5 transition-colors shadow-sm" title="Setujui">
-                                <i class="fa-solid fa-check"></i>
-                            </button>
-                        </div>
-                    </td>
+                    <td class="px-4 py-3 text-center">${cbHtml}</td>
+                    <td class="px-3 py-3 text-wahdah-600 text-xs">${escapeHtml(q.date)}</td>
+                    <td class="px-3 py-3 font-semibold text-wahdah-800">${escapeHtml(getUserName(q.userId))}</td>
+                    <td class="px-3 py-3 text-wahdah-700">${icon} ${escapeHtml(q.desc)} ${kerjaBadge}</td>
+                    <td class="px-3 py-3 text-center">${fotoCell}</td>
+                    <td class="px-3 py-3 text-center">${actionColumn}</td>
                 </tr>
             `;
         }).join('');
+        
+        renderPagination('admin-queue-pagination', paginationState.adminQueue, totalPages, 'renderAdminQueue');
     }
 
     function approveItem(id) {
         const poinInput = document.getElementById(`poin-${id}`);
+        if (!poinInput) return;
+        
         const poin = parseInt(poinInput.value) || 0;
-
         const data = { id: id, poin: poin };
+
+        const btn = document.getElementById(`btnApprove-${id}`);
+        const tingkatInput = document.getElementById(`tingkat-${id}`);
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+        }
+        poinInput.disabled = true;
+        if (tingkatInput) tingkatInput.disabled = true;
 
         if (typeof google === 'undefined') {
             let found = db.jobdesk.find(t => t.Task_ID === id);
@@ -917,137 +1461,188 @@
                 if(found) { found.Status = 'Approved'; found.Poin = poin; }
             }
             renderAdminQueue();
-            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Tugas disetujui', showConfirmButton: false, timer: 1500 });
+            Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Tugas disetujui', showConfirmButton: false, timer: 1500 });
         } else {
-            poinInput.disabled = true;
-            document.getElementById(`tingkat-${id}`).disabled = true;
             google.script.run.withSuccessHandler(res => { 
                 db = res; 
                 renderAdminQueue(); 
-                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Tugas disetujui', showConfirmButton: false, timer: 1500 });
-            }).approveTask(data);
-        }
-    }
-
-    function promptApproveAll() {
-        Swal.fire({
-            title: 'Setujui Semua Antrean',
-            text: 'Tentukan poin default untuk semua tugas di antrean ini:',
-            icon: 'question',
-            input: 'select',
-            inputOptions: {
-                '2': 'Mudah (2 Poin)',
-                '3': 'Sedang (3 Poin)',
-                '5': 'Sulit (5 Poin)'
-            },
-            inputPlaceholder: 'Pilih Poin Default',
-            showCancelButton: true,
-            confirmButtonText: '<i class="fa-solid fa-check-double mr-1"></i> Approve Semua',
-            cancelButtonText: 'Batal',
-            confirmButtonColor: '#25906a',
-            inputValidator: (value) => {
-                if (!value) return 'Anda harus memilih poin default!'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                executeApproveAll(parseInt(result.value));
-            }
-        });
-    }
-
-    function executeApproveAll(defaultPoint) {
-        const filterUserId = document.getElementById('adminQueueFilterNama').value;
-        let queue = [];
-        
-        db.jobdesk.filter(t => t.Status === 'Pending').forEach(t => {
-            if (filterUserId === 'ALL' || t.User_ID === filterUserId) {
-                queue.push({ id: t.Task_ID, poin: defaultPoint });
-            }
-        });
-        db.piket.filter(p => p.Status === 'Pending').forEach(p => {
-            if (filterUserId === 'ALL' || p.User_ID === filterUserId) {
-                queue.push({ id: p.Schedule_ID, poin: defaultPoint });
-            }
-        });
-
-        if (queue.length === 0) return;
-
-        if (typeof google === 'undefined') {
-            queue.forEach(q => {
-                let found = db.jobdesk.find(t => t.Task_ID === q.id);
-                if(found) { found.Status = 'Approved'; found.Poin = q.poin; }
-                else {
-                    found = db.piket.find(p => p.Schedule_ID === q.id);
-                    if(found) { found.Status = 'Approved'; found.Poin = q.poin; }
+                Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Tugas disetujui', showConfirmButton: false, timer: 1500 });
+            }).withFailureHandler(err => {
+                console.error(err);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-check"></i>';
                 }
-            });
-            renderAdminQueue();
-            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: queue.length + ' tugas berhasil disetujui!', showConfirmButton: false, timer: 2000 });
-        } else {
-            Swal.fire({title: 'Memproses ' + queue.length + ' tugas...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
-            google.script.run.withSuccessHandler(res => {
-                db = res;
-                renderAdminQueue();
-                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: queue.length + ' tugas berhasil disetujui!', showConfirmButton: false, timer: 2000 });
-            }).approveAllTasks(queue);
+                poinInput.disabled = false;
+                if (tingkatInput) tingkatInput.disabled = false;
+                Swal.fire('Error', (err && err.message) || 'Gagal menyetujui tugas.', 'error');
+            }).approveTask(sessionToken, data);
         }
     }
 
-    function populateAdminFilter() {
-        const selectHistory = document.getElementById('adminFilterNama');
-        const selectQueue = document.getElementById('adminQueueFilterNama');
-        
-        const users = db.users.filter(u => u.Role === 'User');
-        const optionsHtml = `<option value="ALL">Semua Karyawan</option>` + 
-            users.map(u => `<option value="${u.User_ID}">${u.Nama}</option>`).join('');
-            
-        if (selectHistory) selectHistory.innerHTML = optionsHtml;
-        if (selectQueue) selectQueue.innerHTML = optionsHtml;
+    function resetAdminHistoryFilter() {
+        document.getElementById('adminFilterNama').value = 'ALL';
+        document.getElementById('ahFilterStart').value = '';
+        document.getElementById('ahFilterEnd').value = '';
+        paginationState.adminHistory.page = 1;
+        renderAdminHistory();
     }
 
     function renderAdminHistory() {
         const tbody = document.getElementById('admin-history-tbody');
         const filterUserId = document.getElementById('adminFilterNama').value;
+        const startDateStr = document.getElementById('ahFilterStart').value;
+        const endDateStr = document.getElementById('ahFilterEnd').value;
+
+        let startDate = startDateStr ? new Date(startDateStr) : new Date('2000-01-01');
+        let endDate = endDateStr ? new Date(endDateStr) : new Date('2100-01-01');
+        endDate.setHours(23, 59, 59, 999);
+
         let history = [];
         
         db.jobdesk.forEach(t => {
-            if(filterUserId === 'ALL' || t.User_ID === filterUserId)
-                history.push({ type: 'Task', userId: t.User_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin });
+            if(filterUserId === 'ALL' || t.User_ID === filterUserId) {
+                let itemDate = new Date(t.Tanggal);
+                if(itemDate >= startDate && itemDate <= endDate) {
+                    history.push({ id: t.Task_ID, type: 'Task', userId: t.User_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', fotoUrl: null });
+                }
+            }
         });
         db.piket.forEach(p => {
-            if(filterUserId === 'ALL' || p.User_ID === filterUserId)
-                history.push({ type: 'Piket', userId: p.User_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, status: p.Status, poin: p.Poin });
+            if(filterUserId === 'ALL' || p.User_ID === filterUserId) {
+                let itemDate = new Date(p.Tanggal);
+                if(itemDate >= startDate && itemDate <= endDate) {
+                    history.push({ id: p.Schedule_ID, type: 'Piket', userId: p.User_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, status: p.Status, poin: p.Poin, statusKerja: p.Status_Kerja || 'Selesai', fotoUrl: p.Bukti_Foto_URL });
+                }
+            }
         });
 
         history.sort((a, b) => new Date(b.date) - new Date(a.date));
 
         if(history.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-wahdah-400">Belum ada riwayat aktivitas.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-wahdah-400">Belum ada riwayat aktivitas.</td></tr>`;
+            document.getElementById('admin-history-pagination').innerHTML = '';
             return;
         }
 
-        tbody.innerHTML = history.map(h => {
+        const totalPages = Math.max(1, Math.ceil(history.length / paginationState.adminHistory.pageSize));
+        if (paginationState.adminHistory.page > totalPages) paginationState.adminHistory.page = totalPages;
+        const start = (paginationState.adminHistory.page - 1) * paginationState.adminHistory.pageSize;
+        const pageData = history.slice(start, start + paginationState.adminHistory.pageSize);
+
+        tbody.innerHTML = pageData.map(h => {
             let statusBadge = h.status === 'Approved' ? '<span class="text-emerald-600 font-bold"><i class="fa-solid fa-check"></i></span>' : '<span class="text-amber-500 font-bold"><i class="fa-solid fa-clock"></i></span>';
             let icon = h.type === 'Task' ? '<i class="fa-solid fa-briefcase text-wahdah-400"></i>' : '<i class="fa-solid fa-broom text-gold-500"></i>';
+            let kerjaBadge = h.statusKerja === 'Selesai' ? '<span class="ml-2 bg-blue-100 text-blue-600 text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-blue-200 uppercase">Selesai</span>' : '<span class="ml-2 bg-gray-100 text-gray-500 text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-gray-200 uppercase">Belum Selesai</span>';
+            
+            let fotoCell = `<span class="text-wahdah-300">-</span>`;
+            if (h.type === 'Piket') {
+                if (h.fotoUrl && h.fotoUrl !== '#' && h.fotoUrl.trim() !== '') {
+                    fotoCell = `<a href="${h.fotoUrl}" target="_blank" class="w-8 h-8 bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 rounded-full flex items-center justify-center mx-auto transition-colors" title="Lihat Foto Piket"><i class="fa-solid fa-eye"></i></a>`;
+                } else {
+                    fotoCell = `<span class="text-xs text-wahdah-400 italic">Tanpa Foto</span>`;
+                }
+            }
+
             return `
                 <tr class="hover:bg-wahdah-50/50 transition-colors">
-                    <td class="px-5 py-3 text-wahdah-600 text-xs">${h.date}</td>
-                    <td class="px-5 py-3 font-semibold text-wahdah-900">${getUserName(h.userId)}</td>
-                    <td class="px-5 py-3 text-wahdah-700"><span class="mr-2">${icon}</span> ${h.desc}</td>
+                    <td class="px-5 py-3 text-wahdah-600 text-xs">${escapeHtml(h.date)}</td>
+                    <td class="px-5 py-3 font-semibold text-wahdah-900">${escapeHtml(getUserName(h.userId))}</td>
+                    <td class="px-5 py-3 text-wahdah-700"><span class="mr-2">${icon}</span> ${escapeHtml(h.desc)} ${kerjaBadge}</td>
+                    <td class="px-5 py-3 text-center">${fotoCell}</td>
                     <td class="px-5 py-3 text-center">${statusBadge}</td>
                     <td class="px-5 py-3 text-right font-bold ${h.poin > 0 ? 'text-wahdah-600' : 'text-wahdah-300'}">${h.poin > 0 ? h.poin : '-'}</td>
+                    <td class="px-5 py-3 text-center">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="editAdminHistoryPoin('${h.id}', '${h.type}', ${h.poin || 0})" class="w-7 h-7 bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 rounded-lg flex items-center justify-center transition-colors" title="Edit Poin">
+                                <i class="fa-solid fa-pen text-xs"></i>
+                            </button>
+                            <button onclick="deleteAdminHistoryItem('${h.id}', '${h.type}')" class="w-7 h-7 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 rounded-lg flex items-center justify-center transition-colors" title="Hapus Laporan">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                    </td>
                 </tr>
             `;
         }).join('');
+        
+        renderPagination('admin-history-pagination', paginationState.adminHistory, totalPages, 'renderAdminHistory');
+    }
+
+    function editAdminHistoryPoin(id, type, currentPoin) {
+        Swal.fire({
+            title: 'Edit Poin Laporan',
+            input: 'number',
+            inputValue: currentPoin,
+            inputAttributes: { min: 0, step: 1 },
+            showCancelButton: true,
+            confirmButtonText: 'Simpan',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#177355',
+            inputValidator: (value) => {
+                if (value === '' || value === null || Number(value) < 0) {
+                    return 'Masukkan nilai poin yang valid.';
+                }
+            }
+        }).then(result => {
+            if (!result.isConfirmed) return;
+            const poin = parseInt(result.value) || 0;
+            const data = { id: id, type: type, poin: poin };
+
+            if (typeof google === 'undefined') {
+                let found = type === 'Task' ? db.jobdesk.find(t => t.Task_ID === id) : db.piket.find(p => p.Schedule_ID === id);
+                if (found) found.Poin = poin;
+                renderAdminHistory();
+                Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Poin diperbarui', showConfirmButton: false, timer: 1500 });
+                return;
+            }
+
+            google.script.run.withSuccessHandler(res => {
+                db = res;
+                renderAdminHistory();
+                Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Poin diperbarui', showConfirmButton: false, timer: 1500 });
+            }).withFailureHandler(err => {
+                console.error(err);
+                Swal.fire('Error', (err && err.message) || 'Gagal memperbarui poin.', 'error');
+            }).updateTaskPoin(sessionToken, data);
+        });
+    }
+
+    function deleteAdminHistoryItem(id, type) {
+        Swal.fire({
+            title: 'Hapus Laporan Ini?',
+            text: 'Tindakan ini tidak dapat dibatalkan.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fa-solid fa-trash-can mr-1"></i> Hapus',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#ef4444'
+        }).then(result => {
+            if (!result.isConfirmed) return;
+
+            if (typeof google === 'undefined') {
+                if (type === 'Task') db.jobdesk = db.jobdesk.filter(t => t.Task_ID !== id);
+                else db.piket = db.piket.filter(p => p.Schedule_ID !== id);
+                renderAdminHistory();
+                Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Laporan dihapus', showConfirmButton: false, timer: 1500 });
+                return;
+            }
+
+            google.script.run.withSuccessHandler(res => {
+                db = res;
+                renderAdminHistory();
+                Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Laporan dihapus', showConfirmButton: false, timer: 1500 });
+            }).withFailureHandler(err => {
+                console.error(err);
+                Swal.fire('Error', (err && err.message) || 'Gagal menghapus laporan.', 'error');
+            }).deleteTask(sessionToken, id);
+        });
     }
 
     function resetLeaderboardFilter() {
-        const today = new Date();
-        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
-        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
-        
-        document.getElementById('lbFilterStart').value = firstDay;
-        document.getElementById('lbFilterEnd').value = lastDay;
+        document.getElementById('lbFilterStart').value = '';
+        document.getElementById('lbFilterEnd').value = '';
+        paginationState.leaderboard.page = 1;
         renderLeaderboard();
     }
 
@@ -1063,16 +1658,31 @@
         const userScores = {};
         
         db.users.filter(u => u.Role === 'User').forEach(u => {
-            userScores[u.User_ID] = { nama: u.Nama, total: 0 };
+            userScores[u.User_ID] = { 
+                userId: u.User_ID,
+                nama: u.Nama, 
+                totalAktivitas: 0, 
+                totalSelesai: 0, 
+                totalBelumSelesai: 0, 
+                totalPoin: 0 
+            };
         });
 
         const calculatePoints = (dataArray) => {
             dataArray.forEach(item => {
-                if(item.Status === 'Approved') {
-                    const itemDate = new Date(item.Tanggal);
-                    if(itemDate >= startDate && itemDate <= endDate) {
-                        if(userScores[item.User_ID]) {
-                            userScores[item.User_ID].total += (item.Poin || 0);
+                const itemDate = new Date(item.Tanggal);
+                if(itemDate >= startDate && itemDate <= endDate) {
+                    if(userScores[item.User_ID]) {
+                        userScores[item.User_ID].totalAktivitas++;
+
+                        if (item.Status_Kerja === 'Selesai') {
+                            userScores[item.User_ID].totalSelesai++;
+                        } else {
+                            userScores[item.User_ID].totalBelumSelesai++;
+                        }
+
+                        if(item.Status === 'Approved') {
+                            userScores[item.User_ID].totalPoin += (item.Poin || 0);
                         }
                     }
                 }
@@ -1082,15 +1692,32 @@
         calculatePoints(db.jobdesk);
         calculatePoints(db.piket);
         
-        const sortedBoard = Object.values(userScores).sort((a,b) => b.total - a.total);
+        const sortedBoard = Object.values(userScores).sort((a,b) => b.totalPoin - a.totalPoin);
         
+        const totalKaryawanAktif = sortedBoard.length;
+        const totalAktivitasTercatat = sortedBoard.reduce((sum, s) => sum + s.totalAktivitas, 0);
+        const topScorer = sortedBoard.length > 0 && sortedBoard[0].totalPoin > 0 ? sortedBoard[0].nama : '-';
+        document.getElementById('lbSummaryTotalKaryawan').textContent = totalKaryawanAktif;
+        document.getElementById('lbSummaryTotalAktivitas').textContent = totalAktivitasTercatat;
+        document.getElementById('lbSummaryTopScorer').textContent = topScorer;
+        
+        const labels = sortedBoard.map(s => s.nama);
+        const dataPoints = sortedBoard.map(s => s.totalPoin);
+        renderLeaderboardChart(labels, dataPoints);
+
         if(sortedBoard.length === 0) {
-            boardBody.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-wahdah-400">Belum ada data untuk periode ini.</td></tr>`;
+            boardBody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-wahdah-400">Belum ada data untuk periode ini.</td></tr>`;
+            document.getElementById('leaderboard-pagination').innerHTML = '';
             return;
         }
 
-        boardBody.innerHTML = sortedBoard.map((item, index) => {
-            const rank = index + 1;
+        const totalPages = Math.max(1, Math.ceil(sortedBoard.length / paginationState.leaderboard.pageSize));
+        if (paginationState.leaderboard.page > totalPages) paginationState.leaderboard.page = totalPages;
+        const start = (paginationState.leaderboard.page - 1) * paginationState.leaderboard.pageSize;
+        const pageData = sortedBoard.slice(start, start + paginationState.leaderboard.pageSize);
+
+        boardBody.innerHTML = pageData.map((item, index) => {
+            const rank = start + index + 1;
             let badgeClass = 'bg-wahdah-100 text-wahdah-600';
             if(rank === 1) badgeClass = 'bg-gold-500 text-white shadow-md scale-110';
             else if(rank === 2) badgeClass = 'bg-slate-300 text-slate-800';
@@ -1101,12 +1728,183 @@
                 <td class="px-5 py-4 text-center">
                     <span class="inline-flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs ${badgeClass} transition-transform">${rank}</span>
                 </td>
-                <td class="px-5 py-4 font-bold text-wahdah-900 text-base">${item.nama}</td>
+                <td class="px-5 py-4 font-bold text-wahdah-900 text-base">${escapeHtml(item.nama)}</td>
+                <td class="px-5 py-4 text-center font-bold text-wahdah-700">${item.totalAktivitas}</td>
+                <td class="px-5 py-4 text-center font-bold text-blue-600">${item.totalSelesai}</td>
+                <td class="px-5 py-4 text-center font-bold text-gray-400">${item.totalBelumSelesai}</td>
                 <td class="px-5 py-4 text-right">
-                    <span class="font-bold text-emerald-600 text-lg">${item.total}</span> <span class="text-[10px] text-wahdah-400 font-medium">pts</span>
+                    <button type="button" onclick="showLeaderboardDetail('${item.userId.replace(/'/g, "\\'")}')" class="font-bold text-emerald-600 text-lg hover:text-emerald-800 hover:underline decoration-2 underline-offset-2 transition-colors cursor-pointer" title="Lihat rincian poin">${item.totalPoin}</button> <span class="text-[10px] text-wahdah-400 font-medium">pts</span>
                 </td>
             </tr>`;
         }).join('');
+        
+        renderPagination('leaderboard-pagination', paginationState.leaderboard, totalPages, 'renderLeaderboard');
+    }
+
+    function formatTanggalID(dateStr) {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return escapeHtml(dateStr);
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yyyy = d.getFullYear();
+        return `${dd}/${mm}/${yyyy}`;
+    }
+
+    function showLeaderboardDetail(userId) {
+        const user = db.users.find(u => u.User_ID === userId);
+        if (!user) return;
+
+        const startDateStr = document.getElementById('lbFilterStart').value;
+        const endDateStr = document.getElementById('lbFilterEnd').value;
+        let startDate = startDateStr ? new Date(startDateStr) : new Date('2000-01-01');
+        let endDate = endDateStr ? new Date(endDateStr) : new Date('2100-01-01');
+        endDate.setHours(23, 59, 59, 999);
+
+        const activities = [];
+        const collect = (dataArray, descKey) => {
+            dataArray.forEach(item => {
+                const itemDate = new Date(item.Tanggal);
+                if (item.User_ID === userId && item.Status === 'Approved' && itemDate >= startDate && itemDate <= endDate) {
+                    activities.push({ desc: item[descKey] || '-', date: item.Tanggal, poin: item.Poin || 0 });
+                }
+            });
+        };
+        collect(db.jobdesk, 'Deskripsi_Tugas');
+        collect(db.piket, 'Jenis_Piket');
+
+        activities.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        const totalSkor = activities.reduce((sum, a) => sum + a.poin, 0);
+
+        const itemsHtml = activities.length > 0 ? activities.map(a => `
+            <div class="flex items-center justify-between gap-3 bg-wahdah-50/60 border border-wahdah-100 rounded-xl px-4 py-3">
+                <div>
+                    <div class="flex items-center gap-2 text-sm font-semibold text-wahdah-900">
+                        <span class="w-5 h-5 rounded-full bg-wahdah-600 text-white flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
+                        ${escapeHtml(a.desc)}
+                    </div>
+                    <div class="flex items-center gap-1.5 text-xs text-wahdah-500 mt-1 ml-7">
+                        <i class="fa-regular fa-calendar"></i> ${formatTanggalID(a.date)}
+                    </div>
+                </div>
+                <span class="font-bold text-emerald-600 text-sm whitespace-nowrap">+${a.poin}</span>
+            </div>
+        `).join('') : `<p class="text-center text-wahdah-400 text-sm py-6">Belum ada kegiatan pada periode ini.</p>`;
+
+        Swal.fire({
+            html: `
+                <div class="text-left">
+                    <h3 class="text-xl font-bold text-wahdah-900">${escapeHtml(user.Nama)}</h3>
+                    <p class="text-xs text-wahdah-500 mt-1 mb-3">Daftar kegiatan yang tercatat pada periode terpilih.</p>
+                    <div class="space-y-2.5 max-h-72 overflow-y-auto pr-1">${itemsHtml}</div>
+                    <div class="flex items-center justify-between border-t border-wahdah-100 mt-4 pt-3">
+                        <span class="text-sm font-semibold text-wahdah-700">Total Skor KPI</span>
+                        <span class="text-lg font-bold text-wahdah-900">${totalSkor}</span>
+                    </div>
+                </div>
+            `,
+            showConfirmButton: false,
+            showCloseButton: true,
+            width: 420,
+            padding: '1.5rem'
+        });
+    }
+
+    let lbChartInstance = null;
+    function renderLeaderboardChart(labels, dataPoints) {
+        const ctx = document.getElementById('leaderboardChart');
+        if(!ctx) return;
+
+        if (lbChartInstance) {
+            lbChartInstance.destroy();
+        }
+
+        lbChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total Poin Kinerja',
+                    data: dataPoints,
+                    backgroundColor: '#48ac83',
+                    hoverBackgroundColor: '#25906a',
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#124a3a',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        padding: 10,
+                        cornerRadius: 8,
+                        displayColors: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0, color: '#145c46' },
+                        grid: { color: 'rgba(14,58,46,0.06)' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#145c46' }
+                    }
+                }
+            }
+        });
+    }
+
+    // ==========================================
+    // 5. HELPER PAGINATION
+    // ==========================================
+    function renderPagination(containerId, stateObj, totalPages, renderFunction) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        if (totalPages <= 1) {
+            container.innerHTML = `<span class="text-wahdah-400 text-xs font-medium">Menampilkan halaman 1 dari 1</span>`;
+            return;
+        }
+
+        container.innerHTML = `
+            <span class="text-wahdah-500 text-xs font-medium">Menampilkan halaman ${stateObj.page} dari ${totalPages}</span>
+            <div class="flex items-center gap-2">
+                <button type="button" class="w-8 h-8 rounded-lg border border-wahdah-200 text-wahdah-600 hover:bg-wahdah-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-colors btn-prev" ${stateObj.page <= 1 ? 'disabled' : ''}>
+                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                </button>
+                <button type="button" class="w-8 h-8 rounded-lg border border-wahdah-200 text-wahdah-600 hover:bg-wahdah-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-colors btn-next" ${stateObj.page >= totalPages ? 'disabled' : ''}>
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                </button>
+            </div>
+        `;
+
+        const btnPrev = container.querySelector('.btn-prev');
+        const btnNext = container.querySelector('.btn-next');
+
+        if (btnPrev) {
+            btnPrev.addEventListener('click', () => {
+                if (stateObj.page > 1) {
+                    stateObj.page--;
+                    window[renderFunction]();
+                }
+            });
+        }
+        
+        if (btnNext) {
+            btnNext.addEventListener('click', () => {
+                if (stateObj.page < totalPages) {
+                    stateObj.page++;
+                    window[renderFunction]();
+                }
+            });
+        }
     }
 
 </script>
