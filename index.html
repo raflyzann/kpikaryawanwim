@@ -1056,35 +1056,26 @@
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#2563eb',
-            confirmButtonText: 'Ya, Tandai Selesai',
-            showLoaderOnConfirm: true,
-            allowOutsideClick: () => !Swal.isLoading(),
-            preConfirm: async () => {
-                if (typeof google === 'undefined') {
+            confirmButtonText: 'Ya, Tandai Selesai'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if(typeof google === 'undefined') {
                     ids.forEach(id => {
                         let t = db.jobdesk.find(x => x.Task_ID === id);
                         if(t) t.Status_Kerja = 'Selesai';
                         let p = db.piket.find(x => x.Schedule_ID === id);
                         if(p) p.Status_Kerja = 'Selesai';
                     });
-                    return db;
+                    finalizeBulkAction('Berhasil ditandai selesai!');
+                } else {
+                    Swal.fire({title: 'Memproses...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+                    google.script.run.withSuccessHandler(res => {
+                        db = res; finalizeBulkAction('Berhasil ditandai selesai!');
+                    }).withFailureHandler(err => {
+                        console.error(err);
+                        Swal.fire('Error', (err && err.message) || 'Gagal memproses.', 'error');
+                    }).updateMultipleTaskStatus(sessionToken, ids);
                 }
-                try {
-                    return await new Promise((resolve, reject) => {
-                        google.script.run
-                            .withSuccessHandler(resolve)
-                            .withFailureHandler(reject)
-                            .updateMultipleTaskStatus(sessionToken, ids);
-                    });
-                } catch (err) {
-                    console.error(err);
-                    Swal.showValidationMessage((err && err.message) || 'Gagal memproses.');
-                }
-            }
-        }).then((result) => {
-            if (result.isConfirmed && result.value) {
-                db = result.value;
-                finalizeBulkAction('Berhasil ditandai selesai!');
             }
         });
     }
@@ -1099,33 +1090,24 @@
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#e3342f',
-            confirmButtonText: 'Ya, Hapus',
-            showLoaderOnConfirm: true,
-            allowOutsideClick: () => !Swal.isLoading(),
-            preConfirm: async () => {
-                if (typeof google === 'undefined') {
+            confirmButtonText: 'Ya, Hapus'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if(typeof google === 'undefined') {
                     ids.forEach(id => {
                         db.jobdesk = db.jobdesk.filter(x => x.Task_ID !== id);
                         db.piket = db.piket.filter(x => x.Schedule_ID !== id);
                     });
-                    return db;
+                    finalizeBulkAction('Tugas berhasil dihapus!');
+                } else {
+                    Swal.fire({title: 'Menghapus...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+                    google.script.run.withSuccessHandler(res => {
+                        db = res; finalizeBulkAction('Tugas berhasil dihapus!');
+                    }).withFailureHandler(err => {
+                        console.error(err);
+                        Swal.fire('Error', (err && err.message) || 'Gagal menghapus.', 'error');
+                    }).deleteMultipleTasks(sessionToken, ids);
                 }
-                try {
-                    return await new Promise((resolve, reject) => {
-                        google.script.run
-                            .withSuccessHandler(resolve)
-                            .withFailureHandler(reject)
-                            .deleteMultipleTasks(sessionToken, ids);
-                    });
-                } catch (err) {
-                    console.error(err);
-                    Swal.showValidationMessage((err && err.message) || 'Gagal menghapus.');
-                }
-            }
-        }).then((result) => {
-            if (result.isConfirmed && result.value) {
-                db = result.value;
-                finalizeBulkAction('Tugas berhasil dihapus!');
             }
         });
     }
@@ -1211,12 +1193,9 @@
                 cancelButtonText: 'Batal',
                 inputValidator: (value) => {
                     if (!value || value.trim().length < 10) return 'Deskripsi minimal 10 karakter!';
-                },
-                showLoaderOnConfirm: true,
-                allowOutsideClick: () => !Swal.isLoading(),
-                preConfirm: (value) => processEditTask({id: id, type: type, val: value.trim()})
+                }
             }).then((result) => {
-                if (result.isConfirmed && result.value) finalizeEditTask(result.value);
+                if (result.isConfirmed) processEditTask({id: id, type: type, val: result.value.trim()});
             });
         } else {
             Swal.fire({
@@ -1231,18 +1210,15 @@
                 inputValue: oldVal,
                 showCancelButton: true,
                 confirmButtonColor: '#25906a',
-                confirmButtonText: '<i class="fa-solid fa-save mr-1"></i> Simpan',
-                showLoaderOnConfirm: true,
-                allowOutsideClick: () => !Swal.isLoading(),
-                preConfirm: (value) => processEditTask({id: id, type: type, val: value})
+                confirmButtonText: '<i class="fa-solid fa-save mr-1"></i> Simpan'
             }).then((result) => {
-                if (result.isConfirmed && result.value) finalizeEditTask(result.value);
+                if (result.isConfirmed) processEditTask({id: id, type: type, val: result.value});
             });
         }
     }
 
-    // Eksekutor Edit Tugas (dipanggil dari dalam preConfirm dialog SweetAlert)
-    async function processEditTask(data) {
+    // Eksekutor Edit Tugas
+    function processEditTask(data) {
         if (typeof google === 'undefined') {
             if (data.type === 'Task') {
                 let task = db.jobdesk.find(t => t.Task_ID === data.id);
@@ -1251,25 +1227,19 @@
                 let piket = db.piket.find(p => p.Schedule_ID === data.id);
                 if (piket) piket.Jenis_Piket = data.val;
             }
-            return db;
+            renderUserHistory();
+            Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: 'Perubahan tersimpan!', showConfirmButton: false, timer: 1500});
+        } else {
+            Swal.fire({title: 'Menyimpan...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+            google.script.run.withSuccessHandler(res => {
+                db = res;
+                renderUserHistory();
+                Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: 'Perubahan tersimpan!', showConfirmButton: false, timer: 1500});
+            }).withFailureHandler(err => {
+                console.error(err);
+                Swal.fire('Error', (err && err.message) || 'Gagal menyimpan perubahan.', 'error');
+            }).updateTask(sessionToken, data);
         }
-        try {
-            return await new Promise((resolve, reject) => {
-                google.script.run
-                    .withSuccessHandler(resolve)
-                    .withFailureHandler(reject)
-                    .updateTask(sessionToken, data);
-            });
-        } catch (err) {
-            console.error(err);
-            Swal.showValidationMessage((err && err.message) || 'Gagal menyimpan perubahan.');
-        }
-    }
-
-    function finalizeEditTask(res) {
-        db = res;
-        renderUserHistory();
-        Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: 'Perubahan tersimpan!', showConfirmButton: false, timer: 1500});
     }
 
     // ==========================================
@@ -1352,41 +1322,31 @@
             confirmButtonText: '<i class="fa-solid fa-check-double mr-1"></i> Setujui',
             cancelButtonText: 'Batal',
             confirmButtonColor: '#25906a',
-            inputValidator: (value) => { if (!value) return 'Pilih poin default!' },
-            showLoaderOnConfirm: true,
-            allowOutsideClick: () => !Swal.isLoading(),
-            preConfirm: (value) => {
-                const defaultPoint = parseInt(value);
-                const queue = validIds.map(id => ({ id: id, poin: defaultPoint }));
-                return executeAdminApprove(queue);
-            }
+            inputValidator: (value) => { if (!value) return 'Pilih poin default!' }
         }).then((result) => {
-            if (result.isConfirmed && result.value) {
-                db = result.value.db;
-                finalizeAdminBulkAction(`${result.value.count} laporan disetujui!`);
+            if (result.isConfirmed) {
+                const defaultPoint = parseInt(result.value);
+                const queue = validIds.map(id => ({ id: id, poin: defaultPoint }));
+                executeAdminApprove(queue);
             }
         });
     }
 
-    async function executeAdminApprove(queue) {
+    function executeAdminApprove(queue) {
         if (typeof google === 'undefined') {
             queue.forEach(q => {
                 let found = db.jobdesk.find(t => t.Task_ID === q.id) || db.piket.find(p => p.Schedule_ID === q.id);
                 if(found) { found.Status = 'Approved'; found.Poin = q.poin; }
             });
-            return { db: db, count: queue.length };
-        }
-        try {
-            const res = await new Promise((resolve, reject) => {
-                google.script.run
-                    .withSuccessHandler(resolve)
-                    .withFailureHandler(reject)
-                    .approveAllTasks(sessionToken, queue);
-            });
-            return { db: res, count: queue.length };
-        } catch (err) {
-            console.error(err);
-            Swal.showValidationMessage((err && err.message) || 'Gagal menyetujui laporan.');
+            finalizeAdminBulkAction(`${queue.length} laporan disetujui!`);
+        } else {
+            Swal.fire({title: 'Memproses...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+            google.script.run.withSuccessHandler(res => {
+                db = res; finalizeAdminBulkAction(`${queue.length} laporan disetujui!`);
+            }).withFailureHandler(err => {
+                console.error(err);
+                Swal.fire('Error', (err && err.message) || 'Gagal menyetujui laporan.', 'error');
+            }).approveAllTasks(sessionToken, queue);
         }
     }
 
@@ -1400,33 +1360,24 @@
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#e3342f',
-            confirmButtonText: 'Ya, Hapus',
-            showLoaderOnConfirm: true,
-            allowOutsideClick: () => !Swal.isLoading(),
-            preConfirm: async () => {
-                if (typeof google === 'undefined') {
+            confirmButtonText: 'Ya, Hapus'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if(typeof google === 'undefined') {
                     ids.forEach(id => {
                         db.jobdesk = db.jobdesk.filter(x => x.Task_ID !== id);
                         db.piket = db.piket.filter(x => x.Schedule_ID !== id);
                     });
-                    return db;
+                    finalizeAdminBulkAction('Laporan dihapus!');
+                } else {
+                    Swal.fire({title: 'Menghapus...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+                    google.script.run.withSuccessHandler(res => {
+                        db = res; finalizeAdminBulkAction('Laporan dihapus!');
+                    }).withFailureHandler(err => {
+                        console.error(err);
+                        Swal.fire('Error', (err && err.message) || 'Gagal menghapus laporan.', 'error');
+                    }).deleteMultipleTasks(sessionToken, ids);
                 }
-                try {
-                    return await new Promise((resolve, reject) => {
-                        google.script.run
-                            .withSuccessHandler(resolve)
-                            .withFailureHandler(reject)
-                            .deleteMultipleTasks(sessionToken, ids);
-                    });
-                } catch (err) {
-                    console.error(err);
-                    Swal.showValidationMessage((err && err.message) || 'Gagal menghapus laporan.');
-                }
-            }
-        }).then((result) => {
-            if (result.isConfirmed && result.value) {
-                db = result.value;
-                finalizeAdminBulkAction('Laporan dihapus!');
             }
         });
     }
