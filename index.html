@@ -219,8 +219,8 @@
                                 </div>
                             </div>
                             
-                            <button type="submit" class="w-full bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-sm rounded-xl py-2.5 transition-colors flex items-center justify-center gap-2 shadow-sm mt-auto">
-                                <i class="fa-solid fa-paper-plane"></i> Kirim Laporan Tugas
+                            <button type="submit" id="btnSubmitJobdesk" class="w-full bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-sm rounded-xl py-2.5 transition-colors flex items-center justify-center gap-2 shadow-sm mt-auto disabled:opacity-60 disabled:cursor-not-allowed">
+                                <i id="btnSubmitJobdeskIcon" class="fa-solid fa-paper-plane"></i> <span id="btnSubmitJobdeskLabel">Kirim Laporan Tugas</span>
                             </button>
                         </form>
                     </div>
@@ -253,8 +253,8 @@
                                 </div>
                             </div>
                             
-                            <button type="submit" class="w-full bg-gold-500 hover:bg-gold-600 text-white font-medium text-sm rounded-xl py-2.5 transition-colors flex items-center justify-center gap-2 shadow-sm mt-auto">
-                                <i class="fa-solid fa-upload"></i> Kirim Laporan Piket
+                            <button type="submit" id="btnSubmitPiket" class="w-full bg-gold-500 hover:bg-gold-600 text-white font-medium text-sm rounded-xl py-2.5 transition-colors flex items-center justify-center gap-2 shadow-sm mt-auto disabled:opacity-60 disabled:cursor-not-allowed">
+                                <i id="btnSubmitPiketIcon" class="fa-solid fa-upload"></i> <span id="btnSubmitPiketLabel">Kirim Laporan Piket</span>
                             </button>
                         </form>
                     </div>
@@ -646,6 +646,36 @@
         }
     }
 
+    function setJobdeskButtonProcessing(isProcessing) {
+        const btn = document.getElementById('btnSubmitJobdesk');
+        const label = document.getElementById('btnSubmitJobdeskLabel');
+        const icon = document.getElementById('btnSubmitJobdeskIcon');
+        if (!btn) return;
+        btn.disabled = isProcessing;
+        if (isProcessing) {
+            label.textContent = 'Mengirim...';
+            icon.className = 'fa-solid fa-circle-notch fa-spin';
+        } else {
+            label.textContent = 'Kirim Laporan Tugas';
+            icon.className = 'fa-solid fa-paper-plane';
+        }
+    }
+
+    function setPiketButtonProcessing(isProcessing) {
+        const btn = document.getElementById('btnSubmitPiket');
+        const label = document.getElementById('btnSubmitPiketLabel');
+        const icon = document.getElementById('btnSubmitPiketIcon');
+        if (!btn) return;
+        btn.disabled = isProcessing;
+        if (isProcessing) {
+            label.textContent = 'Mengunggah...';
+            icon.className = 'fa-solid fa-circle-notch fa-spin';
+        } else {
+            label.textContent = 'Kirim Laporan Piket';
+            icon.className = 'fa-solid fa-upload';
+        }
+    }
+
     function handleLogin(e) {
         e.preventDefault();
         const email = document.getElementById('inpUserId').value.trim().toLowerCase();
@@ -881,20 +911,23 @@
         }
 
         if (typeof google === 'undefined') {
+            setJobdeskButtonProcessing(true);
             tasksData.forEach(task => {
                 db.jobdesk.push({ Task_ID: task.id, User_ID: task.userId, Tanggal: task.tanggal, Deskripsi_Tugas: task.deskripsi, Status: task.status, Poin: task.poin, Status_Kerja: task.isSelesai ? 'Selesai' : 'Belum Selesai' });
             });
             postSubmitAction('formJobdesk', `${tasksData.length} Tugas berhasil dicatat!`);
             resetJobdeskForm();
+            setJobdeskButtonProcessing(false);
         } else {
-            Swal.fire({title: 'Mengirim Laporan...', text: 'Mohon tunggu', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+            setJobdeskButtonProcessing(true);
             google.script.run.withSuccessHandler(res => { 
                 db = res; 
                 postSubmitAction('formJobdesk', `${tasksData.length} Tugas berhasil dicatat!`); 
                 resetJobdeskForm();
-                Swal.close(); 
+                setJobdeskButtonProcessing(false);
             }).withFailureHandler(err => {
                 console.error(err);
+                setJobdeskButtonProcessing(false);
                 Swal.fire('Error', (err && err.message) || 'Gagal menyimpan tugas.', 'error');
             }).saveMultipleJobdesk(sessionToken, tasksData);
         }
@@ -917,7 +950,7 @@
 
         const isSelesai = true; // Piket otomatis Selesai
 
-        Swal.fire({title: 'Mengunggah & Menyimpan...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+        setPiketButtonProcessing(true);
 
         // Proses membaca file gambar (Base64)
         const reader = new FileReader();
@@ -946,16 +979,17 @@
             if (typeof google === 'undefined') {
                 db.piket.push({ Schedule_ID: data.id, User_ID: data.userId, Tanggal: data.tanggal, Jenis_Piket: data.jenis, Status: data.status, Bukti_Foto_URL: dataUrl, Poin: data.poin, Status_Kerja: 'Selesai' });
                 postSubmitAction('formPiket', 'Laporan piket berhasil terkirim!');
-                Swal.close();
+                setPiketButtonProcessing(false);
             } else {
                 google.script.run
                     .withSuccessHandler(res => { 
                         db = res; 
                         postSubmitAction('formPiket', 'Laporan piket berhasil terkirim!'); 
-                        Swal.close(); 
+                        setPiketButtonProcessing(false);
                     })
                     .withFailureHandler(err => {
                         console.error(err);
+                        setPiketButtonProcessing(false);
                         Swal.fire('Error', (err && err.message) || 'Gagal mengunggah laporan.', 'error');
                     })
                     .uploadPiket(sessionToken, data);
@@ -1022,26 +1056,35 @@
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#2563eb',
-            confirmButtonText: 'Ya, Tandai Selesai'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                if(typeof google === 'undefined') {
+            confirmButtonText: 'Ya, Tandai Selesai',
+            showLoaderOnConfirm: true,
+            allowOutsideClick: () => !Swal.isLoading(),
+            preConfirm: async () => {
+                if (typeof google === 'undefined') {
                     ids.forEach(id => {
                         let t = db.jobdesk.find(x => x.Task_ID === id);
                         if(t) t.Status_Kerja = 'Selesai';
                         let p = db.piket.find(x => x.Schedule_ID === id);
                         if(p) p.Status_Kerja = 'Selesai';
                     });
-                    finalizeBulkAction('Berhasil ditandai selesai!');
-                } else {
-                    Swal.fire({title: 'Memproses...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
-                    google.script.run.withSuccessHandler(res => {
-                        db = res; finalizeBulkAction('Berhasil ditandai selesai!');
-                    }).withFailureHandler(err => {
-                        console.error(err);
-                        Swal.fire('Error', (err && err.message) || 'Gagal memproses.', 'error');
-                    }).updateMultipleTaskStatus(sessionToken, ids);
+                    return db;
                 }
+                try {
+                    return await new Promise((resolve, reject) => {
+                        google.script.run
+                            .withSuccessHandler(resolve)
+                            .withFailureHandler(reject)
+                            .updateMultipleTaskStatus(sessionToken, ids);
+                    });
+                } catch (err) {
+                    console.error(err);
+                    Swal.showValidationMessage((err && err.message) || 'Gagal memproses.');
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                db = result.value;
+                finalizeBulkAction('Berhasil ditandai selesai!');
             }
         });
     }
@@ -1056,24 +1099,33 @@
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#e3342f',
-            confirmButtonText: 'Ya, Hapus'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                if(typeof google === 'undefined') {
+            confirmButtonText: 'Ya, Hapus',
+            showLoaderOnConfirm: true,
+            allowOutsideClick: () => !Swal.isLoading(),
+            preConfirm: async () => {
+                if (typeof google === 'undefined') {
                     ids.forEach(id => {
                         db.jobdesk = db.jobdesk.filter(x => x.Task_ID !== id);
                         db.piket = db.piket.filter(x => x.Schedule_ID !== id);
                     });
-                    finalizeBulkAction('Tugas berhasil dihapus!');
-                } else {
-                    Swal.fire({title: 'Menghapus...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
-                    google.script.run.withSuccessHandler(res => {
-                        db = res; finalizeBulkAction('Tugas berhasil dihapus!');
-                    }).withFailureHandler(err => {
-                        console.error(err);
-                        Swal.fire('Error', (err && err.message) || 'Gagal menghapus.', 'error');
-                    }).deleteMultipleTasks(sessionToken, ids);
+                    return db;
                 }
+                try {
+                    return await new Promise((resolve, reject) => {
+                        google.script.run
+                            .withSuccessHandler(resolve)
+                            .withFailureHandler(reject)
+                            .deleteMultipleTasks(sessionToken, ids);
+                    });
+                } catch (err) {
+                    console.error(err);
+                    Swal.showValidationMessage((err && err.message) || 'Gagal menghapus.');
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                db = result.value;
+                finalizeBulkAction('Tugas berhasil dihapus!');
             }
         });
     }
@@ -1159,9 +1211,12 @@
                 cancelButtonText: 'Batal',
                 inputValidator: (value) => {
                     if (!value || value.trim().length < 10) return 'Deskripsi minimal 10 karakter!';
-                }
+                },
+                showLoaderOnConfirm: true,
+                allowOutsideClick: () => !Swal.isLoading(),
+                preConfirm: (value) => processEditTask({id: id, type: type, val: value.trim()})
             }).then((result) => {
-                if (result.isConfirmed) processEditTask({id: id, type: type, val: result.value.trim()});
+                if (result.isConfirmed && result.value) finalizeEditTask(result.value);
             });
         } else {
             Swal.fire({
@@ -1176,15 +1231,18 @@
                 inputValue: oldVal,
                 showCancelButton: true,
                 confirmButtonColor: '#25906a',
-                confirmButtonText: '<i class="fa-solid fa-save mr-1"></i> Simpan'
+                confirmButtonText: '<i class="fa-solid fa-save mr-1"></i> Simpan',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: () => !Swal.isLoading(),
+                preConfirm: (value) => processEditTask({id: id, type: type, val: value})
             }).then((result) => {
-                if (result.isConfirmed) processEditTask({id: id, type: type, val: result.value});
+                if (result.isConfirmed && result.value) finalizeEditTask(result.value);
             });
         }
     }
 
-    // Eksekutor Edit Tugas
-    function processEditTask(data) {
+    // Eksekutor Edit Tugas (dipanggil dari dalam preConfirm dialog SweetAlert)
+    async function processEditTask(data) {
         if (typeof google === 'undefined') {
             if (data.type === 'Task') {
                 let task = db.jobdesk.find(t => t.Task_ID === data.id);
@@ -1193,19 +1251,25 @@
                 let piket = db.piket.find(p => p.Schedule_ID === data.id);
                 if (piket) piket.Jenis_Piket = data.val;
             }
-            renderUserHistory();
-            Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: 'Perubahan tersimpan!', showConfirmButton: false, timer: 1500});
-        } else {
-            Swal.fire({title: 'Menyimpan...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
-            google.script.run.withSuccessHandler(res => {
-                db = res;
-                renderUserHistory();
-                Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: 'Perubahan tersimpan!', showConfirmButton: false, timer: 1500});
-            }).withFailureHandler(err => {
-                console.error(err);
-                Swal.fire('Error', (err && err.message) || 'Gagal menyimpan perubahan.', 'error');
-            }).updateTask(sessionToken, data);
+            return db;
         }
+        try {
+            return await new Promise((resolve, reject) => {
+                google.script.run
+                    .withSuccessHandler(resolve)
+                    .withFailureHandler(reject)
+                    .updateTask(sessionToken, data);
+            });
+        } catch (err) {
+            console.error(err);
+            Swal.showValidationMessage((err && err.message) || 'Gagal menyimpan perubahan.');
+        }
+    }
+
+    function finalizeEditTask(res) {
+        db = res;
+        renderUserHistory();
+        Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: 'Perubahan tersimpan!', showConfirmButton: false, timer: 1500});
     }
 
     // ==========================================
@@ -1288,31 +1352,41 @@
             confirmButtonText: '<i class="fa-solid fa-check-double mr-1"></i> Setujui',
             cancelButtonText: 'Batal',
             confirmButtonColor: '#25906a',
-            inputValidator: (value) => { if (!value) return 'Pilih poin default!' }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const defaultPoint = parseInt(result.value);
+            inputValidator: (value) => { if (!value) return 'Pilih poin default!' },
+            showLoaderOnConfirm: true,
+            allowOutsideClick: () => !Swal.isLoading(),
+            preConfirm: (value) => {
+                const defaultPoint = parseInt(value);
                 const queue = validIds.map(id => ({ id: id, poin: defaultPoint }));
-                executeAdminApprove(queue);
+                return executeAdminApprove(queue);
+            }
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                db = result.value.db;
+                finalizeAdminBulkAction(`${result.value.count} laporan disetujui!`);
             }
         });
     }
 
-    function executeAdminApprove(queue) {
+    async function executeAdminApprove(queue) {
         if (typeof google === 'undefined') {
             queue.forEach(q => {
                 let found = db.jobdesk.find(t => t.Task_ID === q.id) || db.piket.find(p => p.Schedule_ID === q.id);
                 if(found) { found.Status = 'Approved'; found.Poin = q.poin; }
             });
-            finalizeAdminBulkAction(`${queue.length} laporan disetujui!`);
-        } else {
-            Swal.fire({title: 'Memproses...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
-            google.script.run.withSuccessHandler(res => {
-                db = res; finalizeAdminBulkAction(`${queue.length} laporan disetujui!`);
-            }).withFailureHandler(err => {
-                console.error(err);
-                Swal.fire('Error', (err && err.message) || 'Gagal menyetujui laporan.', 'error');
-            }).approveAllTasks(sessionToken, queue);
+            return { db: db, count: queue.length };
+        }
+        try {
+            const res = await new Promise((resolve, reject) => {
+                google.script.run
+                    .withSuccessHandler(resolve)
+                    .withFailureHandler(reject)
+                    .approveAllTasks(sessionToken, queue);
+            });
+            return { db: res, count: queue.length };
+        } catch (err) {
+            console.error(err);
+            Swal.showValidationMessage((err && err.message) || 'Gagal menyetujui laporan.');
         }
     }
 
@@ -1326,24 +1400,33 @@
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#e3342f',
-            confirmButtonText: 'Ya, Hapus'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                if(typeof google === 'undefined') {
+            confirmButtonText: 'Ya, Hapus',
+            showLoaderOnConfirm: true,
+            allowOutsideClick: () => !Swal.isLoading(),
+            preConfirm: async () => {
+                if (typeof google === 'undefined') {
                     ids.forEach(id => {
                         db.jobdesk = db.jobdesk.filter(x => x.Task_ID !== id);
                         db.piket = db.piket.filter(x => x.Schedule_ID !== id);
                     });
-                    finalizeAdminBulkAction('Laporan dihapus!');
-                } else {
-                    Swal.fire({title: 'Menghapus...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
-                    google.script.run.withSuccessHandler(res => {
-                        db = res; finalizeAdminBulkAction('Laporan dihapus!');
-                    }).withFailureHandler(err => {
-                        console.error(err);
-                        Swal.fire('Error', (err && err.message) || 'Gagal menghapus laporan.', 'error');
-                    }).deleteMultipleTasks(sessionToken, ids);
+                    return db;
                 }
+                try {
+                    return await new Promise((resolve, reject) => {
+                        google.script.run
+                            .withSuccessHandler(resolve)
+                            .withFailureHandler(reject)
+                            .deleteMultipleTasks(sessionToken, ids);
+                    });
+                } catch (err) {
+                    console.error(err);
+                    Swal.showValidationMessage((err && err.message) || 'Gagal menghapus laporan.');
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                db = result.value;
+                finalizeAdminBulkAction('Laporan dihapus!');
             }
         });
     }
