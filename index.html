@@ -173,6 +173,24 @@
 
             <!-- ================= VIEW: KARYAWAN (RUANG KERJA SAYA) ================= -->
             <section id="viewUserDashboard" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
+                <!-- Filter Rentang Tanggal Poin -->
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-4 flex flex-col md:flex-row gap-4 items-end">
+                    <div class="flex-1 w-full">
+                        <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Mulai Tanggal</label>
+                        <input type="date" id="udFilterStart" class="w-full rounded-xl border border-wahdah-200 px-3 py-2 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none">
+                    </div>
+                    <div class="flex-1 w-full">
+                        <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Sampai Tanggal</label>
+                        <input type="date" id="udFilterEnd" class="w-full rounded-xl border border-wahdah-200 px-3 py-2 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none">
+                    </div>
+                    <button type="button" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-sm rounded-xl px-4 py-2 transition-colors shadow-sm" onclick="updateUserPoints()">
+                        Terapkan
+                    </button>
+                    <button type="button" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-sm rounded-xl px-4 py-2 transition-colors border border-gray-200" onclick="resetUserDashboardFilter()">
+                        Reset
+                    </button>
+                </div>
+
                 <!-- Info Papan Atas -->
                 <div class="bg-gradient-to-br from-wahdah-700 to-wahdah-900 rounded-2xl shadow-soft p-6 text-white pattern-bg flex items-center justify-between">
                     <div>
@@ -264,10 +282,27 @@
             <!-- ================= VIEW: KARYAWAN (RIWAYAT AKTIVITAS) ================= -->
             <section id="viewUserHistory" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
                 <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
-                    <div class="px-5 py-4 border-b border-wahdah-100 flex items-center justify-between bg-wahdah-50/50">
+                    <div class="px-5 py-4 border-b border-wahdah-100 bg-wahdah-50/50 flex flex-col gap-3">
                         <h3 class="text-sm font-bold text-wahdah-900 flex items-center gap-2">
                             <i class="fa-solid fa-clock-rotate-left text-wahdah-600"></i> Daftar Laporan & Aktivitas Anda
                         </h3>
+
+                        <div class="flex flex-col md:flex-row gap-3 items-end">
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Mulai Tanggal</label>
+                                <input type="date" id="uhFilterStart" class="w-full rounded-lg border border-wahdah-200 px-3 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
+                            </div>
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Sampai Tanggal</label>
+                                <input type="date" id="uhFilterEnd" class="w-full rounded-lg border border-wahdah-200 px-3 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
+                            </div>
+                            <button type="button" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-xs rounded-lg px-4 py-2 transition-colors shadow-sm" onclick="paginationState.userHistory.page = 1; renderUserHistory()">
+                                Terapkan
+                            </button>
+                            <button type="button" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-xs rounded-lg px-4 py-2 transition-colors border border-gray-200" onclick="resetUserHistoryFilter()">
+                                Reset
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Bulk Actions Bar User -->
@@ -807,9 +842,11 @@
         document.getElementById('sidebar').classList.add('-translate-x-full');
         document.getElementById('sidebarOverlay').classList.add('hidden');
 
+        if(viewId === 'viewUserDashboard') {
+            resetUserDashboardFilter();
+        }
         if(viewId === 'viewUserHistory') {
-            paginationState.userHistory.page = 1;
-            renderUserHistory();
+            resetUserHistoryFilter();
         }
         if(viewId === 'viewAdminDashboard') {
             paginationState.adminQueue.page = 1;
@@ -1010,14 +1047,29 @@
     }
 
     function updateUserPoints() {
+        const startInput = document.getElementById('udFilterStart');
+        const endInput = document.getElementById('udFilterEnd');
+        const startDateStr = startInput ? startInput.value : '';
+        const endDateStr = endInput ? endInput.value : '';
+
+        let startDate = startDateStr ? new Date(startDateStr) : new Date('2000-01-01');
+        let endDate = endDateStr ? new Date(endDateStr) : new Date('2100-01-01');
+        endDate.setHours(23, 59, 59, 999);
+
         let total = 0;
-        const myJobs = db.jobdesk.filter(t => t.User_ID === currentUser.User_ID && t.Status === 'Approved');
-        const myPikets = db.piket.filter(p => p.User_ID === currentUser.User_ID && p.Status === 'Approved');
+        const myJobs = db.jobdesk.filter(t => t.User_ID === currentUser.User_ID && t.Status === 'Approved' && new Date(t.Tanggal) >= startDate && new Date(t.Tanggal) <= endDate);
+        const myPikets = db.piket.filter(p => p.User_ID === currentUser.User_ID && p.Status === 'Approved' && new Date(p.Tanggal) >= startDate && new Date(p.Tanggal) <= endDate);
         
         myJobs.forEach(t => total += (t.Poin || 0));
         myPikets.forEach(p => total += (p.Poin || 0));
         
         document.getElementById('userTotalPoin').textContent = total;
+    }
+
+    function resetUserDashboardFilter() {
+        document.getElementById('udFilterStart').value = '';
+        document.getElementById('udFilterEnd').value = '';
+        updateUserPoints();
     }
 
     // --- Bulk Action Logic (User History) ---
@@ -1120,18 +1172,37 @@
         Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: msg, showConfirmButton: false, timer: 1500});
     }
 
+    function resetUserHistoryFilter() {
+        document.getElementById('uhFilterStart').value = '';
+        document.getElementById('uhFilterEnd').value = '';
+        paginationState.userHistory.page = 1;
+        renderUserHistory();
+    }
+
     function renderUserHistory() {
         const tbody = document.getElementById('user-history-tbody');
         document.getElementById('selectAllCheckbox').checked = false;
         document.getElementById('bulkActionsBar').classList.add('hidden');
 
+        const startDateStr = document.getElementById('uhFilterStart').value;
+        const endDateStr = document.getElementById('uhFilterEnd').value;
+        let startDate = startDateStr ? new Date(startDateStr) : new Date('2000-01-01');
+        let endDate = endDateStr ? new Date(endDateStr) : new Date('2100-01-01');
+        endDate.setHours(23, 59, 59, 999);
+
         let history = [];
         
         db.jobdesk.filter(t => t.User_ID === currentUser.User_ID).forEach(t => {
-            history.push({ type: 'Task', id: t.Task_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai' });
+            let itemDate = new Date(t.Tanggal);
+            if(itemDate >= startDate && itemDate <= endDate) {
+                history.push({ type: 'Task', id: t.Task_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai' });
+            }
         });
         db.piket.filter(p => p.User_ID === currentUser.User_ID).forEach(p => {
-            history.push({ type: 'Piket', id: p.Schedule_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, status: p.Status, poin: p.Poin, statusKerja: p.Status_Kerja || 'Selesai' });
+            let itemDate = new Date(p.Tanggal);
+            if(itemDate >= startDate && itemDate <= endDate) {
+                history.push({ type: 'Piket', id: p.Schedule_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, status: p.Status, poin: p.Poin, statusKerja: p.Status_Kerja || 'Selesai' });
+            }
         });
 
         history.sort((a, b) => new Date(b.date) - new Date(a.date));
