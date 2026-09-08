@@ -104,6 +104,11 @@
                 <span>Riwayat Kinerja</span>
             </button>
 
+            <button type="button" id="navAdminCatatPenugasan" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewAdminCatatPenugasan', this)">
+                <i class="fa-solid fa-user-pen w-5 text-center"></i>
+                <span>Catat Penugasan</span>
+            </button>
+
             <button type="button" id="navInputKehadiran" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewInputKehadiran', this)">
                 <i class="fa-solid fa-calendar-check w-5 text-center"></i>
                 <span>Inputan & Nilai Kehadiran</span>
@@ -351,6 +356,7 @@
                                     </th>
                                     <th class="text-left font-semibold px-3 py-3.5 whitespace-nowrap">Tanggal</th>
                                     <th class="text-left font-semibold px-3 py-3.5 min-w-[250px]">Rincian Aktivitas</th>
+                                    <th class="text-center font-semibold px-3 py-3.5 whitespace-nowrap">Progres</th>
                                     <th class="text-center font-semibold px-3 py-3.5 whitespace-nowrap">Status Admin</th>
                                     <th class="text-right font-semibold px-3 py-3.5 whitespace-nowrap">Poin Reward</th>
                                     <th class="text-center font-semibold px-3 py-3.5 whitespace-nowrap">Aksi</th>
@@ -409,6 +415,7 @@
                                     <th class="text-left font-semibold px-3 py-3.5 whitespace-nowrap">Tanggal</th>
                                     <th class="text-left font-semibold px-3 py-3.5 whitespace-nowrap">Karyawan</th>
                                     <th class="text-left font-semibold px-3 py-3.5 min-w-[200px]">Laporan</th>
+                                    <th class="text-center font-semibold px-3 py-3.5 whitespace-nowrap">Progres</th>
                                     <th class="text-center font-semibold px-3 py-3.5 whitespace-nowrap">Lihat Foto</th>
                                     <th class="text-center font-semibold px-3 py-3.5 whitespace-nowrap">Aksi / Poin</th>
                                 </tr>
@@ -462,6 +469,7 @@
                                     <th class="text-left font-semibold px-5 py-3.5 whitespace-nowrap">Tanggal</th>
                                     <th class="text-left font-semibold px-5 py-3.5 whitespace-nowrap">Karyawan</th>
                                     <th class="text-left font-semibold px-5 py-3.5 min-w-[200px]">Aktivitas</th>
+                                    <th class="text-center font-semibold px-5 py-3.5 whitespace-nowrap">Progres</th>
                                     <th class="text-center font-semibold px-5 py-3.5 whitespace-nowrap">Lihat Foto</th>
                                     <th class="text-center font-semibold px-5 py-3.5 whitespace-nowrap">Status Admin</th>
                                     <th class="text-right font-semibold px-5 py-3.5 whitespace-nowrap">Poin</th>
@@ -538,6 +546,52 @@
                 </div>
             </section>
 
+            <!-- ================= VIEW: ADMIN (CATAT PENUGASAN) ================= -->
+            <section id="viewAdminCatatPenugasan" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5 md:p-6">
+                    <h3 class="text-sm font-bold text-wahdah-900 mb-4 flex items-center gap-2 border-b border-wahdah-50 pb-3">
+                        <div class="w-8 h-8 rounded-lg bg-wahdah-50 text-wahdah-600 flex items-center justify-center"><i class="fa-solid fa-user-pen"></i></div>
+                        Catat Penugasan untuk Karyawan
+                    </h3>
+                    <form id="formAdminPenugasan" class="flex flex-col space-y-4" onsubmit="submitAdminPenugasan(event)">
+                        <div>
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">Pilih Karyawan <span class="text-red-500">*</span></label>
+                            <select id="inpPenugasanUser" required class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white">
+                                <option value="" disabled selected>Pilih Karyawan...</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">Deskripsi Tugas (Otomatis: Belum Selesai, Menunggu Persetujuan)</label>
+
+                            <!-- Container Input Dinamis -->
+                            <div id="penugasanInputsContainer" class="space-y-3">
+                                <div class="penugasan-input-group relative flex flex-col gap-2 bg-wahdah-50/50 border border-wahdah-100 rounded-xl p-3 view-fade">
+                                    <div class="flex items-start gap-2">
+                                        <textarea rows="2" required placeholder="Contoh: Menyiapkan materi rapat koordinasi mingguan..." class="flex-1 rounded-lg border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white resize-none transition-colors"></textarea>
+                                        <button type="button" class="hidden btn-hapus-penugasan shrink-0 mt-1 w-8 h-8 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors" onclick="removePenugasanInput(this)" title="Hapus baris ini">
+                                            <i class="fa-solid fa-trash-can text-sm"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between mt-2">
+                                <button type="button" onclick="addPenugasanInput()" class="text-xs font-bold text-wahdah-600 hover:text-wahdah-800 flex items-center gap-1 transition-colors px-2 py-1 rounded hover:bg-wahdah-50">
+                                    <i class="fa-solid fa-plus"></i> Tambah Tugas Lainnya
+                                </button>
+                                <p class="text-[10px] text-wahdah-400">Minimal 10 karakter/tugas.</p>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="btnSubmitPenugasan" class="w-full md:w-auto self-start bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-sm rounded-xl px-6 py-2.5 transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
+                            <i id="btnSubmitPenugasanIcon" class="fa-solid fa-paper-plane"></i> <span id="btnSubmitPenugasanLabel">Kirim Penugasan</span>
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- ================= VIEW: ADMIN (INPUT KEHADIRAN) ================= -->
             <section id="viewInputKehadiran" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
                 <!-- Form Input Nilai Kehadiran -->
                 <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5 md:p-6">
@@ -765,6 +819,24 @@
             .replace(/'/g, '&#39;');
     }
 
+    // Marker "[[ASSIGNED_BY:Nama Admin]] " disisipkan di depan Deskripsi_Tugas
+    // oleh backend (saveAdminJobdesk) saat Admin mencatat penugasan untuk
+    // karyawan lain. Fungsi ini memisahkan marker tsb menjadi badge HTML
+    // "Tugas dari: ..." dan mengembalikan sisa teks deskripsi asli.
+    const ASSIGNED_BY_REGEX = /^\[\[ASSIGNED_BY:(.*?)\]\]\s*/;
+    function formatTugasDeskripsi(rawDesc) {
+        const desc = String(rawDesc == null ? '' : rawDesc);
+        const match = desc.match(ASSIGNED_BY_REGEX);
+        if (match) {
+            const adminNama = match[1].trim();
+            return {
+                badgeHtml: `<span class="inline-flex items-center gap-1 bg-gold-50 text-gold-700 border border-gold-200 text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase w-fit"><i class="fa-solid fa-user-pen"></i> Tugas dari: ${escapeHtml(adminNama)}</span>`,
+                desc: desc.slice(match[0].length)
+            };
+        }
+        return { badgeHtml: '', desc: desc };
+    }
+
     const paginationState = {
         userHistory: { page: 1, pageSize: 10 },
         adminQueue: { page: 1, pageSize: 10 },
@@ -882,6 +954,21 @@
         } else {
             label.textContent = 'Simpan Nilai Kehadiran';
             icon.className = 'fa-solid fa-floppy-disk';
+        }
+    }
+
+    function setPenugasanButtonProcessing(isProcessing) {
+        const btn = document.getElementById('btnSubmitPenugasan');
+        const label = document.getElementById('btnSubmitPenugasanLabel');
+        const icon = document.getElementById('btnSubmitPenugasanIcon');
+        if (!btn) return;
+        btn.disabled = isProcessing;
+        if (isProcessing) {
+            label.textContent = 'Mengirim...';
+            icon.className = 'fa-solid fa-circle-notch fa-spin';
+        } else {
+            label.textContent = 'Kirim Penugasan';
+            icon.className = 'fa-solid fa-paper-plane';
         }
     }
 
@@ -1035,6 +1122,10 @@
         if(viewId === 'viewInputKehadiran') {
             populateKehadiranUserDropdown();
             resetKehadiranFilter();
+        }
+        if(viewId === 'viewAdminCatatPenugasan') {
+            populateAdminPenugasanUserDropdown();
+            resetPenugasanForm();
         }
         if(viewId === 'viewLeaderboardTotal') {
             resetLeaderboardTotalFilter();
@@ -1404,7 +1495,7 @@
         history.sort((a, b) => new Date(b.date) - new Date(a.date));
 
         if(history.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-wahdah-400">Belum ada riwayat aktivitas.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-wahdah-400">Belum ada riwayat aktivitas.</td></tr>`;
             document.getElementById('user-history-pagination').innerHTML = '';
             return;
         }
@@ -1416,15 +1507,23 @@
 
         tbody.innerHTML = pageData.map(h => {
             let statusBadge = h.status === 'Approved' ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold">Approved</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[10px] font-bold">Pending</span>';
-            let icon = h.type === 'Task' ? '<i class="fa-solid fa-briefcase text-wahdah-400 mr-2"></i>' : '<i class="fa-solid fa-broom text-gold-500 mr-2"></i>';
-            let kerjaBadge = h.statusKerja === 'Selesai' ? '<span class="ml-2 bg-blue-100 text-blue-600 text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-blue-200 uppercase">Selesai</span>' : '<span class="ml-2 bg-gray-100 text-gray-500 text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-gray-200 uppercase">Belum Selesai</span>';
+            let kerjaBadge = h.statusKerja === 'Selesai' ? '<span class="bg-blue-100 text-blue-600 text-[10px] px-2 py-1 rounded-full font-bold border border-blue-200 uppercase">Selesai</span>' : '<span class="bg-gray-100 text-gray-500 text-[10px] px-2 py-1 rounded-full font-bold border border-gray-200 uppercase">Belum Selesai</span>';
             
             // Checkbox Update Completion
             let disabledCb = h.status === 'Approved' ? 'disabled' : '';
             let cbHtml = `<input type="checkbox" class="row-checkbox w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer" value="${h.id}" onchange="updateBulkActionUI()" ${disabledCb}>`;
             
+            // Pisahkan label "Tugas dari: [Admin]" dari deskripsi asli (khusus Task)
+            let assignedBadgeHtml = '';
+            let displayDesc = h.desc;
+            if (h.type === 'Task') {
+                const parsed = formatTugasDeskripsi(h.desc);
+                assignedBadgeHtml = parsed.badgeHtml;
+                displayDesc = parsed.desc;
+            }
+
             // Edit Action Button (Delete goes to Bulk Action)
-            let rawDesc = h.desc.replace(/^Piket: /, ''); 
+            let rawDesc = displayDesc.replace(/^Piket: /, ''); 
             let escDesc = rawDesc.replace(/'/g, "\\'").replace(/"/g, '&quot;');
             let escStatusKerja = h.statusKerja;
             let actionBtns = h.status === 'Pending' 
@@ -1435,7 +1534,13 @@
                 <tr class="hover:bg-wahdah-50/50 transition-colors">
                     <td class="px-4 py-3 text-center">${cbHtml}</td>
                     <td class="px-3 py-3 whitespace-nowrap text-wahdah-600 text-xs">${escapeHtml(h.date)}</td>
-                    <td class="px-3 py-3 font-medium text-wahdah-900">${icon} ${escapeHtml(h.desc)} ${kerjaBadge}</td>
+                    <td class="px-3 py-3 font-medium text-wahdah-900">
+                        <div class="flex flex-col gap-1">
+                            ${assignedBadgeHtml}
+                            <div>${escapeHtml(displayDesc)}</div>
+                        </div>
+                    </td>
+                    <td class="px-3 py-3 text-center">${kerjaBadge}</td>
                     <td class="px-3 py-3 text-center">${statusBadge}</td>
                     <td class="px-3 py-3 text-right font-bold ${h.poin > 0 ? 'text-wahdah-600' : 'text-wahdah-300'}">${h.poin > 0 ? '+'+h.poin : '-'}</td>
                     <td class="px-3 py-3 text-center">${actionBtns}</td>
@@ -1529,6 +1634,21 @@
         if (selectQueue) selectQueue.innerHTML = optionsHtml;
 
         populateKehadiranUserDropdown();
+        populateAdminPenugasanUserDropdown();
+    }
+
+    function populateAdminPenugasanUserDropdown() {
+        const selectPenugasan = document.getElementById('inpPenugasanUser');
+        if (!selectPenugasan) return;
+
+        const users = db.users.filter(u => u.Role === 'User');
+        const currentValue = selectPenugasan.value;
+        selectPenugasan.innerHTML = `<option value="" disabled ${!currentValue ? 'selected' : ''}>Pilih Karyawan...</option>` +
+            users.map(u => `<option value="${escapeHtml(u.User_ID)}">${escapeHtml(u.Nama)}</option>`).join('');
+
+        if (currentValue && users.some(u => u.User_ID === currentValue)) {
+            selectPenugasan.value = currentValue;
+        }
     }
 
     function populateKehadiranUserDropdown() {
@@ -1696,7 +1816,7 @@
         document.getElementById('adminPendingCount').textContent = queue.length;
 
         if(queue.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-wahdah-400">Tidak ada antrean persetujuan saat ini.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-wahdah-400">Tidak ada antrean persetujuan saat ini.</td></tr>`;
             document.getElementById('admin-queue-pagination').innerHTML = '';
             return;
         }
@@ -1707,8 +1827,16 @@
         const pageData = queue.slice(start, start + paginationState.adminQueue.pageSize);
 
         tbody.innerHTML = pageData.map(q => {
-            let icon = q.type === 'Task' ? '<i class="fa-solid fa-briefcase text-wahdah-400 mr-2"></i>' : '<i class="fa-solid fa-broom text-gold-500 mr-2"></i>';
-            let kerjaBadge = q.statusKerja === 'Selesai' ? '<span class="ml-2 bg-blue-100 text-blue-600 text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-blue-200 uppercase">Selesai</span>' : '<span class="ml-2 bg-gray-100 text-gray-500 text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-gray-200 uppercase">Belum Selesai</span>';
+            let kerjaBadge = q.statusKerja === 'Selesai' ? '<span class="bg-blue-100 text-blue-600 text-[10px] px-2 py-1 rounded-full font-bold border border-blue-200 uppercase">Selesai</span>' : '<span class="bg-gray-100 text-gray-500 text-[10px] px-2 py-1 rounded-full font-bold border border-gray-200 uppercase">Belum Selesai</span>';
+
+            // Pisahkan label "Tugas dari: [Admin]" dari deskripsi asli (khusus Task)
+            let assignedBadgeHtml = '';
+            let displayDesc = q.desc;
+            if (q.type === 'Task') {
+                const parsed = formatTugasDeskripsi(q.desc);
+                assignedBadgeHtml = parsed.badgeHtml;
+                displayDesc = parsed.desc;
+            }
             
             let fotoCell = `<span class="text-wahdah-300">-</span>`;
             if (q.type === 'Piket') {
@@ -1744,7 +1872,13 @@
                     <td class="px-4 py-3 text-center">${cbHtml}</td>
                     <td class="px-3 py-3 text-wahdah-600 text-xs">${escapeHtml(q.date)}</td>
                     <td class="px-3 py-3 font-semibold text-wahdah-800">${escapeHtml(getUserName(q.userId))}</td>
-                    <td class="px-3 py-3 text-wahdah-700">${icon} ${escapeHtml(q.desc)} ${kerjaBadge}</td>
+                    <td class="px-3 py-3 text-wahdah-700">
+                        <div class="flex flex-col gap-1">
+                            ${assignedBadgeHtml}
+                            <div>${escapeHtml(displayDesc)}</div>
+                        </div>
+                    </td>
+                    <td class="px-3 py-3 text-center">${kerjaBadge}</td>
                     <td class="px-3 py-3 text-center">${fotoCell}</td>
                     <td class="px-3 py-3 text-center">${actionColumn}</td>
                 </tr>
@@ -1837,7 +1971,7 @@
         history.sort((a, b) => new Date(b.date) - new Date(a.date));
 
         if(history.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-wahdah-400">Belum ada riwayat aktivitas.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-wahdah-400">Belum ada riwayat aktivitas.</td></tr>`;
             document.getElementById('admin-history-pagination').innerHTML = '';
             return;
         }
@@ -1849,8 +1983,16 @@
 
         tbody.innerHTML = pageData.map(h => {
             let statusBadge = h.status === 'Approved' ? '<span class="text-emerald-600 font-bold"><i class="fa-solid fa-check"></i></span>' : '<span class="text-amber-500 font-bold"><i class="fa-solid fa-clock"></i></span>';
-            let icon = h.type === 'Task' ? '<i class="fa-solid fa-briefcase text-wahdah-400"></i>' : '<i class="fa-solid fa-broom text-gold-500"></i>';
-            let kerjaBadge = h.statusKerja === 'Selesai' ? '<span class="ml-2 bg-blue-100 text-blue-600 text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-blue-200 uppercase">Selesai</span>' : '<span class="ml-2 bg-gray-100 text-gray-500 text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-gray-200 uppercase">Belum Selesai</span>';
+            let kerjaBadge = h.statusKerja === 'Selesai' ? '<span class="bg-blue-100 text-blue-600 text-[10px] px-2 py-1 rounded-full font-bold border border-blue-200 uppercase">Selesai</span>' : '<span class="bg-gray-100 text-gray-500 text-[10px] px-2 py-1 rounded-full font-bold border border-gray-200 uppercase">Belum Selesai</span>';
+
+            // Pisahkan label "Tugas dari: [Admin]" dari deskripsi asli (khusus Task)
+            let assignedBadgeHtml = '';
+            let displayDesc = h.desc;
+            if (h.type === 'Task') {
+                const parsed = formatTugasDeskripsi(h.desc);
+                assignedBadgeHtml = parsed.badgeHtml;
+                displayDesc = parsed.desc;
+            }
             
             let fotoCell = `<span class="text-wahdah-300">-</span>`;
             if (h.type === 'Piket') {
@@ -1865,7 +2007,13 @@
                 <tr class="hover:bg-wahdah-50/50 transition-colors">
                     <td class="px-5 py-3 text-wahdah-600 text-xs">${escapeHtml(h.date)}</td>
                     <td class="px-5 py-3 font-semibold text-wahdah-900">${escapeHtml(getUserName(h.userId))}</td>
-                    <td class="px-5 py-3 text-wahdah-700"><span class="mr-2">${icon}</span> ${escapeHtml(h.desc)} ${kerjaBadge}</td>
+                    <td class="px-5 py-3 text-wahdah-700">
+                        <div class="flex flex-col gap-1">
+                            ${assignedBadgeHtml}
+                            <div>${escapeHtml(displayDesc)}</div>
+                        </div>
+                    </td>
+                    <td class="px-5 py-3 text-center">${kerjaBadge}</td>
                     <td class="px-5 py-3 text-center">${fotoCell}</td>
                     <td class="px-5 py-3 text-center">${statusBadge}</td>
                     <td class="px-5 py-3 text-right font-bold ${h.poin > 0 ? 'text-wahdah-600' : 'text-wahdah-300'}">${h.poin > 0 ? h.poin : '-'}</td>
@@ -2059,7 +2207,131 @@
     }
 
     // ==========================================
-    // 4b. FUNGSI INPUT NILAI KEHADIRAN (ADMIN)
+    // 4b. FUNGSI CATAT PENUGASAN (ADMIN -> KARYAWAN)
+    // ==========================================
+    function addPenugasanInput() {
+        const container = document.getElementById('penugasanInputsContainer');
+        const newGroup = document.createElement('div');
+        newGroup.className = 'penugasan-input-group relative flex flex-col gap-2 bg-wahdah-50/50 border border-wahdah-100 rounded-xl p-3 view-fade';
+        newGroup.innerHTML = `
+            <div class="flex items-start gap-2">
+                <textarea rows="2" required placeholder="Contoh: Menyiapkan materi rapat koordinasi mingguan..." class="flex-1 rounded-lg border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white resize-none transition-colors"></textarea>
+                <button type="button" class="btn-hapus-penugasan shrink-0 mt-1 w-8 h-8 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors" onclick="removePenugasanInput(this)" title="Hapus baris ini">
+                    <i class="fa-solid fa-trash-can text-sm"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(newGroup);
+        togglePenugasanDeleteButtons();
+    }
+
+    function removePenugasanInput(btn) {
+        const group = btn.closest('.penugasan-input-group');
+        group.remove();
+        togglePenugasanDeleteButtons();
+    }
+
+    function togglePenugasanDeleteButtons() {
+        const groups = document.querySelectorAll('#penugasanInputsContainer .penugasan-input-group');
+        groups.forEach((g) => {
+            const delBtn = g.querySelector('.btn-hapus-penugasan');
+            if (delBtn) {
+                if (groups.length > 1) {
+                    delBtn.classList.remove('hidden');
+                } else {
+                    delBtn.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    function resetPenugasanForm() {
+        const form = document.getElementById('formAdminPenugasan');
+        if (form) form.reset();
+        const container = document.getElementById('penugasanInputsContainer');
+        if (!container) return;
+        const groups = container.querySelectorAll('.penugasan-input-group');
+        groups.forEach((group, index) => {
+            if (index > 0) group.remove();
+            else {
+                const ta = group.querySelector('textarea');
+                if (ta) ta.value = '';
+            }
+        });
+        togglePenugasanDeleteButtons();
+    }
+
+    function submitAdminPenugasan(e) {
+        e.preventDefault();
+
+        const targetUserId = document.getElementById('inpPenugasanUser').value;
+        if (!targetUserId) {
+            return Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Mohon pilih karyawan yang akan ditugaskan terlebih dahulu.', confirmButtonColor: '#25906a' });
+        }
+
+        const groups = document.querySelectorAll('#penugasanInputsContainer .penugasan-input-group');
+        const todayStr = new Date().toISOString().split('T')[0];
+        let tasksData = [];
+        let isValid = true;
+
+        groups.forEach((group) => {
+            const ta = group.querySelector('textarea');
+            const desc = ta.value.trim();
+            if (desc.length < 10) {
+                isValid = false;
+                ta.classList.add('border-red-400', 'focus:ring-red-400', 'bg-red-50');
+            } else {
+                ta.classList.remove('border-red-400', 'focus:ring-red-400', 'bg-red-50');
+                tasksData.push({ deskripsi: desc });
+            }
+        });
+
+        if (!isValid) {
+            return Swal.fire('Perhatian', 'Pastikan semua deskripsi tugas diisi dengan minimal 10 karakter.', 'warning');
+        }
+        if (tasksData.length === 0) {
+            return Swal.fire('Perhatian', 'Minimal isi 1 deskripsi tugas.', 'warning');
+        }
+
+        setPenugasanButtonProcessing(true);
+
+        const namaKaryawan = getUserName(targetUserId);
+
+        if (typeof google === 'undefined') {
+            // Mode pratinjau lokal (di luar Apps Script) - simpan di memori saja.
+            const namaAdmin = currentUser ? currentUser.Nama : 'Admin';
+            tasksData.forEach((task, index) => {
+                db.jobdesk.push({
+                    Task_ID: 'TSK-' + Date.now() + '-' + index,
+                    User_ID: targetUserId,
+                    Tanggal: todayStr,
+                    Deskripsi_Tugas: `[[ASSIGNED_BY:${namaAdmin}]] ${task.deskripsi}`,
+                    Status: 'Pending',
+                    Poin: 0,
+                    Status_Kerja: 'Belum Selesai'
+                });
+            });
+            finalizeAdminPenugasanSubmit(tasksData.length, namaKaryawan);
+        } else {
+            google.script.run.withSuccessHandler(res => {
+                db = res;
+                finalizeAdminPenugasanSubmit(tasksData.length, namaKaryawan);
+            }).withFailureHandler(err => {
+                console.error(err);
+                setPenugasanButtonProcessing(false);
+                Swal.fire('Error', (err && err.message) || 'Gagal mengirim penugasan.', 'error');
+            }).saveAdminJobdesk(sessionToken, { targetUserId: targetUserId, tasks: tasksData });
+        }
+    }
+
+    function finalizeAdminPenugasanSubmit(count, namaKaryawan) {
+        resetPenugasanForm();
+        setPenugasanButtonProcessing(false);
+        Swal.fire({ icon: 'success', title: 'Sukses', text: `${count} tugas berhasil ditugaskan kepada ${namaKaryawan}.`, timer: 1800, showConfirmButton: false });
+    }
+
+    // ==========================================
+    // 4c. FUNGSI INPUT NILAI KEHADIRAN (ADMIN)
     // ==========================================
     function submitKehadiran(e) {
         e.preventDefault();
@@ -2307,9 +2579,10 @@
         const itemsHtml = activities.length > 0 ? activities.map(a => `
             <div class="flex items-center justify-between gap-3 bg-wahdah-50/60 border border-wahdah-100 rounded-xl px-4 py-3">
                 <div>
+                    ${formatTugasDeskripsi(a.desc).badgeHtml ? `<div class="mb-1">${formatTugasDeskripsi(a.desc).badgeHtml}</div>` : ''}
                     <div class="flex items-center gap-2 text-sm font-semibold text-wahdah-900">
                         <span class="w-5 h-5 rounded-full bg-wahdah-600 text-white flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                        ${escapeHtml(a.desc)}
+                        ${escapeHtml(formatTugasDeskripsi(a.desc).desc)}
                     </div>
                     <div class="flex items-center gap-1.5 text-xs text-wahdah-500 mt-1 ml-7">
                         <i class="fa-regular fa-calendar"></i> ${formatTanggalID(a.date)}
