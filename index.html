@@ -184,16 +184,30 @@
             <!-- ================= VIEW: KARYAWAN (RUANG KERJA SAYA) ================= -->
             <section id="viewUserDashboard" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
                 <!-- Info Papan Atas -->
-                <div class="bg-gradient-to-br from-wahdah-700 to-wahdah-900 rounded-2xl shadow-soft p-6 text-white pattern-bg flex items-center justify-between">
-                    <div>
-                        <p class="text-wahdah-200 text-xs font-medium mb-1">Total Poin Kinerja Anda</p>
-                        <div class="flex items-baseline gap-2">
-                            <span id="userTotalPoin" class="text-4xl font-bold">0</span>
-                            <span class="text-sm text-wahdah-300">Poin</span>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-gradient-to-br from-wahdah-700 to-wahdah-900 rounded-2xl shadow-soft p-6 text-white pattern-bg flex items-center justify-between">
+                        <div>
+                            <p class="text-wahdah-200 text-xs font-medium mb-1">Total Poin Kinerja Anda</p>
+                            <div class="flex items-baseline gap-2">
+                                <span id="userTotalPoin" class="text-4xl font-bold">0</span>
+                                <span class="text-sm text-wahdah-300">Poin</span>
+                            </div>
+                        </div>
+                        <div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center text-3xl text-gold-400 border-2 border-white/20 backdrop-blur-sm">
+                            <i class="fa-solid fa-medal"></i>
                         </div>
                     </div>
-                    <div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center text-3xl text-gold-400 border-2 border-white/20 backdrop-blur-sm">
-                        <i class="fa-solid fa-medal"></i>
+                    <div class="bg-gradient-to-br from-gold-600 to-amber-800 rounded-2xl shadow-soft p-6 text-white pattern-bg flex items-center justify-between">
+                        <div>
+                            <p class="text-gold-100 text-xs font-medium mb-1">Total Poin Kehadiran Anda</p>
+                            <div class="flex items-baseline gap-2">
+                                <span id="userTotalPoinKehadiran" class="text-4xl font-bold">0</span>
+                                <span class="text-sm text-gold-100/80">Poin</span>
+                            </div>
+                        </div>
+                        <div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center text-3xl text-white border-2 border-white/20 backdrop-blur-sm">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
                     </div>
                 </div>
 
@@ -1231,6 +1245,21 @@
         myPikets.forEach(p => total += (p.Poin || 0));
         
         document.getElementById('userTotalPoin').textContent = total;
+
+        // Total Poin Kehadiran: jumlahkan nilai kehadiran milik user yang
+        // bulannya beririsan dengan rentang filter tanggal di atas.
+        let totalKehadiran = 0;
+        const myKehadiran = (db.kehadiran || []).filter(k => k.User_ID === currentUser.User_ID);
+        myKehadiran.forEach(k => {
+            const kBulan = String(k.Bulan || '').slice(0, 7);
+            const monthStart = new Date(kBulan + '-01');
+            const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0, 23, 59, 59, 999);
+            if (monthStart <= endDate && monthEnd >= startDate) {
+                totalKehadiran += (k.Nilai || 0);
+            }
+        });
+        const totalKehadiranEl = document.getElementById('userTotalPoinKehadiran');
+        if (totalKehadiranEl) totalKehadiranEl.textContent = totalKehadiran;
     }
 
     function resetUserDashboardFilter() {
