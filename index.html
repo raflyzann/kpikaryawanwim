@@ -101,12 +101,22 @@
             
             <button type="button" id="navAdminHistory" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewAdminHistory', this)">
                 <i class="fa-solid fa-list-check w-5 text-center"></i>
-                <span>Riwayat Kinerja Karyawan</span>
+                <span>Riwayat Kinerja</span>
+            </button>
+
+            <button type="button" id="navInputKehadiran" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewInputKehadiran', this)">
+                <i class="fa-solid fa-calendar-check w-5 text-center"></i>
+                <span>Inputan & Nilai Kehadiran</span>
             </button>
 
             <button type="button" id="navLeaderboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewLeaderboard', this)">
                 <i class="fa-solid fa-ranking-star w-5 text-center"></i>
-                <span>Leaderboard Poin</span>
+                <span>Leaderboard Poin Kinerja</span>
+            </button>
+
+            <button type="button" id="navLeaderboardTotal" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewLeaderboardTotal', this)">
+                <i class="fa-solid fa-trophy w-5 text-center"></i>
+                <span>Leaderboard Total Poin</span>
             </button>
         </nav>
 
@@ -514,6 +524,134 @@
                 </div>
             </section>
 
+            <section id="viewInputKehadiran" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
+                <!-- Form Input Nilai Kehadiran -->
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5 md:p-6">
+                    <h3 class="text-sm font-bold text-wahdah-900 mb-4 flex items-center gap-2 border-b border-wahdah-50 pb-3">
+                        <div class="w-8 h-8 rounded-lg bg-wahdah-50 text-wahdah-600 flex items-center justify-center"><i class="fa-solid fa-calendar-check"></i></div>
+                        Input Nilai Kehadiran Karyawan
+                    </h3>
+                    <form id="formKehadiran" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end" onsubmit="submitKehadiran(event)">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">Nama Karyawan</label>
+                            <select id="inpKehadiranUser" required class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white">
+                                <option value="" disabled selected>Pilih Karyawan...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">Bulan & Tahun</label>
+                            <input type="month" id="inpKehadiranBulan" required class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">Nilai Kehadiran (Poin)</label>
+                            <input type="number" id="inpKehadiranNilai" required min="0" step="1" placeholder="Contoh: 10" class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white">
+                        </div>
+                        <div class="md:col-span-4">
+                            <button type="submit" id="btnSubmitKehadiran" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-sm rounded-xl px-6 py-2.5 transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
+                                <i id="btnSubmitKehadiranIcon" class="fa-solid fa-floppy-disk"></i> <span id="btnSubmitKehadiranLabel">Simpan Nilai Kehadiran</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Leaderboard Poin Kehadiran -->
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
+                    <div class="px-5 py-4 border-b border-wahdah-100 bg-wahdah-50/50">
+                        <h3 class="text-sm font-bold text-wahdah-900 flex items-center gap-2 mb-3">
+                            <i class="fa-solid fa-calendar-days text-wahdah-600"></i> Leaderboard Poin Kehadiran
+                        </h3>
+                        <div class="flex flex-col md:flex-row gap-3 items-end">
+                            <div class="flex-1 w-full md:max-w-xs">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Filter Bulan</label>
+                                <input type="month" id="lkFilterBulan" class="w-full rounded-lg border border-wahdah-200 px-3 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
+                            </div>
+                            <button type="button" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-xs rounded-lg px-4 py-2 transition-colors shadow-sm" onclick="paginationState.kehadiranBoard.page = 1; renderLeaderboardKehadiran()">
+                                Terapkan
+                            </button>
+                            <button type="button" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-xs rounded-lg px-4 py-2 transition-colors border border-gray-200" onclick="resetKehadiranFilter()">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-wahdah-50 border-b border-wahdah-100">
+                                <tr class="text-wahdah-700 text-xs uppercase tracking-wide">
+                                    <th class="text-center font-semibold px-5 py-4 w-20">Peringkat</th>
+                                    <th class="text-left font-semibold px-5 py-4">Karyawan</th>
+                                    <th class="text-right font-semibold px-5 py-4 w-40">Poin Kehadiran</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboardKehadiran-tbody" class="divide-y divide-wahdah-50">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="leaderboardKehadiran-pagination" class="flex items-center justify-between px-5 py-3 border-t border-wahdah-100 bg-white"></div>
+                </div>
+            </section>
+
+            <section id="viewLeaderboardTotal" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
+                <!-- Summary Card: Peraih Skor Tertinggi -->
+                <div class="bg-gradient-to-br from-wahdah-700 to-wahdah-900 rounded-2xl shadow-soft p-5 text-white pattern-bg">
+                    <p class="text-xs font-semibold text-wahdah-200 mb-1">Peraih Skor Tertinggi</p>
+                    <p id="ltSummaryTopScorer" class="text-xl font-bold truncate">-</p>
+                </div>
+
+                <!-- Filter Rentang Tanggal -->
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-4 flex flex-col md:flex-row gap-4 items-end">
+                    <div class="flex-1 w-full">
+                        <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Mulai Tanggal</label>
+                        <input type="date" id="ltFilterStart" class="w-full rounded-xl border border-wahdah-200 px-3 py-2 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none">
+                    </div>
+                    <div class="flex-1 w-full">
+                        <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Sampai Tanggal</label>
+                        <input type="date" id="ltFilterEnd" class="w-full rounded-xl border border-wahdah-200 px-3 py-2 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none">
+                    </div>
+                    <button type="button" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-sm rounded-xl px-4 py-2 transition-colors shadow-sm" onclick="paginationState.akumulasiBoard.page = 1; renderLeaderboardAkumulasi()">
+                        Terapkan
+                    </button>
+                    <button type="button" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-sm rounded-xl px-4 py-2 transition-colors border border-gray-200" onclick="resetLeaderboardTotalFilter()">
+                        Reset
+                    </button>
+                </div>
+
+                <!-- Grafik Peringkat Karyawan -->
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5">
+                    <h3 class="text-sm font-bold text-wahdah-900 mb-4">Grafik Peringkat Karyawan</h3>
+                    <div class="relative h-64 md:h-80">
+                        <canvas id="leaderboardTotalChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Leaderboard Total Akumulasi (Kinerja + Kehadiran) -->
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
+                    <div class="px-5 py-4 border-b border-wahdah-100 bg-wahdah-50/50">
+                        <h3 class="text-sm font-bold text-wahdah-900 flex items-center gap-2">
+                            <i class="fa-solid fa-trophy text-gold-500"></i> Leaderboard Total Akumulasi (Kinerja + Kehadiran)
+                        </h3>
+                        <p class="text-[11px] text-wahdah-400 mt-1">Total Poin Kinerja (Jobdesk & Piket) ditambah Total Poin Kehadiran keseluruhan.</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-wahdah-50 border-b border-wahdah-100">
+                                <tr class="text-wahdah-700 text-xs uppercase tracking-wide">
+                                    <th class="text-center font-semibold px-5 py-4 w-20">Peringkat</th>
+                                    <th class="text-left font-semibold px-5 py-4">Nama Karyawan</th>
+                                    <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Poin Kinerja</th>
+                                    <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Poin Kehadiran</th>
+                                    <th class="text-right font-semibold px-5 py-4 w-40">Total Poin Keseluruhan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboardAkumulasi-tbody" class="divide-y divide-wahdah-50">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="leaderboardAkumulasi-pagination" class="flex items-center justify-between px-5 py-3 border-t border-wahdah-100 bg-white"></div>
+                </div>
+            </section>
+
         </main>
     </div>
 
@@ -599,7 +737,7 @@
     // ==========================================
     // 1. STATE & INISIALISASI
     // ==========================================
-    let db = { users: [], jobdesk: [], piket: [] };
+    let db = { users: [], jobdesk: [], piket: [], kehadiran: [] };
     let currentUser = null;
     let sessionToken = null; // token sesi dari server, dikirim di setiap aksi penting
 
@@ -617,7 +755,9 @@
         userHistory: { page: 1, pageSize: 10 },
         adminQueue: { page: 1, pageSize: 10 },
         adminHistory: { page: 1, pageSize: 10 },
-        leaderboard: { page: 1, pageSize: 10 }
+        leaderboard: { page: 1, pageSize: 10 },
+        kehadiranBoard: { page: 1, pageSize: 10 },
+        akumulasiBoard: { page: 1, pageSize: 10 }
     };
 
     window.addEventListener('DOMContentLoaded', loadData);
@@ -645,6 +785,7 @@
 
     function getDummyData() {
         const today = new Date().toISOString().split('T')[0];
+        const bulanIni = today.slice(0, 7);
         return {
             users: [
                 { User_ID: 'admin@mail.com', Nama: 'Admin Master', Role: 'Admin', PIN: '123456' },
@@ -659,6 +800,10 @@
             piket: [
                 { Schedule_ID: 'PKT-1', User_ID: 'user@mail.com', Tanggal: today, Jenis_Piket: 'Lantai 1', Status: 'Approved', Bukti_Foto_URL: '#', Poin: 5, Status_Kerja: 'Selesai' },
                 { Schedule_ID: 'PKT-2', User_ID: 'budi@mail.com', Tanggal: today, Jenis_Piket: 'Dapur & Pantry', Status: 'Pending', Bukti_Foto_URL: 'https://google.com', Poin: 0, Status_Kerja: 'Selesai' }
+            ],
+            kehadiran: [
+                { Kehadiran_ID: 'KHD-1', User_ID: 'user@mail.com', Bulan: bulanIni, Nilai: 8 },
+                { Kehadiran_ID: 'KHD-2', User_ID: 'budi@mail.com', Bulan: bulanIni, Nilai: 6 }
             ]
         };
     }
@@ -708,6 +853,21 @@
         } else {
             label.textContent = 'Kirim Laporan Piket';
             icon.className = 'fa-solid fa-upload';
+        }
+    }
+
+    function setKehadiranButtonProcessing(isProcessing) {
+        const btn = document.getElementById('btnSubmitKehadiran');
+        const label = document.getElementById('btnSubmitKehadiranLabel');
+        const icon = document.getElementById('btnSubmitKehadiranIcon');
+        if (!btn) return;
+        btn.disabled = isProcessing;
+        if (isProcessing) {
+            label.textContent = 'Menyimpan...';
+            icon.className = 'fa-solid fa-circle-notch fa-spin';
+        } else {
+            label.textContent = 'Simpan Nilai Kehadiran';
+            icon.className = 'fa-solid fa-floppy-disk';
         }
     }
 
@@ -797,7 +957,7 @@
         }
         currentUser = null;
         sessionToken = null;
-        db = { users: [], jobdesk: [], piket: [] };
+        db = { users: [], jobdesk: [], piket: [], kehadiran: [] };
         document.getElementById('sidebarUserName').textContent = 'Belum Login';
         document.getElementById('sidebarUserRole').textContent = '-';
         document.getElementById('btnLogout').classList.add('hidden');
@@ -857,6 +1017,13 @@
         }
         if(viewId === 'viewLeaderboard') {
             resetLeaderboardFilter();
+        }
+        if(viewId === 'viewInputKehadiran') {
+            populateKehadiranUserDropdown();
+            resetKehadiranFilter();
+        }
+        if(viewId === 'viewLeaderboardTotal') {
+            resetLeaderboardTotalFilter();
         }
     }
 
@@ -1331,6 +1498,22 @@
             
         if (selectHistory) selectHistory.innerHTML = optionsHtml;
         if (selectQueue) selectQueue.innerHTML = optionsHtml;
+
+        populateKehadiranUserDropdown();
+    }
+
+    function populateKehadiranUserDropdown() {
+        const selectKehadiran = document.getElementById('inpKehadiranUser');
+        if (!selectKehadiran) return;
+
+        const users = db.users.filter(u => u.Role === 'User');
+        const currentValue = selectKehadiran.value;
+        selectKehadiran.innerHTML = `<option value="" disabled ${!currentValue ? 'selected' : ''}>Pilih Karyawan...</option>` +
+            users.map(u => `<option value="${escapeHtml(u.User_ID)}">${escapeHtml(u.Nama)}</option>`).join('');
+
+        if (currentValue && users.some(u => u.User_ID === currentValue)) {
+            selectKehadiran.value = currentValue;
+        }
     }
 
     // --- Bulk Action Logic (Admin Queue) ---
@@ -1846,6 +2029,217 @@
         renderPagination('leaderboard-pagination', paginationState.leaderboard, totalPages, 'renderLeaderboard');
     }
 
+    // ==========================================
+    // 4b. FUNGSI INPUT NILAI KEHADIRAN (ADMIN)
+    // ==========================================
+    function submitKehadiran(e) {
+        e.preventDefault();
+
+        const userId = document.getElementById('inpKehadiranUser').value;
+        const bulan = document.getElementById('inpKehadiranBulan').value; // format: YYYY-MM
+        const nilai = parseInt(document.getElementById('inpKehadiranNilai').value, 10);
+
+        if (!userId || !bulan || isNaN(nilai) || nilai < 0) {
+            Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Mohon pilih karyawan, bulan, dan isi nilai kehadiran dengan benar.', confirmButtonColor: '#25906a' });
+            return;
+        }
+
+        setKehadiranButtonProcessing(true);
+
+        if (typeof google === 'undefined') {
+            // Mode pratinjau lokal (di luar Apps Script) - simpan di memori saja.
+            if (!db.kehadiran) db.kehadiran = [];
+            const existing = db.kehadiran.find(k => k.User_ID === userId && k.Bulan === bulan);
+            if (existing) {
+                existing.Nilai = nilai;
+            } else {
+                db.kehadiran.push({ Kehadiran_ID: 'KHD-' + Date.now(), User_ID: userId, Bulan: bulan, Nilai: nilai });
+            }
+            finalizeKehadiranSubmit(!!existing);
+        } else {
+            const isUpdate = (db.kehadiran || []).some(k => k.User_ID === userId && k.Bulan === bulan);
+            google.script.run
+                .withSuccessHandler(res => {
+                    db = res;
+                    finalizeKehadiranSubmit(isUpdate);
+                })
+                .withFailureHandler(err => {
+                    console.error(err);
+                    setKehadiranButtonProcessing(false);
+                    Swal.fire('Error', (err && err.message) || 'Gagal menyimpan nilai kehadiran.', 'error');
+                })
+                .saveKehadiran(sessionToken, { userId: userId, bulan: bulan, nilai: nilai });
+        }
+    }
+
+    function finalizeKehadiranSubmit(isUpdate) {
+        document.getElementById('formKehadiran').reset();
+        renderLeaderboardKehadiran();
+        renderLeaderboardAkumulasi();
+        setKehadiranButtonProcessing(false);
+
+        Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: isUpdate ? 'Nilai kehadiran diperbarui!' : 'Nilai kehadiran disimpan!', showConfirmButton: false, timer: 1500 });
+    }
+
+    function resetKehadiranFilter() {
+        const filterEl = document.getElementById('lkFilterBulan');
+        if (filterEl) filterEl.value = '';
+        paginationState.kehadiranBoard.page = 1;
+        renderLeaderboardKehadiran();
+    }
+
+    function renderLeaderboardKehadiran() {
+        const boardBody = document.getElementById('leaderboardKehadiran-tbody');
+        if (!boardBody) return;
+
+        const bulanFilter = document.getElementById('lkFilterBulan').value; // '' = semua bulan
+
+        const kehadiranData = db.kehadiran || [];
+        const scores = {};
+
+        db.users.filter(u => u.Role === 'User').forEach(u => {
+            scores[u.User_ID] = { userId: u.User_ID, nama: u.Nama, totalPoin: 0 };
+        });
+
+        kehadiranData.forEach(k => {
+            if (!scores[k.User_ID]) return;
+            // Ambil 7 karakter pertama ("YYYY-MM") untuk jaga-jaga kalau ada
+            // data lama yang formatnya masih "YYYY-MM-DD" atau objek Date.
+            const kBulan = String(k.Bulan || '').slice(0, 7);
+            if (bulanFilter && kBulan !== bulanFilter) return;
+            scores[k.User_ID].totalPoin += (k.Nilai || 0);
+        });
+
+        const sortedBoard = Object.values(scores).sort((a, b) => b.totalPoin - a.totalPoin);
+
+        if (sortedBoard.length === 0) {
+            boardBody.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-wahdah-400">Belum ada data kehadiran untuk periode ini.</td></tr>`;
+            document.getElementById('leaderboardKehadiran-pagination').innerHTML = '';
+            return;
+        }
+
+        const totalPages = Math.max(1, Math.ceil(sortedBoard.length / paginationState.kehadiranBoard.pageSize));
+        if (paginationState.kehadiranBoard.page > totalPages) paginationState.kehadiranBoard.page = totalPages;
+        const start = (paginationState.kehadiranBoard.page - 1) * paginationState.kehadiranBoard.pageSize;
+        const pageData = sortedBoard.slice(start, start + paginationState.kehadiranBoard.pageSize);
+
+        boardBody.innerHTML = pageData.map((item, index) => {
+            const rank = start + index + 1;
+            let badgeClass = 'bg-wahdah-100 text-wahdah-600';
+            if (rank === 1) badgeClass = 'bg-gold-500 text-white shadow-md scale-110';
+            else if (rank === 2) badgeClass = 'bg-slate-300 text-slate-800';
+            else if (rank === 3) badgeClass = 'bg-amber-600/40 text-amber-900';
+
+            return `
+            <tr class="hover:bg-wahdah-50/30 transition-colors">
+                <td class="px-5 py-4 text-center">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs ${badgeClass} transition-transform">${rank}</span>
+                </td>
+                <td class="px-5 py-4 font-bold text-wahdah-900 text-base">${escapeHtml(item.nama)}</td>
+                <td class="px-5 py-4 text-right">
+                    <span class="font-bold text-emerald-600 text-lg">${item.totalPoin}</span> <span class="text-[10px] text-wahdah-400 font-medium">pts</span>
+                </td>
+            </tr>`;
+        }).join('');
+
+        renderPagination('leaderboardKehadiran-pagination', paginationState.kehadiranBoard, totalPages, 'renderLeaderboardKehadiran');
+    }
+
+    function resetLeaderboardTotalFilter() {
+        document.getElementById('ltFilterStart').value = '';
+        document.getElementById('ltFilterEnd').value = '';
+        paginationState.akumulasiBoard.page = 1;
+        renderLeaderboardAkumulasi();
+    }
+
+    function renderLeaderboardAkumulasi() {
+        const boardBody = document.getElementById('leaderboardAkumulasi-tbody');
+        if (!boardBody) return;
+
+        const startDateStr = document.getElementById('ltFilterStart') ? document.getElementById('ltFilterStart').value : '';
+        const endDateStr = document.getElementById('ltFilterEnd') ? document.getElementById('ltFilterEnd').value : '';
+        let startDate = startDateStr ? new Date(startDateStr) : new Date('2000-01-01');
+        let endDate = endDateStr ? new Date(endDateStr) : new Date('2100-01-01');
+        endDate.setHours(23, 59, 59, 999);
+
+        const kehadiranData = db.kehadiran || [];
+        const scores = {};
+
+        db.users.filter(u => u.Role === 'User').forEach(u => {
+            scores[u.User_ID] = { userId: u.User_ID, nama: u.Nama, poinKinerja: 0, poinKehadiran: 0, totalPoin: 0 };
+        });
+
+        const addKinerja = (dataArray) => {
+            dataArray.forEach(item => {
+                const itemDate = new Date(item.Tanggal);
+                if (scores[item.User_ID] && item.Status === 'Approved' && itemDate >= startDate && itemDate <= endDate) {
+                    scores[item.User_ID].poinKinerja += (item.Poin || 0);
+                }
+            });
+        };
+        addKinerja(db.jobdesk);
+        addKinerja(db.piket);
+
+        kehadiranData.forEach(k => {
+            if (!scores[k.User_ID]) return;
+            // Ambil 7 karakter pertama ("YYYY-MM") untuk jaga-jaga kalau ada
+            // data lama yang formatnya masih "YYYY-MM-DD" atau objek Date.
+            const kBulan = String(k.Bulan || '').slice(0, 7);
+            // Sertakan data kehadiran jika bulan yang bersangkutan beririsan dengan rentang tanggal filter.
+            const monthStart = new Date(kBulan + '-01');
+            const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0, 23, 59, 59, 999);
+            if (monthStart <= endDate && monthEnd >= startDate) {
+                scores[k.User_ID].poinKehadiran += (k.Nilai || 0);
+            }
+        });
+
+        Object.values(scores).forEach(s => { s.totalPoin = s.poinKinerja + s.poinKehadiran; });
+
+        const sortedBoard = Object.values(scores).sort((a, b) => b.totalPoin - a.totalPoin);
+
+        const topScorer = sortedBoard.length > 0 && sortedBoard[0].totalPoin > 0 ? sortedBoard[0].nama : '-';
+        const topScorerEl = document.getElementById('ltSummaryTopScorer');
+        if (topScorerEl) topScorerEl.textContent = topScorer;
+
+        const labels = sortedBoard.map(s => s.nama);
+        const dataPoints = sortedBoard.map(s => s.totalPoin);
+        renderLeaderboardTotalChart(labels, dataPoints);
+
+        if (sortedBoard.length === 0) {
+            boardBody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-wahdah-400">Belum ada data untuk ditampilkan.</td></tr>`;
+            document.getElementById('leaderboardAkumulasi-pagination').innerHTML = '';
+            return;
+        }
+
+        const totalPages = Math.max(1, Math.ceil(sortedBoard.length / paginationState.akumulasiBoard.pageSize));
+        if (paginationState.akumulasiBoard.page > totalPages) paginationState.akumulasiBoard.page = totalPages;
+        const start = (paginationState.akumulasiBoard.page - 1) * paginationState.akumulasiBoard.pageSize;
+        const pageData = sortedBoard.slice(start, start + paginationState.akumulasiBoard.pageSize);
+
+        boardBody.innerHTML = pageData.map((item, index) => {
+            const rank = start + index + 1;
+            let badgeClass = 'bg-wahdah-100 text-wahdah-600';
+            if (rank === 1) badgeClass = 'bg-gold-500 text-white shadow-md scale-110';
+            else if (rank === 2) badgeClass = 'bg-slate-300 text-slate-800';
+            else if (rank === 3) badgeClass = 'bg-amber-600/40 text-amber-900';
+
+            return `
+            <tr class="hover:bg-wahdah-50/30 transition-colors">
+                <td class="px-5 py-4 text-center">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs ${badgeClass} transition-transform">${rank}</span>
+                </td>
+                <td class="px-5 py-4 font-bold text-wahdah-900 text-base">${escapeHtml(item.nama)}</td>
+                <td class="px-5 py-4 text-right font-bold text-wahdah-700">${item.poinKinerja}</td>
+                <td class="px-5 py-4 text-right font-bold text-wahdah-700">${item.poinKehadiran}</td>
+                <td class="px-5 py-4 text-right">
+                    <span class="font-bold text-gold-600 text-lg">${item.totalPoin}</span> <span class="text-[10px] text-wahdah-400 font-medium">pts</span>
+                </td>
+            </tr>`;
+        }).join('');
+
+        renderPagination('leaderboardAkumulasi-pagination', paginationState.akumulasiBoard, totalPages, 'renderLeaderboardAkumulasi');
+    }
+
     function formatTanggalID(dateStr) {
         const d = new Date(dateStr);
         if (isNaN(d.getTime())) return escapeHtml(dateStr);
@@ -1933,6 +2327,57 @@
                     data: dataPoints,
                     backgroundColor: '#48ac83',
                     hoverBackgroundColor: '#25906a',
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#124a3a',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        padding: 10,
+                        cornerRadius: 8,
+                        displayColors: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0, color: '#145c46' },
+                        grid: { color: 'rgba(14,58,46,0.06)' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#145c46' }
+                    }
+                }
+            }
+        });
+    }
+
+    let ltChartInstance = null;
+    function renderLeaderboardTotalChart(labels, dataPoints) {
+        const ctx = document.getElementById('leaderboardTotalChart');
+        if(!ctx) return;
+
+        if (ltChartInstance) {
+            ltChartInstance.destroy();
+        }
+
+        ltChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total Poin Keseluruhan',
+                    data: dataPoints,
+                    backgroundColor: '#e0a72e',
+                    hoverBackgroundColor: '#c48c1a',
                     borderRadius: 6,
                     borderSkipped: false
                 }]
