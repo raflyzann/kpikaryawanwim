@@ -831,10 +831,18 @@
             const adminNama = match[1].trim();
             return {
                 badgeHtml: `<span class="inline-flex items-center gap-1 bg-gold-50 text-gold-700 border border-gold-200 text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase w-fit"><i class="fa-solid fa-user-pen"></i> Tugas dari: ${escapeHtml(adminNama)}</span>`,
-                desc: desc.slice(match[0].length)
+                desc: desc.slice(match[0].length),
+                adminNama: adminNama
             };
         }
-        return { badgeHtml: '', desc: desc };
+        return { badgeHtml: '', desc: desc, adminNama: null };
+    }
+
+    // Sisipkan kembali marker "[[ASSIGNED_BY:...]] " di depan deskripsi yang
+    // baru diedit, supaya badge "Tugas dari: ..." tetap dipertahankan.
+    function reattachAssignedByMarker(newDesc, adminNama) {
+        if (!adminNama) return newDesc;
+        return `[[ASSIGNED_BY:${adminNama}]] ${newDesc}`;
     }
 
     const paginationState = {
@@ -1478,21 +1486,24 @@
         endDate.setHours(23, 59, 59, 999);
 
         let history = [];
-        
+        let _seq = 0;
+
         db.jobdesk.filter(t => t.User_ID === currentUser.User_ID).forEach(t => {
             let itemDate = new Date(t.Tanggal);
             if(itemDate >= startDate && itemDate <= endDate) {
-                history.push({ type: 'Task', id: t.Task_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai' });
+                history.push({ type: 'Task', id: t.Task_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', _seq: _seq++ });
             }
         });
         db.piket.filter(p => p.User_ID === currentUser.User_ID).forEach(p => {
             let itemDate = new Date(p.Tanggal);
             if(itemDate >= startDate && itemDate <= endDate) {
-                history.push({ type: 'Piket', id: p.Schedule_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, status: p.Status, poin: p.Poin, statusKerja: p.Status_Kerja || 'Selesai' });
+                history.push({ type: 'Piket', id: p.Schedule_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, status: p.Status, poin: p.Poin, statusKerja: p.Status_Kerja || 'Selesai', _seq: _seq++ });
             }
         });
 
-        history.sort((a, b) => new Date(b.date) - new Date(a.date));
+        // Input terbaru di atas: urutkan berdasarkan tanggal terbaru dulu,
+        // lalu untuk tanggal yang sama, urutan input (_seq) terbaru menang.
+        history.sort((a, b) => (new Date(b.date) - new Date(a.date)) || (b._seq - a._seq));
 
         if(history.length === 0) {
             tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-wahdah-400">Belum ada riwayat aktivitas.</td></tr>`;
@@ -1516,18 +1527,21 @@
             // Pisahkan label "Tugas dari: [Admin]" dari deskripsi asli (khusus Task)
             let assignedBadgeHtml = '';
             let displayDesc = h.desc;
+            let assignedAdminNama = null;
             if (h.type === 'Task') {
                 const parsed = formatTugasDeskripsi(h.desc);
                 assignedBadgeHtml = parsed.badgeHtml;
                 displayDesc = parsed.desc;
+                assignedAdminNama = parsed.adminNama;
             }
 
             // Edit Action Button (Delete goes to Bulk Action)
             let rawDesc = displayDesc.replace(/^Piket: /, ''); 
             let escDesc = rawDesc.replace(/'/g, "\\'").replace(/"/g, '&quot;');
             let escStatusKerja = h.statusKerja;
+            let escAdminNama = assignedAdminNama ? assignedAdminNama.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
             let actionBtns = h.status === 'Pending' 
-                ? `<button onclick="editUserTask('${h.type}', '${h.id}', '${escDesc}', '${escStatusKerja}')" class="text-blue-500 hover:bg-blue-50 p-1.5 rounded-lg transition-colors mr-1" title="Edit Tugas"><i class="fa-solid fa-pen-to-square"></i></button>`
+                ? `<button onclick="editUserTask('${h.type}', '${h.id}', '${escDesc}', '${escStatusKerja}', '${escAdminNama}')" class="text-blue-500 hover:bg-blue-50 p-1.5 rounded-lg transition-colors mr-1" title="Edit Tugas"><i class="fa-solid fa-pen-to-square"></i></button>`
                 : `<span class="text-wahdah-300 text-[10px] italic"><i class="fa-solid fa-lock mr-1"></i>Terkunci</span>`;
 
             return `
@@ -1552,7 +1566,7 @@
     }
 
     // Fungsi Edit Tugas (Karyawan)
-    function editUserTask(type, id, oldVal, oldStatusKerja) {
+    function editUserTask(type, id, oldVal, oldStatusKerja, adminNama) {
         if(type === 'Task') {
             Swal.fire({
                 title: 'Edit Deskripsi Tugas',
@@ -1567,7 +1581,7 @@
                     if (!value || value.trim().length < 10) return 'Deskripsi minimal 10 karakter!';
                 }
             }).then((result) => {
-                if (result.isConfirmed) processEditTask({id: id, type: type, val: result.value.trim()});
+                if (result.isConfirmed) processEditTask({id: id, type: type, val: result.value.trim(), adminNama: adminNama || null});
             });
         } else {
             Swal.fire({
@@ -1591,13 +1605,18 @@
 
     // Eksekutor Edit Tugas
     function processEditTask(data) {
+        // Sisipkan kembali marker "[[ASSIGNED_BY:...]]" (jika ada) supaya
+        // badge "Tugas dari: ..." tetap dipertahankan setelah diedit.
+        const finalVal = (data.type === 'Task') ? reattachAssignedByMarker(data.val, data.adminNama) : data.val;
+        const payload = { id: data.id, type: data.type, val: finalVal };
+
         if (typeof google === 'undefined') {
             if (data.type === 'Task') {
                 let task = db.jobdesk.find(t => t.Task_ID === data.id);
-                if (task) task.Deskripsi_Tugas = data.val;
+                if (task) task.Deskripsi_Tugas = finalVal;
             } else {
                 let piket = db.piket.find(p => p.Schedule_ID === data.id);
-                if (piket) piket.Jenis_Piket = data.val;
+                if (piket) piket.Jenis_Piket = finalVal;
             }
             renderUserHistory();
             Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: 'Perubahan tersimpan!', showConfirmButton: false, timer: 1500});
@@ -1610,7 +1629,7 @@
             }).withFailureHandler(err => {
                 console.error(err);
                 Swal.fire('Error', (err && err.message) || 'Gagal menyimpan perubahan.', 'error');
-            }).updateTask(sessionToken, data);
+            }).updateTask(sessionToken, payload);
         }
     }
 
@@ -1800,18 +1819,23 @@
         document.getElementById('adminBulkActionsBar').classList.add('hidden');
 
         let queue = [];
-        
+        let _seq = 0;
+
         db.jobdesk.filter(t => t.Status === 'Pending').forEach(t => {
             if (filterUserId === 'ALL' || t.User_ID === filterUserId) {
-                queue.push({ type: 'Task', id: t.Task_ID, userId: t.User_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, statusKerja: t.Status_Kerja || 'Selesai', fotoUrl: null });
+                queue.push({ type: 'Task', id: t.Task_ID, userId: t.User_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, statusKerja: t.Status_Kerja || 'Selesai', fotoUrl: null, _seq: _seq++ });
             }
         });
         
         db.piket.filter(p => p.Status === 'Pending').forEach(p => {
             if (filterUserId === 'ALL' || p.User_ID === filterUserId) {
-                queue.push({ type: 'Piket', id: p.Schedule_ID, userId: p.User_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, statusKerja: p.Status_Kerja || 'Selesai', fotoUrl: p.Bukti_Foto_URL });
+                queue.push({ type: 'Piket', id: p.Schedule_ID, userId: p.User_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, statusKerja: p.Status_Kerja || 'Selesai', fotoUrl: p.Bukti_Foto_URL, _seq: _seq++ });
             }
         });
+
+        // Input terbaru di atas: urutkan berdasarkan tanggal terbaru dulu,
+        // lalu untuk tanggal yang sama, urutan input (_seq) terbaru menang.
+        queue.sort((a, b) => (new Date(b.date) - new Date(a.date)) || (b._seq - a._seq));
 
         document.getElementById('adminPendingCount').textContent = queue.length;
 
@@ -1950,12 +1974,13 @@
         endDate.setHours(23, 59, 59, 999);
 
         let history = [];
-        
+        let _seq = 0;
+
         db.jobdesk.forEach(t => {
             if(filterUserId === 'ALL' || t.User_ID === filterUserId) {
                 let itemDate = new Date(t.Tanggal);
                 if(itemDate >= startDate && itemDate <= endDate) {
-                    history.push({ id: t.Task_ID, type: 'Task', userId: t.User_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', fotoUrl: null });
+                    history.push({ id: t.Task_ID, type: 'Task', userId: t.User_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', fotoUrl: null, _seq: _seq++ });
                 }
             }
         });
@@ -1963,12 +1988,14 @@
             if(filterUserId === 'ALL' || p.User_ID === filterUserId) {
                 let itemDate = new Date(p.Tanggal);
                 if(itemDate >= startDate && itemDate <= endDate) {
-                    history.push({ id: p.Schedule_ID, type: 'Piket', userId: p.User_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, status: p.Status, poin: p.Poin, statusKerja: p.Status_Kerja || 'Selesai', fotoUrl: p.Bukti_Foto_URL });
+                    history.push({ id: p.Schedule_ID, type: 'Piket', userId: p.User_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, status: p.Status, poin: p.Poin, statusKerja: p.Status_Kerja || 'Selesai', fotoUrl: p.Bukti_Foto_URL, _seq: _seq++ });
                 }
             }
         });
 
-        history.sort((a, b) => new Date(b.date) - new Date(a.date));
+        // Input terbaru di atas: urutkan berdasarkan tanggal terbaru dulu,
+        // lalu untuk tanggal yang sama, urutan input (_seq) terbaru menang.
+        history.sort((a, b) => (new Date(b.date) - new Date(a.date)) || (b._seq - a._seq));
 
         if(history.length === 0) {
             tbody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-wahdah-400">Belum ada riwayat aktivitas.</td></tr>`;
