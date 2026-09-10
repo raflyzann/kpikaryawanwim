@@ -385,7 +385,7 @@
                         <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
                             <div class="flex items-center gap-2 w-full sm:w-auto">
                                 <i class="fa-solid fa-filter text-wahdah-400 text-xs"></i>
-                                <select id="adminQueueFilterNama" class="w-full sm:w-48 text-xs border border-wahdah-200 rounded-lg px-2 py-1.5 focus:ring-1 focus:ring-wahdah-400 outline-none bg-white" onchange="paginationState.adminQueue.page = 1; renderAdminQueue()">
+                                <select id="adminQueueFilterNama" class="w-full sm:w-48 text-xs border border-wahdah-200 rounded-lg px-2 py-1.5 focus:ring-1 focus:ring-wahdah-400 outline-none bg-white" onchange="paginationState.adminQueue.page = 1; adminQueueSelectedIds.clear(); renderAdminQueue()">
                                     <option value="ALL">Semua Karyawan</option>
                                 </select>
                             </div>
@@ -854,6 +854,14 @@
         akumulasiBoard: { page: 1, pageSize: 10 }
     };
 
+    // Menyimpan ID baris yang dicentang lintas HALAMAN (pagination), karena
+    // tbody dirender ulang tiap ganti halaman sehingga state checkbox bawaan
+    // browser hilang. Set ini jadi "sumber kebenaran" untuk centang/select-all.
+    let userHistorySelectedIds = new Set();
+    let currentUserHistoryIds = [];
+    let adminQueueSelectedIds = new Set();
+    let currentAdminQueueIds = [];
+
     window.addEventListener('DOMContentLoaded', loadData);
 
     function toggleSidebar() {
@@ -1119,6 +1127,7 @@
         }
         if(viewId === 'viewAdminDashboard') {
             paginationState.adminQueue.page = 1;
+            adminQueueSelectedIds.clear();
             renderAdminQueue();
         }
         if(viewId === 'viewAdminHistory') {
@@ -1369,14 +1378,25 @@
 
     // --- Bulk Action Logic (User History) ---
     function toggleAllCheckboxes(checked) {
-        const checkboxes = document.querySelectorAll('.row-checkbox:not(:disabled)');
-        checkboxes.forEach(cb => cb.checked = checked);
+        if (checked) {
+            currentUserHistoryIds.forEach(id => userHistorySelectedIds.add(id));
+        } else {
+            userHistorySelectedIds.clear();
+        }
+        document.querySelectorAll('.row-checkbox:not(:disabled)').forEach(cb => {
+            cb.checked = userHistorySelectedIds.has(cb.value);
+        });
+        updateBulkActionUI();
+    }
+
+    function toggleUserRowSelection(id, checked) {
+        if (checked) userHistorySelectedIds.add(id);
+        else userHistorySelectedIds.delete(id);
         updateBulkActionUI();
     }
 
     function updateBulkActionUI() {
-        const checkboxes = document.querySelectorAll('.row-checkbox:checked');
-        const count = checkboxes.length;
+        const count = userHistorySelectedIds.size;
         const bar = document.getElementById('bulkActionsBar');
         document.getElementById('selectedCount').textContent = count;
         
@@ -1384,13 +1404,16 @@
             bar.classList.remove('hidden');
         } else {
             bar.classList.add('hidden');
-            document.getElementById('selectAllCheckbox').checked = false;
+        }
+
+        const selectAllCb = document.getElementById('selectAllCheckbox');
+        if (selectAllCb) {
+            selectAllCb.checked = currentUserHistoryIds.length > 0 && currentUserHistoryIds.every(id => userHistorySelectedIds.has(id));
         }
     }
 
     function getSelectedIds() {
-        const checkboxes = document.querySelectorAll('.row-checkbox:checked');
-        return Array.from(checkboxes).map(cb => cb.value);
+        return Array.from(userHistorySelectedIds);
     }
 
     function bulkMarkDone() {
@@ -1460,7 +1483,7 @@
     }
 
     function finalizeBulkAction(msg) {
-        document.getElementById('selectAllCheckbox').checked = false;
+        userHistorySelectedIds.clear();
         document.getElementById('bulkActionsBar').classList.add('hidden');
         renderUserHistory();
         updateUserPoints();
@@ -1471,13 +1494,12 @@
         document.getElementById('uhFilterStart').value = '';
         document.getElementById('uhFilterEnd').value = '';
         paginationState.userHistory.page = 1;
+        userHistorySelectedIds.clear();
         renderUserHistory();
     }
 
     function renderUserHistory() {
         const tbody = document.getElementById('user-history-tbody');
-        document.getElementById('selectAllCheckbox').checked = false;
-        document.getElementById('bulkActionsBar').classList.add('hidden');
 
         const startDateStr = document.getElementById('uhFilterStart').value;
         const endDateStr = document.getElementById('uhFilterEnd').value;
@@ -1505,9 +1527,16 @@
         // lalu untuk tanggal yang sama, urutan input (_seq) terbaru menang.
         history.sort((a, b) => (new Date(b.date) - new Date(a.date)) || (b._seq - a._seq));
 
+        // Simpan seluruh ID yang BISA dicentang (status Pending) lintas
+        // halaman, supaya "select all" dan hitungan "dipilih" mencakup semua
+        // halaman, bukan cuma yang sedang tampil.
+        currentUserHistoryIds = history.filter(h => h.status !== 'Approved').map(h => h.id);
+        userHistorySelectedIds.forEach(id => { if (!currentUserHistoryIds.includes(id)) userHistorySelectedIds.delete(id); });
+
         if(history.length === 0) {
             tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-wahdah-400">Belum ada riwayat aktivitas.</td></tr>`;
             document.getElementById('user-history-pagination').innerHTML = '';
+            updateBulkActionUI();
             return;
         }
 
@@ -1522,7 +1551,8 @@
             
             // Checkbox Update Completion
             let disabledCb = h.status === 'Approved' ? 'disabled' : '';
-            let cbHtml = `<input type="checkbox" class="row-checkbox w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer" value="${h.id}" onchange="updateBulkActionUI()" ${disabledCb}>`;
+            let isChecked = userHistorySelectedIds.has(h.id) ? 'checked' : '';
+            let cbHtml = `<input type="checkbox" class="row-checkbox w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer" value="${h.id}" ${isChecked} onchange="toggleUserRowSelection('${h.id}', this.checked)" ${disabledCb}>`;
             
             // Pisahkan label "Tugas dari: [Admin]" dari deskripsi asli (khusus Task)
             let assignedBadgeHtml = '';
@@ -1563,6 +1593,7 @@
         }).join('');
         
         renderPagination('user-history-pagination', paginationState.userHistory, totalPages, 'renderUserHistory');
+        updateBulkActionUI();
     }
 
     // Fungsi Edit Tugas (Karyawan)
@@ -1686,14 +1717,27 @@
 
     // --- Bulk Action Logic (Admin Queue) ---
     function toggleAllAdminCheckboxes(checked) {
-        const checkboxes = document.querySelectorAll('.admin-row-checkbox:not(:disabled)');
-        checkboxes.forEach(cb => cb.checked = checked);
+        if (checked) {
+            currentAdminQueueIds.forEach(id => adminQueueSelectedIds.add(id));
+        } else {
+            adminQueueSelectedIds.clear();
+        }
+        // Sinkronkan checkbox yang sedang tampil di halaman ini saja;
+        // halaman lain otomatis ikut karena checked-nya dibaca dari Set saat dirender.
+        document.querySelectorAll('.admin-row-checkbox').forEach(cb => {
+            cb.checked = adminQueueSelectedIds.has(cb.value);
+        });
+        updateAdminBulkActionUI();
+    }
+
+    function toggleAdminRowSelection(id, checked) {
+        if (checked) adminQueueSelectedIds.add(id);
+        else adminQueueSelectedIds.delete(id);
         updateAdminBulkActionUI();
     }
 
     function updateAdminBulkActionUI() {
-        const checkboxes = document.querySelectorAll('.admin-row-checkbox:checked');
-        const count = checkboxes.length;
+        const count = adminQueueSelectedIds.size;
         const bar = document.getElementById('adminBulkActionsBar');
         document.getElementById('adminSelectedCount').textContent = count;
         
@@ -1701,12 +1745,16 @@
             bar.classList.remove('hidden');
         } else {
             bar.classList.add('hidden');
-            document.getElementById('selectAllAdminCheckbox').checked = false;
+        }
+
+        const selectAllCb = document.getElementById('selectAllAdminCheckbox');
+        if (selectAllCb) {
+            selectAllCb.checked = currentAdminQueueIds.length > 0 && currentAdminQueueIds.every(id => adminQueueSelectedIds.has(id));
         }
     }
 
     function getAdminSelectedIds() {
-        return Array.from(document.querySelectorAll('.admin-row-checkbox:checked')).map(cb => cb.value);
+        return Array.from(adminQueueSelectedIds);
     }
 
     function bulkAdminApprove() {
@@ -1805,7 +1853,7 @@
     }
 
     function finalizeAdminBulkAction(msg) {
-        document.getElementById('selectAllAdminCheckbox').checked = false;
+        adminQueueSelectedIds.clear();
         document.getElementById('adminBulkActionsBar').classList.add('hidden');
         renderAdminQueue();
         Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: msg, showConfirmButton: false, timer: 1500});
@@ -1814,9 +1862,6 @@
     function renderAdminQueue() {
         const tbody = document.getElementById('admin-queue-tbody');
         const filterUserId = document.getElementById('adminQueueFilterNama').value;
-        
-        document.getElementById('selectAllAdminCheckbox').checked = false;
-        document.getElementById('adminBulkActionsBar').classList.add('hidden');
 
         let queue = [];
         let _seq = 0;
@@ -1837,11 +1882,20 @@
         // lalu untuk tanggal yang sama, urutan input (_seq) terbaru menang.
         queue.sort((a, b) => (new Date(b.date) - new Date(a.date)) || (b._seq - a._seq));
 
+        // Simpan seluruh ID hasil filter (bukan cuma yang tampil di halaman
+        // ini) supaya "select all" dan penghitungan "N dipilih" mencakup
+        // semua halaman, bukan cuma halaman yang sedang aktif.
+        currentAdminQueueIds = queue.map(q => q.id);
+        // Buang ID yang sudah tidak ada lagi di antrean (misal sudah
+        // disetujui/dihapus dari filter lain) supaya hitungannya tetap akurat.
+        adminQueueSelectedIds.forEach(id => { if (!currentAdminQueueIds.includes(id)) adminQueueSelectedIds.delete(id); });
+
         document.getElementById('adminPendingCount').textContent = queue.length;
 
         if(queue.length === 0) {
             tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-wahdah-400">Tidak ada antrean persetujuan saat ini.</td></tr>`;
             document.getElementById('admin-queue-pagination').innerHTML = '';
+            updateAdminBulkActionUI();
             return;
         }
 
@@ -1871,7 +1925,8 @@
                 }
             }
 
-            let cbHtml = `<input type="checkbox" class="admin-row-checkbox w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer" value="${q.id}" onchange="updateAdminBulkActionUI()">`;
+            let isChecked = adminQueueSelectedIds.has(q.id) ? 'checked' : '';
+            let cbHtml = `<input type="checkbox" class="admin-row-checkbox w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer" value="${q.id}" ${isChecked} onchange="toggleAdminRowSelection('${q.id}', this.checked)">`;
 
             let actionColumn = '';
             if (q.statusKerja === 'Belum Selesai') {
@@ -1910,6 +1965,7 @@
         }).join('');
         
         renderPagination('admin-queue-pagination', paginationState.adminQueue, totalPages, 'renderAdminQueue');
+        updateAdminBulkActionUI();
     }
 
     function approveItem(id) {
