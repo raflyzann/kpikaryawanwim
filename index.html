@@ -114,6 +114,11 @@
                 <span>Inputan & Nilai Kehadiran</span>
             </button>
 
+            <button type="button" id="navInputSeragam" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewInputSeragam', this)">
+                <i class="fa-solid fa-shirt w-5 text-center"></i>
+                <span>Penilaian Seragam</span>
+            </button>
+
             <button type="button" id="navLeaderboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewLeaderboard', this)">
                 <i class="fa-solid fa-ranking-star w-5 text-center"></i>
                 <span>Leaderboard Poin Kinerja</span>
@@ -192,7 +197,7 @@
             <!-- ================= VIEW: KARYAWAN (RUANG KERJA SAYA) ================= -->
             <section id="viewUserDashboard" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
                 <!-- Info Papan Atas -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="bg-gradient-to-br from-wahdah-700 to-wahdah-900 rounded-2xl shadow-soft p-6 text-white pattern-bg flex items-center justify-between">
                         <div>
                             <p class="text-wahdah-200 text-xs font-medium mb-1">Total Poin Kinerja Anda</p>
@@ -203,6 +208,18 @@
                         </div>
                         <div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center text-3xl text-gold-400 border-2 border-white/20 backdrop-blur-sm">
                             <i class="fa-solid fa-medal"></i>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-sky-700 to-sky-900 rounded-2xl shadow-soft p-6 text-white pattern-bg flex items-center justify-between">
+                        <div>
+                            <p class="text-sky-200 text-xs font-medium mb-1">Total Poin Seragam Anda</p>
+                            <div class="flex items-baseline gap-2">
+                                <span id="userTotalPoinSeragam" class="text-4xl font-bold">0</span>
+                                <span class="text-sm text-sky-300">Poin</span>
+                            </div>
+                        </div>
+                        <div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center text-3xl text-white border-2 border-white/20 backdrop-blur-sm">
+                            <i class="fa-solid fa-shirt"></i>
                         </div>
                     </div>
                     <div class="bg-gradient-to-br from-gold-600 to-amber-800 rounded-2xl shadow-soft p-6 text-white pattern-bg flex items-center justify-between">
@@ -662,6 +679,82 @@
                 </div>
             </section>
 
+            <!-- ================= VIEW: ADMIN (PENILAIAN SERAGAM) ================= -->
+            <section id="viewInputSeragam" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
+                <!-- Form Input Penilaian Seragam -->
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5 md:p-6">
+                    <h3 class="text-sm font-bold text-wahdah-900 mb-4 flex items-center gap-2 border-b border-wahdah-50 pb-3">
+                        <div class="w-8 h-8 rounded-lg bg-wahdah-50 text-wahdah-600 flex items-center justify-center"><i class="fa-solid fa-shirt"></i></div>
+                        Penilaian Seragam Karyawan
+                    </h3>
+                    <form id="formSeragam" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end" onsubmit="submitSeragam(event)">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">Nama Karyawan</label>
+                            <select id="inpSeragamUser" required class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white">
+                                <option value="" disabled selected>Pilih Karyawan...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">Tanggal</label>
+                            <input type="date" id="inpSeragamTanggal" required class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">Penilaian</label>
+                            <label class="w-full flex items-center gap-2 rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm bg-white cursor-pointer select-none hover:bg-wahdah-50/50 transition-colors">
+                                <input type="checkbox" id="inpSeragamCeklis" class="w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer">
+                                <span class="text-wahdah-700">Berseragam Rapi & Lengkap</span>
+                            </label>
+                        </div>
+                        <div class="md:col-span-4 flex items-center justify-between flex-wrap gap-2">
+                            <button type="submit" id="btnSubmitSeragam" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-sm rounded-xl px-6 py-2.5 transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
+                                <i id="btnSubmitSeragamIcon" class="fa-solid fa-floppy-disk"></i> <span id="btnSubmitSeragamLabel">Simpan Penilaian Seragam</span>
+                            </button>
+                            <p class="text-[10px] text-wahdah-400">Tercentang = 2 Poin &bull; Tidak tercentang = 0 Poin</p>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Leaderboard Poin Seragam -->
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
+                    <div class="px-5 py-4 border-b border-wahdah-100 bg-wahdah-50/50">
+                        <h3 class="text-sm font-bold text-wahdah-900 flex items-center gap-2 mb-3">
+                            <i class="fa-solid fa-shirt text-wahdah-600"></i> Leaderboard Poin Seragam
+                        </h3>
+                        <div class="flex flex-col md:flex-row gap-3 items-end">
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Mulai Tanggal</label>
+                                <input type="date" id="lsFilterStart" class="w-full rounded-lg border border-wahdah-200 px-3 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
+                            </div>
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Sampai Tanggal</label>
+                                <input type="date" id="lsFilterEnd" class="w-full rounded-lg border border-wahdah-200 px-3 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
+                            </div>
+                            <button type="button" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-xs rounded-lg px-4 py-2 transition-colors shadow-sm" onclick="paginationState.seragamBoard.page = 1; renderLeaderboardSeragam()">
+                                Terapkan
+                            </button>
+                            <button type="button" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-xs rounded-lg px-4 py-2 transition-colors border border-gray-200" onclick="resetSeragamFilter()">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-wahdah-50 border-b border-wahdah-100">
+                                <tr class="text-wahdah-700 text-xs uppercase tracking-wide">
+                                    <th class="text-center font-semibold px-5 py-4 w-20">Peringkat</th>
+                                    <th class="text-left font-semibold px-5 py-4">Karyawan</th>
+                                    <th class="text-right font-semibold px-5 py-4 w-40">Poin Seragam</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboardSeragam-tbody" class="divide-y divide-wahdah-50">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="leaderboardSeragam-pagination" class="flex items-center justify-between px-5 py-3 border-t border-wahdah-100 bg-white"></div>
+                </div>
+            </section>
+
             <section id="viewLeaderboardTotal" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
                 <!-- Summary Card: Peraih Skor Tertinggi -->
                 <div class="bg-gradient-to-br from-wahdah-700 to-wahdah-900 rounded-2xl shadow-soft p-5 text-white pattern-bg">
@@ -695,13 +788,13 @@
                     </div>
                 </div>
 
-                <!-- Leaderboard Total Akumulasi (Kinerja + Kehadiran) -->
+                <!-- Leaderboard Total Akumulasi (Kinerja + Seragam + Kehadiran) -->
                 <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
                     <div class="px-5 py-4 border-b border-wahdah-100 bg-wahdah-50/50">
                         <h3 class="text-sm font-bold text-wahdah-900 flex items-center gap-2">
-                            <i class="fa-solid fa-trophy text-gold-500"></i> Leaderboard Total Akumulasi (Kinerja + Kehadiran)
+                            <i class="fa-solid fa-trophy text-gold-500"></i> Leaderboard Total Akumulasi (Kinerja + Seragam + Kehadiran)
                         </h3>
-                        <p class="text-[11px] text-wahdah-400 mt-1">Total Poin Kinerja (Jobdesk & Piket) ditambah Total Poin Kehadiran keseluruhan.</p>
+                        <p class="text-[11px] text-wahdah-400 mt-1">Total Poin Kinerja (Jobdesk & Piket) ditambah Total Poin Seragam dan Total Poin Kehadiran keseluruhan.</p>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
@@ -710,6 +803,7 @@
                                     <th class="text-center font-semibold px-5 py-4 w-20">Peringkat</th>
                                     <th class="text-left font-semibold px-5 py-4">Nama Karyawan</th>
                                     <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Poin Kinerja</th>
+                                    <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Poin Seragam</th>
                                     <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Poin Kehadiran</th>
                                     <th class="text-right font-semibold px-5 py-4 w-40">Total Poin Keseluruhan</th>
                                 </tr>
@@ -808,7 +902,7 @@
     // ==========================================
     // 1. STATE & INISIALISASI
     // ==========================================
-    let db = { users: [], jobdesk: [], piket: [], kehadiran: [] };
+    let db = { users: [], jobdesk: [], piket: [], kehadiran: [], seragam: [] };
     let currentUser = null;
     let sessionToken = null; // token sesi dari server, dikirim di setiap aksi penting
 
@@ -854,6 +948,7 @@
         adminHistory: { page: 1, pageSize: 10 },
         leaderboard: { page: 1, pageSize: 10 },
         kehadiranBoard: { page: 1, pageSize: 10 },
+        seragamBoard: { page: 1, pageSize: 10 },
         akumulasiBoard: { page: 1, pageSize: 10 }
     };
 
@@ -909,6 +1004,10 @@
             kehadiran: [
                 { Kehadiran_ID: 'KHD-1', User_ID: 'user@mail.com', Bulan: bulanIni, Nilai: 8 },
                 { Kehadiran_ID: 'KHD-2', User_ID: 'budi@mail.com', Bulan: bulanIni, Nilai: 6 }
+            ],
+            seragam: [
+                { Seragam_ID: 'SRG-1', User_ID: 'user@mail.com', Tanggal: today, Nilai: 2 },
+                { Seragam_ID: 'SRG-2', User_ID: 'budi@mail.com', Tanggal: today, Nilai: 0 }
             ]
         };
     }
@@ -972,6 +1071,21 @@
             icon.className = 'fa-solid fa-circle-notch fa-spin';
         } else {
             label.textContent = 'Simpan Nilai Kehadiran';
+            icon.className = 'fa-solid fa-floppy-disk';
+        }
+    }
+
+    function setSeragamButtonProcessing(isProcessing) {
+        const btn = document.getElementById('btnSubmitSeragam');
+        const label = document.getElementById('btnSubmitSeragamLabel');
+        const icon = document.getElementById('btnSubmitSeragamIcon');
+        if (!btn) return;
+        btn.disabled = isProcessing;
+        if (isProcessing) {
+            label.textContent = 'Menyimpan...';
+            icon.className = 'fa-solid fa-circle-notch fa-spin';
+        } else {
+            label.textContent = 'Simpan Penilaian Seragam';
             icon.className = 'fa-solid fa-floppy-disk';
         }
     }
@@ -1078,7 +1192,7 @@
         }
         currentUser = null;
         sessionToken = null;
-        db = { users: [], jobdesk: [], piket: [], kehadiran: [] };
+        db = { users: [], jobdesk: [], piket: [], kehadiran: [], seragam: [] };
         document.getElementById('sidebarUserName').textContent = 'Belum Login';
         document.getElementById('sidebarUserRole').textContent = '-';
         document.getElementById('btnLogout').classList.add('hidden');
@@ -1151,6 +1265,10 @@
             populateKehadiranUserDropdown();
             resetKehadiranFilter();
         }
+        if(viewId === 'viewInputSeragam') {
+            populateSeragamUserDropdown();
+            resetSeragamFilter();
+        }
         if(viewId === 'viewAdminCatatPenugasan') {
             populateAdminPenugasanUserDropdown();
             resetPenugasanForm();
@@ -1182,6 +1300,10 @@
             case 'viewInputKehadiran':
                 populateKehadiranUserDropdown();
                 renderLeaderboardKehadiran();
+                break;
+            case 'viewInputSeragam':
+                populateSeragamUserDropdown();
+                renderLeaderboardSeragam();
                 break;
             case 'viewAdminCatatPenugasan':
                 populateAdminPenugasanUserDropdown();
@@ -1450,6 +1572,19 @@
         });
         const totalKehadiranEl = document.getElementById('userTotalPoinKehadiran');
         if (totalKehadiranEl) totalKehadiranEl.textContent = totalKehadiran;
+
+        // Total Poin Seragam: jumlahkan nilai seragam milik user yang
+        // tanggalnya berada dalam rentang filter tanggal di atas.
+        let totalSeragam = 0;
+        const mySeragam = (db.seragam || []).filter(s => s.User_ID === currentUser.User_ID);
+        mySeragam.forEach(s => {
+            const itemDate = new Date(String(s.Tanggal || '').slice(0, 10));
+            if (itemDate >= startDate && itemDate <= endDate) {
+                totalSeragam += (s.Nilai || 0);
+            }
+        });
+        const totalSeragamEl = document.getElementById('userTotalPoinSeragam');
+        if (totalSeragamEl) totalSeragamEl.textContent = totalSeragam;
     }
 
     function resetUserDashboardFilter() {
@@ -1766,6 +1901,7 @@
         if (selectQueue) selectQueue.innerHTML = optionsHtml;
 
         populateKehadiranUserDropdown();
+        populateSeragamUserDropdown();
         populateAdminPenugasanUserDropdown();
     }
 
@@ -1794,6 +1930,20 @@
 
         if (currentValue && users.some(u => u.User_ID === currentValue)) {
             selectKehadiran.value = currentValue;
+        }
+    }
+
+    function populateSeragamUserDropdown() {
+        const selectSeragam = document.getElementById('inpSeragamUser');
+        if (!selectSeragam) return;
+
+        const users = db.users.filter(u => u.Role === 'User');
+        const currentValue = selectSeragam.value;
+        selectSeragam.innerHTML = `<option value="" disabled ${!currentValue ? 'selected' : ''}>Pilih Karyawan...</option>` +
+            users.map(u => `<option value="${escapeHtml(u.User_ID)}">${escapeHtml(u.Nama)}</option>`).join('');
+
+        if (currentValue && users.some(u => u.User_ID === currentValue)) {
+            selectSeragam.value = currentValue;
         }
     }
 
@@ -2611,6 +2761,129 @@
         renderPagination('leaderboardKehadiran-pagination', paginationState.kehadiranBoard, totalPages, 'renderLeaderboardKehadiran');
     }
 
+    // ==========================================
+    // 4d. FUNGSI PENILAIAN SERAGAM (ADMIN)
+    // ==========================================
+    function submitSeragam(e) {
+        e.preventDefault();
+
+        const userId = document.getElementById('inpSeragamUser').value;
+        const tanggal = document.getElementById('inpSeragamTanggal').value; // format: YYYY-MM-DD
+        const isCeklis = document.getElementById('inpSeragamCeklis').checked;
+        const nilai = isCeklis ? 2 : 0;
+
+        if (!userId || !tanggal) {
+            Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Mohon pilih karyawan dan tanggal penilaian.', confirmButtonColor: '#25906a' });
+            return;
+        }
+
+        setSeragamButtonProcessing(true);
+
+        if (typeof google === 'undefined') {
+            // Mode pratinjau lokal (di luar Apps Script) - simpan di memori saja.
+            if (!db.seragam) db.seragam = [];
+            const existing = db.seragam.find(s => s.User_ID === userId && s.Tanggal === tanggal);
+            if (existing) {
+                existing.Nilai = nilai;
+            } else {
+                db.seragam.push({ Seragam_ID: 'SRG-' + Date.now(), User_ID: userId, Tanggal: tanggal, Nilai: nilai });
+            }
+            finalizeSeragamSubmit(!!existing);
+        } else {
+            const isUpdate = (db.seragam || []).some(s => s.User_ID === userId && s.Tanggal === tanggal);
+            google.script.run
+                .withSuccessHandler(res => {
+                    db = res;
+                    finalizeSeragamSubmit(isUpdate);
+                })
+                .withFailureHandler(err => {
+                    console.error(err);
+                    setSeragamButtonProcessing(false);
+                    Swal.fire('Error', (err && err.message) || 'Gagal menyimpan penilaian seragam.', 'error');
+                })
+                .saveSeragam(sessionToken, { userId: userId, tanggal: tanggal, nilai: nilai });
+        }
+    }
+
+    function finalizeSeragamSubmit(isUpdate) {
+        const form = document.getElementById('formSeragam');
+        if (form) form.reset();
+        renderLeaderboardSeragam();
+        renderLeaderboardAkumulasi();
+        setSeragamButtonProcessing(false);
+
+        Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: isUpdate ? 'Penilaian seragam diperbarui!' : 'Penilaian seragam disimpan!', showConfirmButton: false, timer: 1500 });
+    }
+
+    function resetSeragamFilter() {
+        const startEl = document.getElementById('lsFilterStart');
+        const endEl = document.getElementById('lsFilterEnd');
+        if (startEl) startEl.value = '';
+        if (endEl) endEl.value = '';
+        paginationState.seragamBoard.page = 1;
+        renderLeaderboardSeragam();
+    }
+
+    function renderLeaderboardSeragam() {
+        const boardBody = document.getElementById('leaderboardSeragam-tbody');
+        if (!boardBody) return;
+
+        const startDateStr = document.getElementById('lsFilterStart').value;
+        const endDateStr = document.getElementById('lsFilterEnd').value;
+        let startDate = startDateStr ? new Date(startDateStr) : new Date('2000-01-01');
+        let endDate = endDateStr ? new Date(endDateStr) : new Date('2100-01-01');
+        endDate.setHours(23, 59, 59, 999);
+
+        const seragamData = db.seragam || [];
+        const scores = {};
+
+        db.users.filter(u => u.Role === 'User').forEach(u => {
+            scores[u.User_ID] = { userId: u.User_ID, nama: u.Nama, totalPoin: 0 };
+        });
+
+        seragamData.forEach(s => {
+            if (!scores[s.User_ID]) return;
+            const itemDate = new Date(String(s.Tanggal || '').slice(0, 10));
+            if (itemDate >= startDate && itemDate <= endDate) {
+                scores[s.User_ID].totalPoin += (s.Nilai || 0);
+            }
+        });
+
+        const sortedBoard = Object.values(scores).sort((a, b) => b.totalPoin - a.totalPoin);
+
+        if (sortedBoard.length === 0) {
+            boardBody.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-wahdah-400">Belum ada data seragam untuk periode ini.</td></tr>`;
+            document.getElementById('leaderboardSeragam-pagination').innerHTML = '';
+            return;
+        }
+
+        const totalPages = Math.max(1, Math.ceil(sortedBoard.length / paginationState.seragamBoard.pageSize));
+        if (paginationState.seragamBoard.page > totalPages) paginationState.seragamBoard.page = totalPages;
+        const start = (paginationState.seragamBoard.page - 1) * paginationState.seragamBoard.pageSize;
+        const pageData = sortedBoard.slice(start, start + paginationState.seragamBoard.pageSize);
+
+        boardBody.innerHTML = pageData.map((item, index) => {
+            const rank = start + index + 1;
+            let badgeClass = 'bg-wahdah-100 text-wahdah-600';
+            if (rank === 1) badgeClass = 'bg-gold-500 text-white shadow-md scale-110';
+            else if (rank === 2) badgeClass = 'bg-slate-300 text-slate-800';
+            else if (rank === 3) badgeClass = 'bg-amber-600/40 text-amber-900';
+
+            return `
+            <tr class="hover:bg-wahdah-50/30 transition-colors">
+                <td class="px-5 py-4 text-center">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs ${badgeClass} transition-transform">${rank}</span>
+                </td>
+                <td class="px-5 py-4 font-bold text-wahdah-900 text-base">${escapeHtml(item.nama)}</td>
+                <td class="px-5 py-4 text-right">
+                    <span class="font-bold text-sky-600 text-lg">${item.totalPoin}</span> <span class="text-[10px] text-wahdah-400 font-medium">pts</span>
+                </td>
+            </tr>`;
+        }).join('');
+
+        renderPagination('leaderboardSeragam-pagination', paginationState.seragamBoard, totalPages, 'renderLeaderboardSeragam');
+    }
+
     function resetLeaderboardTotalFilter() {
         document.getElementById('ltFilterStart').value = '';
         document.getElementById('ltFilterEnd').value = '';
@@ -2629,10 +2902,11 @@
         endDate.setHours(23, 59, 59, 999);
 
         const kehadiranData = db.kehadiran || [];
+        const seragamData = db.seragam || [];
         const scores = {};
 
         db.users.filter(u => u.Role === 'User').forEach(u => {
-            scores[u.User_ID] = { userId: u.User_ID, nama: u.Nama, poinKinerja: 0, poinKehadiran: 0, totalPoin: 0 };
+            scores[u.User_ID] = { userId: u.User_ID, nama: u.Nama, poinKinerja: 0, poinSeragam: 0, poinKehadiran: 0, totalPoin: 0 };
         });
 
         const addKinerja = (dataArray) => {
@@ -2645,6 +2919,14 @@
         };
         addKinerja(db.jobdesk);
         addKinerja(db.piket);
+
+        seragamData.forEach(s => {
+            if (!scores[s.User_ID]) return;
+            const itemDate = new Date(String(s.Tanggal || '').slice(0, 10));
+            if (itemDate >= startDate && itemDate <= endDate) {
+                scores[s.User_ID].poinSeragam += (s.Nilai || 0);
+            }
+        });
 
         kehadiranData.forEach(k => {
             if (!scores[k.User_ID]) return;
@@ -2659,7 +2941,7 @@
             }
         });
 
-        Object.values(scores).forEach(s => { s.totalPoin = s.poinKinerja + s.poinKehadiran; });
+        Object.values(scores).forEach(s => { s.totalPoin = s.poinKinerja + s.poinSeragam + s.poinKehadiran; });
 
         const sortedBoard = Object.values(scores).sort((a, b) => b.totalPoin - a.totalPoin);
 
@@ -2672,7 +2954,7 @@
         renderLeaderboardTotalChart(labels, dataPoints);
 
         if (sortedBoard.length === 0) {
-            boardBody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-wahdah-400">Belum ada data untuk ditampilkan.</td></tr>`;
+            boardBody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-wahdah-400">Belum ada data untuk ditampilkan.</td></tr>`;
             document.getElementById('leaderboardAkumulasi-pagination').innerHTML = '';
             return;
         }
@@ -2696,6 +2978,7 @@
                 </td>
                 <td class="px-5 py-4 font-bold text-wahdah-900 text-base">${escapeHtml(item.nama)}</td>
                 <td class="px-5 py-4 text-right font-bold text-wahdah-700">${item.poinKinerja}</td>
+                <td class="px-5 py-4 text-right font-bold text-sky-600">${item.poinSeragam}</td>
                 <td class="px-5 py-4 text-right font-bold text-wahdah-700">${item.poinKehadiran}</td>
                 <td class="px-5 py-4 text-right">
                     <span class="font-bold text-gold-600 text-lg">${item.totalPoin}</span> <span class="text-[10px] text-wahdah-400 font-medium">pts</span>
