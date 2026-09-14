@@ -689,10 +689,20 @@
                     </h3>
                     <form id="formSeragam" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end" onsubmit="submitSeragam(event)">
                         <div class="md:col-span-2">
-                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">Nama Karyawan</label>
-                            <select id="inpSeragamUser" required class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white">
-                                <option value="" disabled selected>Pilih Karyawan...</option>
-                            </select>
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">Nama Karyawan <span class="font-normal text-wahdah-400">(bisa pilih lebih dari satu)</span></label>
+                            <div class="relative">
+                                <button type="button" id="seragamUserMultiSelectBtn" onclick="toggleSeragamUserDropdown()" class="w-full flex items-center justify-between gap-2 rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white text-left">
+                                    <span id="seragamUserMultiSelectLabel" class="truncate text-wahdah-400">Pilih Karyawan...</span>
+                                    <i class="fa-solid fa-chevron-down text-xs text-wahdah-400 shrink-0"></i>
+                                </button>
+                                <div id="seragamUserDropdownPanel" class="hidden absolute z-20 mt-1.5 w-full bg-white border border-wahdah-200 rounded-xl shadow-lg max-h-64 overflow-y-auto">
+                                    <label class="flex items-center gap-2 px-3 py-2.5 text-sm border-b border-wahdah-100 hover:bg-wahdah-50 cursor-pointer font-semibold text-wahdah-700 sticky top-0 bg-white">
+                                        <input type="checkbox" id="seragamUserSelectAll" onchange="toggleAllSeragamUsers(this.checked)" class="w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer">
+                                        Pilih Semua Karyawan
+                                    </label>
+                                    <div id="seragamUserCheckboxList"></div>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-wahdah-700 mb-1">Tanggal</label>
@@ -1266,6 +1276,7 @@
             resetKehadiranFilter();
         }
         if(viewId === 'viewInputSeragam') {
+            selectedSeragamUserIds = [];
             populateSeragamUserDropdown();
             resetSeragamFilter();
         }
@@ -1933,19 +1944,80 @@
         }
     }
 
+    // --- Dropdown Multi-Select Karyawan (Penilaian Seragam) ---
+    let selectedSeragamUserIds = [];
+
     function populateSeragamUserDropdown() {
-        const selectSeragam = document.getElementById('inpSeragamUser');
-        if (!selectSeragam) return;
+        const listEl = document.getElementById('seragamUserCheckboxList');
+        if (!listEl) return;
 
         const users = db.users.filter(u => u.Role === 'User');
-        const currentValue = selectSeragam.value;
-        selectSeragam.innerHTML = `<option value="" disabled ${!currentValue ? 'selected' : ''}>Pilih Karyawan...</option>` +
-            users.map(u => `<option value="${escapeHtml(u.User_ID)}">${escapeHtml(u.Nama)}</option>`).join('');
+        // Buang ID yang sudah tidak valid lagi (mis. user dihapus) dari pilihan sebelumnya.
+        selectedSeragamUserIds = selectedSeragamUserIds.filter(id => users.some(u => u.User_ID === id));
 
-        if (currentValue && users.some(u => u.User_ID === currentValue)) {
-            selectSeragam.value = currentValue;
+        listEl.innerHTML = users.map(u => `
+            <label class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-wahdah-50 cursor-pointer">
+                <input type="checkbox" class="seragam-user-checkbox w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer" value="${escapeHtml(u.User_ID)}" ${selectedSeragamUserIds.includes(u.User_ID) ? 'checked' : ''} onchange="toggleSeragamUser('${u.User_ID}', this.checked)">
+                <span class="text-wahdah-800">${escapeHtml(u.Nama)}</span>
+            </label>
+        `).join('') || `<p class="px-3 py-4 text-xs text-wahdah-400 text-center">Belum ada data karyawan.</p>`;
+
+        updateSeragamUserSelectUI();
+    }
+
+    function toggleSeragamUserDropdown() {
+        const panel = document.getElementById('seragamUserDropdownPanel');
+        if (!panel) return;
+        panel.classList.toggle('hidden');
+    }
+
+    function toggleSeragamUser(userId, checked) {
+        if (checked) {
+            if (!selectedSeragamUserIds.includes(userId)) selectedSeragamUserIds.push(userId);
+        } else {
+            selectedSeragamUserIds = selectedSeragamUserIds.filter(id => id !== userId);
+        }
+        updateSeragamUserSelectUI();
+    }
+
+    function toggleAllSeragamUsers(checked) {
+        const users = db.users.filter(u => u.Role === 'User');
+        selectedSeragamUserIds = checked ? users.map(u => u.User_ID) : [];
+        document.querySelectorAll('.seragam-user-checkbox').forEach(cb => { cb.checked = checked; });
+        updateSeragamUserSelectUI();
+    }
+
+    function updateSeragamUserSelectUI() {
+        const users = db.users.filter(u => u.Role === 'User');
+        const label = document.getElementById('seragamUserMultiSelectLabel');
+        const selectAllCb = document.getElementById('seragamUserSelectAll');
+
+        if (label) {
+            if (selectedSeragamUserIds.length === 0) {
+                label.textContent = 'Pilih Karyawan...';
+                label.classList.add('text-wahdah-400');
+            } else if (selectedSeragamUserIds.length === 1) {
+                const u = users.find(x => x.User_ID === selectedSeragamUserIds[0]);
+                label.textContent = u ? u.Nama : '1 karyawan dipilih';
+                label.classList.remove('text-wahdah-400');
+            } else {
+                label.textContent = `${selectedSeragamUserIds.length} karyawan dipilih`;
+                label.classList.remove('text-wahdah-400');
+            }
+        }
+        if (selectAllCb) {
+            selectAllCb.checked = users.length > 0 && selectedSeragamUserIds.length === users.length;
         }
     }
+
+    // Tutup panel dropdown kalau user klik di luar area dropdown.
+    document.addEventListener('click', function(e) {
+        const panel = document.getElementById('seragamUserDropdownPanel');
+        const btn = document.getElementById('seragamUserMultiSelectBtn');
+        if (!panel || panel.classList.contains('hidden')) return;
+        if (panel.contains(e.target) || (btn && btn.contains(e.target))) return;
+        panel.classList.add('hidden');
+    });
 
     // --- Bulk Action Logic (Admin Queue) ---
     function toggleAllAdminCheckboxes(checked) {
@@ -2767,13 +2839,13 @@
     function submitSeragam(e) {
         e.preventDefault();
 
-        const userId = document.getElementById('inpSeragamUser').value;
+        const userIds = selectedSeragamUserIds.slice();
         const tanggal = document.getElementById('inpSeragamTanggal').value; // format: YYYY-MM-DD
         const isCeklis = document.getElementById('inpSeragamCeklis').checked;
         const nilai = isCeklis ? 2 : 0;
 
-        if (!userId || !tanggal) {
-            Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Mohon pilih karyawan dan tanggal penilaian.', confirmButtonColor: '#25906a' });
+        if (userIds.length === 0 || !tanggal) {
+            Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Mohon pilih minimal 1 karyawan dan isi tanggal penilaian.', confirmButtonColor: '#25906a' });
             return;
         }
 
@@ -2782,37 +2854,54 @@
         if (typeof google === 'undefined') {
             // Mode pratinjau lokal (di luar Apps Script) - simpan di memori saja.
             if (!db.seragam) db.seragam = [];
-            const existing = db.seragam.find(s => s.User_ID === userId && s.Tanggal === tanggal);
-            if (existing) {
-                existing.Nilai = nilai;
-            } else {
-                db.seragam.push({ Seragam_ID: 'SRG-' + Date.now(), User_ID: userId, Tanggal: tanggal, Nilai: nilai });
-            }
-            finalizeSeragamSubmit(!!existing);
+            let updateCount = 0;
+            userIds.forEach(userId => {
+                const existing = db.seragam.find(s => s.User_ID === userId && s.Tanggal === tanggal);
+                if (existing) {
+                    existing.Nilai = nilai;
+                    updateCount++;
+                } else {
+                    db.seragam.push({ Seragam_ID: 'SRG-' + Date.now() + '-' + userId, User_ID: userId, Tanggal: tanggal, Nilai: nilai });
+                }
+            });
+            finalizeSeragamSubmit(userIds.length, updateCount);
         } else {
-            const isUpdate = (db.seragam || []).some(s => s.User_ID === userId && s.Tanggal === tanggal);
+            const updateCount = userIds.filter(userId => (db.seragam || []).some(s => s.User_ID === userId && s.Tanggal === tanggal)).length;
             google.script.run
                 .withSuccessHandler(res => {
                     db = res;
-                    finalizeSeragamSubmit(isUpdate);
+                    finalizeSeragamSubmit(userIds.length, updateCount);
                 })
                 .withFailureHandler(err => {
                     console.error(err);
                     setSeragamButtonProcessing(false);
                     Swal.fire('Error', (err && err.message) || 'Gagal menyimpan penilaian seragam.', 'error');
                 })
-                .saveSeragam(sessionToken, { userId: userId, tanggal: tanggal, nilai: nilai });
+                .saveSeragam(sessionToken, { userIds: userIds, tanggal: tanggal, nilai: nilai });
         }
     }
 
-    function finalizeSeragamSubmit(isUpdate) {
+    function finalizeSeragamSubmit(totalCount, updateCount) {
         const form = document.getElementById('formSeragam');
         if (form) form.reset();
+        selectedSeragamUserIds = [];
+        document.querySelectorAll('.seragam-user-checkbox').forEach(cb => { cb.checked = false; });
+        updateSeragamUserSelectUI();
         renderLeaderboardSeragam();
         renderLeaderboardAkumulasi();
         setSeragamButtonProcessing(false);
 
-        Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: isUpdate ? 'Penilaian seragam diperbarui!' : 'Penilaian seragam disimpan!', showConfirmButton: false, timer: 1500 });
+        const newCount = totalCount - updateCount;
+        let msg;
+        if (totalCount === 1) {
+            msg = updateCount > 0 ? 'Penilaian seragam diperbarui!' : 'Penilaian seragam disimpan!';
+        } else {
+            const parts = [];
+            if (newCount > 0) parts.push(`${newCount} baru`);
+            if (updateCount > 0) parts.push(`${updateCount} diperbarui`);
+            msg = `Penilaian seragam ${totalCount} karyawan disimpan (${parts.join(', ')})!`;
+        }
+        Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: msg, showConfirmButton: false, timer: 2000 });
     }
 
     function resetSeragamFilter() {
