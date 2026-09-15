@@ -82,6 +82,11 @@
         <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
             <p class="px-3 text-[11px] uppercase tracking-wider text-wahdah-300 font-semibold mb-2 user-only hidden">Menu Karyawan</p>
             
+            <button type="button" id="navDashboardPoin" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors user-only hidden" onclick="switchView('viewDashboardPoin', this)">
+                <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                <span>Dashboard Poin</span>
+            </button>
+
             <button type="button" id="navUserDashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors user-only hidden" onclick="switchView('viewUserDashboard', this)">
                 <i class="fa-solid fa-briefcase w-5 text-center"></i>
                 <span>Ruang Kerja Saya</span>
@@ -277,7 +282,7 @@
             </section>
 
             <!-- ================= VIEW: KARYAWAN (RUANG KERJA SAYA) ================= -->
-            <section id="viewUserDashboard" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
+            <section id="viewDashboardPoin" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
                 <!-- Card Presentasi Persen (Kinerja 50% + Kehadiran 30% + Seragam 20%) -->
                 <div class="bg-gradient-to-br from-wahdah-900 via-wahdah-800 to-wahdah-950 rounded-2xl shadow-soft p-6 text-white pattern-bg">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -354,7 +359,9 @@
                         Reset
                     </button>
                 </div>
+            </section>
 
+            <section id="viewUserDashboard" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
                 <!-- Form Stack: Jobdesk berada di Atas, Piket di Bawah -->
                 <div class="flex flex-col gap-6">
                     <!-- Form Input Jobdesk -->
@@ -1571,7 +1578,7 @@
         document.getElementById('sidebar').classList.add('-translate-x-full');
         document.getElementById('sidebarOverlay').classList.add('hidden');
 
-        if(viewId === 'viewUserDashboard') {
+        if(viewId === 'viewDashboardPoin') {
             resetUserDashboardFilter();
         }
         if(viewId === 'viewUserHistory') {
@@ -1610,7 +1617,7 @@
     // sedang dipakai user (beda dengan switchView yang selalu reset ke default).
     function rerenderCurrentView() {
         switch (currentViewId) {
-            case 'viewUserDashboard':
+            case 'viewDashboardPoin':
                 updateUserPoints();
                 break;
             case 'viewUserHistory':
@@ -2140,7 +2147,7 @@
                         <div class="flex flex-col gap-1">
                             ${assignedBadgeHtml}
                             <div>${escapeHtml(displayDesc)}</div>
-                            ${h.catatan ? `<div class="text-[11px] text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2 py-1 flex items-start gap-1.5 mt-0.5"><i class="fa-solid fa-note-sticky mt-0.5"></i><span><span class="font-semibold">Catatan Admin:</span> ${escapeHtml(h.catatan)}</span></div>` : ''}
+                            ${h.catatan ? `<div class="text-[11px] text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2 py-1 flex items-start gap-1.5 mt-0.5"><i class="fa-solid fa-note-sticky mt-0.5"></i><span><span class="font-semibold">Catatan:</span> ${escapeHtml(h.catatan)}</span></div>` : ''}
                         </div>
                     </td>
                     <td class="px-3 py-3 text-center">${kerjaBadge}</td>
@@ -3279,7 +3286,7 @@
                 </td>
                 <td class="px-5 py-4 font-bold text-wahdah-900 text-base">${escapeHtml(item.nama)}</td>
                 <td class="px-5 py-4 text-right">
-                    <span class="font-bold text-emerald-600 text-lg">${item.totalPoin}</span> <span class="text-[10px] text-wahdah-400 font-medium">pts</span>
+                    <button type="button" onclick="showKehadiranDetail('${item.userId.replace(/'/g, "\\'")}')" class="font-bold text-emerald-600 text-lg hover:text-emerald-800 hover:underline decoration-2 underline-offset-2 transition-colors cursor-pointer" title="Lihat rincian poin">${item.totalPoin}</button> <span class="text-[10px] text-wahdah-400 font-medium">pts</span>
                 </td>
             </tr>`;
         }).join('');
@@ -3419,7 +3426,7 @@
                 </td>
                 <td class="px-5 py-4 font-bold text-wahdah-900 text-base">${escapeHtml(item.nama)}</td>
                 <td class="px-5 py-4 text-right">
-                    <span class="font-bold text-sky-600 text-lg">${item.totalPoin}</span> <span class="text-[10px] text-wahdah-400 font-medium">pts</span>
+                    <button type="button" onclick="showSeragamDetail('${item.userId.replace(/'/g, "\\'")}')" class="font-bold text-sky-600 text-lg hover:text-sky-800 hover:underline decoration-2 underline-offset-2 transition-colors cursor-pointer" title="Lihat rincian poin">${item.totalPoin}</button> <span class="text-[10px] text-wahdah-400 font-medium">pts</span>
                 </td>
             </tr>`;
         }).join('');
@@ -3695,6 +3702,17 @@
         return `${dd}/${mm}/${yyyy}`;
     }
 
+    const NAMA_BULAN_ID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    function formatBulanID(bulanStr) {
+        // bulanStr diharapkan berformat "YYYY-MM"
+        const parts = String(bulanStr || '').slice(0, 7).split('-');
+        if (parts.length !== 2) return escapeHtml(bulanStr || '-');
+        const tahun = parts[0];
+        const bulanIdx = parseInt(parts[1], 10) - 1;
+        if (isNaN(bulanIdx) || bulanIdx < 0 || bulanIdx > 11) return escapeHtml(bulanStr);
+        return `${NAMA_BULAN_ID[bulanIdx]} ${tahun}`;
+    }
+
     function showLeaderboardDetail(userId) {
         const user = db.users.find(u => u.User_ID === userId);
         if (!user) return;
@@ -3745,6 +3763,102 @@
                     <div class="space-y-2.5 max-h-72 overflow-y-auto pr-1">${itemsHtml}</div>
                     <div class="flex items-center justify-between border-t border-wahdah-100 mt-4 pt-3">
                         <span class="text-sm font-semibold text-wahdah-700">Total Skor KPI</span>
+                        <span class="text-lg font-bold text-wahdah-900">${totalSkor}</span>
+                    </div>
+                </div>
+            `,
+            showConfirmButton: false,
+            showCloseButton: true,
+            width: 420,
+            padding: '1.5rem'
+        });
+    }
+
+    function showKehadiranDetail(userId) {
+        const user = db.users.find(u => u.User_ID === userId);
+        if (!user) return;
+
+        const bulanFilter = document.getElementById('lkFilterBulan').value; // '' = semua bulan
+
+        const items = (db.kehadiran || [])
+            .filter(k => k.User_ID === userId)
+            .filter(k => {
+                const kBulan = String(k.Bulan || '').slice(0, 7);
+                return !bulanFilter || kBulan === bulanFilter;
+            })
+            .map(k => ({ bulan: String(k.Bulan || '').slice(0, 7), poin: k.Nilai || 0 }))
+            .sort((a, b) => b.bulan.localeCompare(a.bulan));
+
+        const totalSkor = items.reduce((sum, a) => sum + a.poin, 0);
+
+        const itemsHtml = items.length > 0 ? items.map(a => `
+            <div class="flex items-center justify-between gap-3 bg-wahdah-50/60 border border-wahdah-100 rounded-xl px-4 py-3">
+                <div class="flex items-center gap-2 text-sm font-semibold text-wahdah-900">
+                    <span class="w-5 h-5 rounded-full bg-gold-600 text-white flex items-center justify-center text-[10px]"><i class="fa-solid fa-calendar-check"></i></span>
+                    ${formatBulanID(a.bulan)}
+                </div>
+                <span class="font-bold text-emerald-600 text-sm whitespace-nowrap">+${a.poin}</span>
+            </div>
+        `).join('') : `<p class="text-center text-wahdah-400 text-sm py-6">Belum ada data kehadiran pada periode ini.</p>`;
+
+        Swal.fire({
+            html: `
+                <div class="text-left">
+                    <h3 class="text-xl font-bold text-wahdah-900">${escapeHtml(user.Nama)}</h3>
+                    <p class="text-xs text-wahdah-500 mt-1 mb-3">Daftar poin kehadiran per bulan pada periode terpilih.</p>
+                    <div class="space-y-2.5 max-h-72 overflow-y-auto pr-1">${itemsHtml}</div>
+                    <div class="flex items-center justify-between border-t border-wahdah-100 mt-4 pt-3">
+                        <span class="text-sm font-semibold text-wahdah-700">Total Poin Kehadiran</span>
+                        <span class="text-lg font-bold text-wahdah-900">${totalSkor}</span>
+                    </div>
+                </div>
+            `,
+            showConfirmButton: false,
+            showCloseButton: true,
+            width: 420,
+            padding: '1.5rem'
+        });
+    }
+
+    function showSeragamDetail(userId) {
+        const user = db.users.find(u => u.User_ID === userId);
+        if (!user) return;
+
+        const startDateStr = document.getElementById('lsFilterStart').value;
+        const endDateStr = document.getElementById('lsFilterEnd').value;
+        let startDate = startDateStr ? new Date(startDateStr) : new Date('2000-01-01');
+        let endDate = endDateStr ? new Date(endDateStr) : new Date('2100-01-01');
+        endDate.setHours(23, 59, 59, 999);
+
+        const items = (db.seragam || [])
+            .filter(s => s.User_ID === userId)
+            .filter(s => {
+                const itemDate = new Date(String(s.Tanggal || '').slice(0, 10));
+                return itemDate >= startDate && itemDate <= endDate;
+            })
+            .map(s => ({ tanggal: s.Tanggal, poin: s.Nilai || 0 }))
+            .sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+        const totalSkor = items.reduce((sum, a) => sum + a.poin, 0);
+
+        const itemsHtml = items.length > 0 ? items.map(a => `
+            <div class="flex items-center justify-between gap-3 bg-wahdah-50/60 border border-wahdah-100 rounded-xl px-4 py-3">
+                <div class="flex items-center gap-2 text-sm font-semibold text-wahdah-900">
+                    <span class="w-5 h-5 rounded-full bg-sky-600 text-white flex items-center justify-center text-[10px]"><i class="fa-solid fa-shirt"></i></span>
+                    ${formatTanggalID(a.tanggal)}
+                </div>
+                <span class="font-bold text-emerald-600 text-sm whitespace-nowrap">+${a.poin}</span>
+            </div>
+        `).join('') : `<p class="text-center text-wahdah-400 text-sm py-6">Belum ada data seragam pada periode ini.</p>`;
+
+        Swal.fire({
+            html: `
+                <div class="text-left">
+                    <h3 class="text-xl font-bold text-wahdah-900">${escapeHtml(user.Nama)}</h3>
+                    <p class="text-xs text-wahdah-500 mt-1 mb-3">Daftar poin seragam per tanggal pada periode terpilih.</p>
+                    <div class="space-y-2.5 max-h-72 overflow-y-auto pr-1">${itemsHtml}</div>
+                    <div class="flex items-center justify-between border-t border-wahdah-100 mt-4 pt-3">
+                        <span class="text-sm font-semibold text-wahdah-700">Total Poin Seragam</span>
                         <span class="text-lg font-bold text-wahdah-900">${totalSkor}</span>
                     </div>
                 </div>
