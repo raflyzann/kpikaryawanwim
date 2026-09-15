@@ -187,10 +187,84 @@
                             <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">PIN</label>
                             <input type="password" id="inpPin" required maxlength="6" inputmode="numeric" placeholder="••••••" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white tracking-[0.3em] transition-shadow text-left font-bold">
                         </div>
+                        <div class="text-right -mt-2">
+                            <button type="button" onclick="document.getElementById('viewLogin').classList.add('hidden'); switchView('viewResetPin')" class="text-xs font-semibold text-wahdah-600 hover:text-wahdah-800 hover:underline transition-colors">
+                                Lupa PIN?
+                            </button>
+                        </div>
                         <button type="submit" id="btnLoginSubmit" class="w-full bg-wahdah-700 hover:bg-wahdah-800 text-white font-medium text-sm rounded-xl py-3 mt-2 shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
                             <span id="btnLoginSubmitLabel">Masuk</span> <i id="btnLoginSubmitIcon" class="fa-solid fa-arrow-right"></i>
                         </button>
                     </form>
+
+                    <p class="text-xs text-wahdah-500 mt-4">
+                        Belum memiliki akun?
+                        <button type="button" onclick="document.getElementById('viewLogin').classList.add('hidden'); switchView('viewRegister')" class="font-semibold text-wahdah-700 hover:text-wahdah-900 hover:underline transition-colors">
+                            Daftar di sini
+                        </button>
+                    </p>
+                </div>
+            </section>
+
+            <!-- ================= VIEW: DAFTAR AKUN BARU ================= -->
+            <section id="viewRegister" class="view-section hidden view-fade flex flex-col items-center justify-center h-full">
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-8 w-full max-w-sm text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-wahdah-50 text-wahdah-600 flex items-center justify-center mx-auto mb-4 text-2xl shadow-softer border border-wahdah-100">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-wahdah-900 mb-1">Daftar Akun</h2>
+                    <p class="text-xs text-wahdah-500 mb-6">Buat akun karyawan baru</p>
+
+                    <form id="formRegister" class="space-y-4" onsubmit="handleRegister(event)">
+                        <div class="text-left">
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Nama Lengkap</label>
+                            <input type="text" id="inpRegisterNama" required placeholder="Nama Lengkap Anda" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white transition-shadow">
+                        </div>
+                        <div class="text-left">
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Email</label>
+                            <input type="email" id="inpRegisterEmail" required placeholder="user@email.com" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white transition-shadow">
+                        </div>
+                        <div class="text-left">
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">PIN</label>
+                            <input type="password" id="inpRegisterPin" required maxlength="6" inputmode="numeric" placeholder="••••••" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white tracking-[0.3em] transition-shadow text-left font-bold">
+                        </div>
+                        <button type="submit" id="btnRegisterSubmit" class="w-full bg-wahdah-700 hover:bg-wahdah-800 text-white font-medium text-sm rounded-xl py-3 mt-2 shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                            <span id="btnRegisterSubmitLabel">Daftar</span> <i id="btnRegisterSubmitIcon" class="fa-solid fa-user-plus"></i>
+                        </button>
+                    </form>
+
+                    <button type="button" onclick="switchView('viewLogin')" class="mt-4 text-xs font-semibold text-wahdah-600 hover:text-wahdah-800 hover:underline transition-colors">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Login
+                    </button>
+                </div>
+            </section>
+
+            <!-- ================= VIEW: LUPA / RESET PIN ================= -->
+            <section id="viewResetPin" class="view-section hidden view-fade flex flex-col items-center justify-center h-full">
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-8 w-full max-w-sm text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-wahdah-50 text-wahdah-600 flex items-center justify-center mx-auto mb-4 text-2xl shadow-softer border border-wahdah-100">
+                        <i class="fa-solid fa-key"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-wahdah-900 mb-1">Lupa PIN</h2>
+                    <p class="text-xs text-wahdah-500 mb-6">Masukkan email dan PIN baru Anda</p>
+
+                    <form id="formResetPin" class="space-y-4" onsubmit="handleResetPin(event)">
+                        <div class="text-left">
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Email</label>
+                            <input type="email" id="inpResetPinEmail" required placeholder="user@email.com" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white transition-shadow">
+                        </div>
+                        <div class="text-left">
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">PIN Baru</label>
+                            <input type="password" id="inpResetPinBaru" required maxlength="6" inputmode="numeric" placeholder="••••••" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white tracking-[0.3em] transition-shadow text-left font-bold">
+                        </div>
+                        <button type="submit" id="btnResetPinSubmit" class="w-full bg-wahdah-700 hover:bg-wahdah-800 text-white font-medium text-sm rounded-xl py-3 mt-2 shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                            <span id="btnResetPinSubmitLabel">Ubah PIN</span> <i id="btnResetPinSubmitIcon" class="fa-solid fa-key"></i>
+                        </button>
+                    </form>
+
+                    <button type="button" onclick="switchView('viewLogin')" class="mt-4 text-xs font-semibold text-wahdah-600 hover:text-wahdah-800 hover:underline transition-colors">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Login
+                    </button>
                 </div>
             </section>
 
@@ -1038,6 +1112,114 @@
             label.textContent = 'Masuk';
             icon.className = 'fa-solid fa-arrow-right';
         }
+    }
+
+    function setRegisterButtonProcessing(isProcessing) {
+        const btn = document.getElementById('btnRegisterSubmit');
+        const label = document.getElementById('btnRegisterSubmitLabel');
+        const icon = document.getElementById('btnRegisterSubmitIcon');
+        if (!btn) return;
+        btn.disabled = isProcessing;
+        if (isProcessing) {
+            label.textContent = 'Memproses...';
+            icon.className = 'fa-solid fa-circle-notch fa-spin';
+        } else {
+            label.textContent = 'Daftar';
+            icon.className = 'fa-solid fa-user-plus';
+        }
+    }
+
+    function setResetPinButtonProcessing(isProcessing) {
+        const btn = document.getElementById('btnResetPinSubmit');
+        const label = document.getElementById('btnResetPinSubmitLabel');
+        const icon = document.getElementById('btnResetPinSubmitIcon');
+        if (!btn) return;
+        btn.disabled = isProcessing;
+        if (isProcessing) {
+            label.textContent = 'Memproses...';
+            icon.className = 'fa-solid fa-circle-notch fa-spin';
+        } else {
+            label.textContent = 'Ubah PIN';
+            icon.className = 'fa-solid fa-key';
+        }
+    }
+
+    function handleRegister(e) {
+        e.preventDefault();
+        const nama = document.getElementById('inpRegisterNama').value.trim();
+        const email = document.getElementById('inpRegisterEmail').value.trim().toLowerCase();
+        const pin = document.getElementById('inpRegisterPin').value.trim();
+
+        if (!nama || !email || !pin) {
+            return Swal.fire('Perhatian', 'Nama, email, dan PIN wajib diisi.', 'warning');
+        }
+
+        setRegisterButtonProcessing(true);
+
+        if (typeof google === 'undefined') {
+            // Mode pratinjau lokal - fitur ini butuh backend Apps Script asli.
+            setRegisterButtonProcessing(false);
+            Swal.fire('Info', 'Pendaftaran hanya bisa diuji saat terhubung ke backend Apps Script.', 'info');
+            return;
+        }
+
+        google.script.run
+            .withSuccessHandler(res => {
+                setRegisterButtonProcessing(false);
+                if (res && res.error) {
+                    Swal.fire({ icon: 'error', title: 'Pendaftaran Gagal', text: res.error, confirmButtonColor: '#177355' });
+                    return;
+                }
+                Swal.fire({ icon: 'success', title: 'Pendaftaran Berhasil', text: 'Silakan login menggunakan akun yang baru dibuat.', confirmButtonColor: '#177355' })
+                    .then(() => {
+                        document.getElementById('formRegister').reset();
+                        switchView('viewLogin');
+                    });
+            })
+            .withFailureHandler(err => {
+                setRegisterButtonProcessing(false);
+                console.error(err);
+                Swal.fire('Error', (err && err.message) || 'Tidak dapat menghubungi server. Coba lagi.', 'error');
+            })
+            .registerUser(nama, email, pin);
+    }
+
+    function handleResetPin(e) {
+        e.preventDefault();
+        const email = document.getElementById('inpResetPinEmail').value.trim().toLowerCase();
+        const pinBaru = document.getElementById('inpResetPinBaru').value.trim();
+
+        if (!email || !pinBaru) {
+            return Swal.fire('Perhatian', 'Email dan PIN baru wajib diisi.', 'warning');
+        }
+
+        setResetPinButtonProcessing(true);
+
+        if (typeof google === 'undefined') {
+            setResetPinButtonProcessing(false);
+            Swal.fire('Info', 'Reset PIN hanya bisa diuji saat terhubung ke backend Apps Script.', 'info');
+            return;
+        }
+
+        google.script.run
+            .withSuccessHandler(res => {
+                setResetPinButtonProcessing(false);
+                if (res && res.error) {
+                    Swal.fire({ icon: 'error', title: 'Gagal Mengubah PIN', text: res.error, confirmButtonColor: '#177355' });
+                    return;
+                }
+                Swal.fire({ icon: 'success', title: 'PIN Berhasil Diubah', text: 'Silakan login dengan PIN baru Anda.', confirmButtonColor: '#177355' })
+                    .then(() => {
+                        document.getElementById('formResetPin').reset();
+                        switchView('viewLogin');
+                    });
+            })
+            .withFailureHandler(err => {
+                setResetPinButtonProcessing(false);
+                console.error(err);
+                Swal.fire('Error', (err && err.message) || 'Tidak dapat menghubungi server. Coba lagi.', 'error');
+            })
+            .resetPin(email, pinBaru);
     }
 
     function setJobdeskButtonProcessing(isProcessing) {
