@@ -2410,7 +2410,22 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 const defaultPoint = parseInt(result.value);
-                const queue = validIds.map(id => ({ id: id, poin: defaultPoint }));
+                // Ikutkan catatan tiap laporan Piket yang dipilih (khususnya
+                // yang sedang tampil di halaman ini dan sudah/baru diisi admin
+                // di kotak catatan) supaya sekali klik "Setujui" ini otomatis
+                // menyimpan catatan + poin sekaligus, tanpa perlu klik simpan
+                // catatan satu-satu dulu sebelum approve massal.
+                const queue = validIds.map(id => {
+                    const item = { id: id, poin: defaultPoint };
+                    const catatanInput = document.getElementById(`catatan-${id}`);
+                    if (catatanInput) {
+                        item.catatan = catatanInput.value;
+                    } else {
+                        const existing = db.piket.find(p => p.Schedule_ID === id);
+                        if (existing) item.catatan = existing.Catatan_Admin || '';
+                    }
+                    return item;
+                });
                 executeAdminApprove(queue);
             }
         });
@@ -2419,8 +2434,16 @@
     function executeAdminApprove(queue) {
         if (typeof google === 'undefined') {
             queue.forEach(q => {
-                let found = db.jobdesk.find(t => t.Task_ID === q.id) || db.piket.find(p => p.Schedule_ID === q.id);
-                if(found) { found.Status = 'Approved'; found.Poin = q.poin; }
+                let found = db.jobdesk.find(t => t.Task_ID === q.id);
+                if(found) {
+                    found.Status = 'Approved'; found.Poin = q.poin;
+                } else {
+                    found = db.piket.find(p => p.Schedule_ID === q.id);
+                    if(found) {
+                        found.Status = 'Approved'; found.Poin = q.poin;
+                        if (q.catatan !== undefined) found.Catatan_Admin = q.catatan;
+                    }
+                }
             });
             finalizeAdminBulkAction(`${queue.length} laporan disetujui!`);
         } else {
@@ -2650,6 +2673,12 @@
         const poin = parseInt(poinInput.value) || 0;
         const data = { id: id, poin: poin };
 
+        // Ikutkan catatan (khusus laporan Piket) dalam panggilan approve yang
+        // sama, supaya admin tidak perlu klik "Simpan Catatan" terpisah
+        // sebelum menekan "Setujui": cukup isi catatan -> pilih poin -> Setujui.
+        const catatanInput = document.getElementById(`catatan-${id}`);
+        if (catatanInput) data.catatan = catatanInput.value;
+
         const btn = document.getElementById(`btnApprove-${id}`);
         const tingkatInput = document.getElementById(`tingkat-${id}`);
         if (btn) {
@@ -2658,13 +2687,18 @@
         }
         poinInput.disabled = true;
         if (tingkatInput) tingkatInput.disabled = true;
+        if (catatanInput) catatanInput.disabled = true;
 
         if (typeof google === 'undefined') {
             let found = db.jobdesk.find(t => t.Task_ID === id);
             if(found) { found.Status = 'Approved'; found.Poin = poin; }
             else {
                 found = db.piket.find(p => p.Schedule_ID === id);
-                if(found) { found.Status = 'Approved'; found.Poin = poin; }
+                if(found) {
+                    found.Status = 'Approved';
+                    found.Poin = poin;
+                    if (data.catatan !== undefined) found.Catatan_Admin = data.catatan;
+                }
             }
             renderAdminQueue();
             Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Tugas disetujui', showConfirmButton: false, timer: 1500 });
@@ -2681,6 +2715,7 @@
                 }
                 poinInput.disabled = false;
                 if (tingkatInput) tingkatInput.disabled = false;
+                if (catatanInput) catatanInput.disabled = false;
                 Swal.fire('Error', (err && err.message) || 'Gagal menyetujui tugas.', 'error');
             }).approveTask(sessionToken, data);
         }
