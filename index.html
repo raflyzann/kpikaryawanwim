@@ -121,7 +121,7 @@
 
             <button type="button" id="navLeaderboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewLeaderboard', this)">
                 <i class="fa-solid fa-ranking-star w-5 text-center"></i>
-                <span>Leaderboard Poin Kinerja</span>
+                <span>Poin Laporan Kinerja</span>
             </button>
 
             <button type="button" id="navLeaderboardTotal" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewLeaderboardTotal', this)">
@@ -225,8 +225,12 @@
                             <input type="email" id="inpRegisterEmail" required placeholder="user@email.com" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white transition-shadow">
                         </div>
                         <div class="text-left">
-                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">PIN</label>
-                            <input type="password" id="inpRegisterPin" required maxlength="6" inputmode="numeric" placeholder="••••••" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white tracking-[0.3em] transition-shadow text-left font-bold">
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">PIN (6 Digit)</label>
+                            <input type="password" id="inpRegisterPin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" placeholder="••••••" oninput="sanitizePinInput(this)" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white tracking-[0.3em] transition-shadow text-left font-bold">
+                        </div>
+                        <div class="text-left">
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Konfirmasi PIN</label>
+                            <input type="password" id="inpRegisterPinConfirm" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" placeholder="••••••" oninput="sanitizePinInput(this)" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white tracking-[0.3em] transition-shadow text-left font-bold">
                         </div>
                         <button type="submit" id="btnRegisterSubmit" class="w-full bg-wahdah-700 hover:bg-wahdah-800 text-white font-medium text-sm rounded-xl py-3 mt-2 shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
                             <span id="btnRegisterSubmitLabel">Daftar</span> <i id="btnRegisterSubmitIcon" class="fa-solid fa-user-plus"></i>
@@ -254,8 +258,12 @@
                             <input type="email" id="inpResetPinEmail" required placeholder="user@email.com" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white transition-shadow">
                         </div>
                         <div class="text-left">
-                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">PIN Baru</label>
-                            <input type="password" id="inpResetPinBaru" required maxlength="6" inputmode="numeric" placeholder="••••••" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white tracking-[0.3em] transition-shadow text-left font-bold">
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">PIN Baru (6 Digit)</label>
+                            <input type="password" id="inpResetPinBaru" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" placeholder="••••••" oninput="sanitizePinInput(this)" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white tracking-[0.3em] transition-shadow text-left font-bold">
+                        </div>
+                        <div class="text-left">
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Konfirmasi PIN Baru</label>
+                            <input type="password" id="inpResetPinBaruConfirm" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" placeholder="••••••" oninput="sanitizePinInput(this)" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white tracking-[0.3em] transition-shadow text-left font-bold">
                         </div>
                         <button type="submit" id="btnResetPinSubmit" class="w-full bg-wahdah-700 hover:bg-wahdah-800 text-white font-medium text-sm rounded-xl py-3 mt-2 shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
                             <span id="btnResetPinSubmitLabel">Ubah PIN</span> <i id="btnResetPinSubmitIcon" class="fa-solid fa-key"></i>
@@ -624,7 +632,7 @@
 
             <!-- ================= VIEW: LEADERBOARD ================= -->
             <section id="viewLeaderboard" class="view-section hidden view-fade max-w-5xl mx-auto space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5">
                         <p class="text-xs font-semibold text-wahdah-500 mb-1">Total Karyawan Aktif</p>
                         <p id="lbSummaryTotalKaryawan" class="text-3xl font-bold text-wahdah-900">0</p>
@@ -632,10 +640,6 @@
                     <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5">
                         <p class="text-xs font-semibold text-wahdah-500 mb-1">Total Tugas Aktivitas Tercatat</p>
                         <p id="lbSummaryTotalAktivitas" class="text-3xl font-bold text-wahdah-900">0</p>
-                    </div>
-                    <div class="bg-gradient-to-br from-wahdah-700 to-wahdah-900 rounded-2xl shadow-soft p-5 text-white pattern-bg">
-                        <p class="text-xs font-semibold text-wahdah-200 mb-1">Peraih Skor Tertinggi</p>
-                        <p id="lbSummaryTopScorer" class="text-xl font-bold truncate">-</p>
                     </div>
                 </div>
 
@@ -654,13 +658,6 @@
                     <button type="button" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-sm rounded-xl px-4 py-2 transition-colors border border-gray-200" onclick="resetLeaderboardFilter()">
                         Reset
                     </button>
-                </div>
-                
-                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5">
-                    <h3 class="text-sm font-bold text-wahdah-900 mb-4">Grafik Peringkat Karyawan</h3>
-                    <div class="relative h-64 md:h-80">
-                        <canvas id="leaderboardChart"></canvas>
-                    </div>
                 </div>
 
                 <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-x-auto min-h-[300px]">
@@ -1258,14 +1255,31 @@
         }
     }
 
+    /**
+     * Batasi input PIN agar selalu tepat 6 digit angka: buang karakter
+     * non-angka yang mungkin diketik/ditempel, dan potong jika lebih dari
+     * 6 digit (maxlength HTML tidak selalu cukup untuk mencegah paste).
+     */
+    function sanitizePinInput(el) {
+        const cleaned = el.value.replace(/\D/g, '').slice(0, 6);
+        if (cleaned !== el.value) el.value = cleaned;
+    }
+
     function handleRegister(e) {
         e.preventDefault();
         const nama = document.getElementById('inpRegisterNama').value.trim();
         const email = document.getElementById('inpRegisterEmail').value.trim().toLowerCase();
         const pin = document.getElementById('inpRegisterPin').value.trim();
+        const pinConfirm = document.getElementById('inpRegisterPinConfirm').value.trim();
 
-        if (!nama || !email || !pin) {
-            return Swal.fire('Perhatian', 'Nama, email, dan PIN wajib diisi.', 'warning');
+        if (!nama || !email || !pin || !pinConfirm) {
+            return Swal.fire('Perhatian', 'Nama, email, PIN, dan konfirmasi PIN wajib diisi.', 'warning');
+        }
+        if (!/^\d{6}$/.test(pin)) {
+            return Swal.fire('Perhatian', 'PIN harus tepat 6 digit angka (tidak boleh lebih atau kurang).', 'warning');
+        }
+        if (pin !== pinConfirm) {
+            return Swal.fire('Perhatian', 'Konfirmasi PIN tidak cocok dengan PIN yang diisi.', 'warning');
         }
 
         setRegisterButtonProcessing(true);
@@ -1302,9 +1316,16 @@
         e.preventDefault();
         const email = document.getElementById('inpResetPinEmail').value.trim().toLowerCase();
         const pinBaru = document.getElementById('inpResetPinBaru').value.trim();
+        const pinBaruConfirm = document.getElementById('inpResetPinBaruConfirm').value.trim();
 
-        if (!email || !pinBaru) {
-            return Swal.fire('Perhatian', 'Email dan PIN baru wajib diisi.', 'warning');
+        if (!email || !pinBaru || !pinBaruConfirm) {
+            return Swal.fire('Perhatian', 'Email, PIN baru, dan konfirmasi PIN baru wajib diisi.', 'warning');
+        }
+        if (!/^\d{6}$/.test(pinBaru)) {
+            return Swal.fire('Perhatian', 'PIN baru harus tepat 6 digit angka (tidak boleh lebih atau kurang).', 'warning');
+        }
+        if (pinBaru !== pinBaruConfirm) {
+            return Swal.fire('Perhatian', 'Konfirmasi PIN baru tidak cocok dengan PIN baru yang diisi.', 'warning');
         }
 
         setResetPinButtonProcessing(true);
@@ -2987,14 +3008,8 @@
         
         const totalKaryawanAktif = sortedBoard.length;
         const totalAktivitasTercatat = sortedBoard.reduce((sum, s) => sum + s.totalAktivitas, 0);
-        const topScorer = sortedBoard.length > 0 && sortedBoard[0].totalPoin > 0 ? sortedBoard[0].nama : '-';
         document.getElementById('lbSummaryTotalKaryawan').textContent = totalKaryawanAktif;
         document.getElementById('lbSummaryTotalAktivitas').textContent = totalAktivitasTercatat;
-        document.getElementById('lbSummaryTopScorer').textContent = topScorer;
-        
-        const labels = sortedBoard.map(s => s.nama);
-        const dataPoints = sortedBoard.map(s => s.totalPoin);
-        renderLeaderboardChart(labels, dataPoints);
 
         if(sortedBoard.length === 0) {
             boardBody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-wahdah-400">Belum ada data untuk periode ini.</td></tr>`;
@@ -3738,57 +3753,6 @@
             showCloseButton: true,
             width: 420,
             padding: '1.5rem'
-        });
-    }
-
-    let lbChartInstance = null;
-    function renderLeaderboardChart(labels, dataPoints) {
-        const ctx = document.getElementById('leaderboardChart');
-        if(!ctx) return;
-
-        if (lbChartInstance) {
-            lbChartInstance.destroy();
-        }
-
-        lbChartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Total Poin Kinerja',
-                    data: dataPoints,
-                    backgroundColor: '#48ac83',
-                    hoverBackgroundColor: '#25906a',
-                    borderRadius: 6,
-                    borderSkipped: false
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#124a3a',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        padding: 10,
-                        cornerRadius: 8,
-                        displayColors: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { precision: 0, color: '#145c46' },
-                        grid: { color: 'rgba(14,58,46,0.06)' }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: '#145c46' }
-                    }
-                }
-            }
         });
     }
 
