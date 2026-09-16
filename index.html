@@ -134,6 +134,11 @@
                 <i class="fa-solid fa-trophy w-5 text-center"></i>
                 <span>Leaderboard Total Poin</span>
             </button>
+
+            <button type="button" id="navAdminResetPin" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewAdminResetPin', this)">
+                <i class="fa-solid fa-key w-5 text-center"></i>
+                <span>Reset PIN Karyawan</span>
+            </button>
         </nav>
 
         <div class="px-6 py-5 border-t border-white/10 flex items-center justify-between">
@@ -141,9 +146,14 @@
                 <p id="sidebarUserName" class="text-sm font-bold truncate">Belum Login</p>
                 <p id="sidebarUserRole" class="text-[10px] text-wahdah-300">-</p>
             </div>
-            <button id="btnLogout" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-red-500/80 text-white flex items-center justify-center transition-colors hidden" title="Logout" onclick="logout()">
-                <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
-            </button>
+            <div class="flex items-center gap-2">
+                <button id="btnChangePin" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-wahdah-500/80 text-white flex items-center justify-center transition-colors hidden" title="Ganti PIN" aria-label="Ganti PIN" onclick="openChangePinDialog()">
+                    <i class="fa-solid fa-key text-xs"></i>
+                </button>
+                <button id="btnLogout" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-red-500/80 text-white flex items-center justify-center transition-colors hidden" title="Logout" aria-label="Logout" onclick="logout()">
+                    <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+                </button>
+            </div>
         </div>
     </aside>
 
@@ -154,14 +164,14 @@
     <div id="mainArea" class="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative">
 
         <header class="shrink-0 sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-wahdah-100 px-4 md:px-8 py-4 flex items-center gap-4 shadow-softer">
-            <button id="hamburgerBtn" class="hidden w-10 h-10 rounded-lg hover:bg-wahdah-50 text-wahdah-700 flex items-center justify-center transition-colors" onclick="toggleSidebar()">
+            <button id="hamburgerBtn" aria-label="Buka menu" class="hidden w-10 h-10 rounded-lg hover:bg-wahdah-50 text-wahdah-700 flex items-center justify-center transition-colors" onclick="toggleSidebar()">
                 <i class="fa-solid fa-bars text-lg"></i>
             </button>
             <div>
                 <h1 id="pageTitle" class="font-bold text-wahdah-900 text-lg leading-tight">Selamat Datang</h1>
                 <p id="pageSubtitle" class="text-wahdah-500 text-xs">Sistem Kinerja & Gamifikasi</p>
             </div>
-            <button type="button" id="btnRefreshData" onclick="refreshAppData()" title="Muat ulang data" class="hidden ml-auto w-10 h-10 rounded-lg hover:bg-wahdah-50 text-wahdah-700 flex items-center justify-center transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
+            <button type="button" id="btnRefreshData" onclick="refreshAppData()" title="Muat ulang data" aria-label="Muat ulang data" class="hidden ml-auto w-10 h-10 rounded-lg hover:bg-wahdah-50 text-wahdah-700 flex items-center justify-center transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
                 <i id="btnRefreshDataIcon" class="fa-solid fa-arrows-rotate text-lg"></i>
             </button>
         </header>
@@ -192,11 +202,6 @@
                         <div class="text-left">
                             <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">PIN</label>
                             <input type="password" id="inpPin" required maxlength="6" inputmode="numeric" placeholder="••••••" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white tracking-[0.3em] transition-shadow text-left font-bold">
-                        </div>
-                        <div class="text-right -mt-2">
-                            <button type="button" onclick="document.getElementById('viewLogin').classList.add('hidden'); switchView('viewResetPin')" class="text-xs font-semibold text-wahdah-600 hover:text-wahdah-800 hover:underline transition-colors">
-                                Lupa PIN?
-                            </button>
                         </div>
                         <button type="submit" id="btnLoginSubmit" class="w-full bg-wahdah-700 hover:bg-wahdah-800 text-white font-medium text-sm rounded-xl py-3 mt-2 shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
                             <span id="btnLoginSubmitLabel">Masuk</span> <i id="btnLoginSubmitIcon" class="fa-solid fa-arrow-right"></i>
@@ -240,39 +245,6 @@
                         </div>
                         <button type="submit" id="btnRegisterSubmit" class="w-full bg-wahdah-700 hover:bg-wahdah-800 text-white font-medium text-sm rounded-xl py-3 mt-2 shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
                             <span id="btnRegisterSubmitLabel">Daftar</span> <i id="btnRegisterSubmitIcon" class="fa-solid fa-user-plus"></i>
-                        </button>
-                    </form>
-
-                    <button type="button" onclick="switchView('viewLogin')" class="mt-4 text-xs font-semibold text-wahdah-600 hover:text-wahdah-800 hover:underline transition-colors">
-                        <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Login
-                    </button>
-                </div>
-            </section>
-
-            <!-- ================= VIEW: LUPA / RESET PIN ================= -->
-            <section id="viewResetPin" class="view-section hidden view-fade flex flex-col items-center justify-center h-full">
-                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-8 w-full max-w-sm text-center">
-                    <div class="w-16 h-16 rounded-2xl bg-wahdah-50 text-wahdah-600 flex items-center justify-center mx-auto mb-4 text-2xl shadow-softer border border-wahdah-100">
-                        <i class="fa-solid fa-key"></i>
-                    </div>
-                    <h2 class="text-xl font-bold text-wahdah-900 mb-1">Lupa PIN</h2>
-                    <p class="text-xs text-wahdah-500 mb-6">Masukkan email dan PIN baru Anda</p>
-
-                    <form id="formResetPin" class="space-y-4" onsubmit="handleResetPin(event)">
-                        <div class="text-left">
-                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Email</label>
-                            <input type="email" id="inpResetPinEmail" required placeholder="user@email.com" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white transition-shadow">
-                        </div>
-                        <div class="text-left">
-                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">PIN Baru (6 Digit)</label>
-                            <input type="password" id="inpResetPinBaru" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" placeholder="••••••" oninput="sanitizePinInput(this)" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white tracking-[0.3em] transition-shadow text-left font-bold">
-                        </div>
-                        <div class="text-left">
-                            <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Konfirmasi PIN Baru</label>
-                            <input type="password" id="inpResetPinBaruConfirm" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" placeholder="••••••" oninput="sanitizePinInput(this)" class="w-full rounded-xl border border-wahdah-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 focus:border-wahdah-400 outline-none bg-white tracking-[0.3em] transition-shadow text-left font-bold">
-                        </div>
-                        <button type="submit" id="btnResetPinSubmit" class="w-full bg-wahdah-700 hover:bg-wahdah-800 text-white font-medium text-sm rounded-xl py-3 mt-2 shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
-                            <span id="btnResetPinSubmitLabel">Ubah PIN</span> <i id="btnResetPinSubmitIcon" class="fa-solid fa-key"></i>
                         </button>
                     </form>
 
@@ -1018,6 +990,49 @@
                 </div>
             </section>
 
+            <!-- ================= VIEW: ADMIN (RESET PIN KARYAWAN) ================= -->
+            <section id="viewAdminResetPin" class="view-section hidden view-fade max-w-3xl mx-auto space-y-6">
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5 md:p-6">
+                    <h3 class="text-sm font-bold text-wahdah-900 mb-4 flex items-center gap-2 border-b border-wahdah-50 pb-3">
+                        <div class="w-8 h-8 rounded-lg bg-wahdah-50 text-wahdah-600 flex items-center justify-center"><i class="fa-solid fa-key"></i></div>
+                        Reset PIN Karyawan
+                    </h3>
+                    <form id="formAdminResetPin" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end" onsubmit="handleAdminResetPin(event)">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">Pilih Karyawan</label>
+                            <select id="inpAdminResetUser" required class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white">
+                                <option value="" disabled selected>Pilih Karyawan...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">PIN Baru (6 Digit)</label>
+                            <input type="password" id="inpAdminResetPinBaru" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" placeholder="••••••" oninput="sanitizePinInput(this)" class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white tracking-[0.3em] font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">Konfirmasi PIN Baru</label>
+                            <input type="password" id="inpAdminResetPinConfirm" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" placeholder="••••••" oninput="sanitizePinInput(this)" class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white tracking-[0.3em] font-bold">
+                        </div>
+                        <div class="md:col-span-2">
+                            <button type="submit" id="btnAdminResetPinSubmit" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-sm rounded-xl px-6 py-2.5 transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
+                                <i class="fa-solid fa-key"></i> <span>Reset PIN</span>
+                            </button>
+                            <p class="text-[11px] text-wahdah-400 mt-2">PIN disimpan sebagai hash. Sampaikan PIN baru ke karyawan yang bersangkutan secara aman.</p>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5 md:p-6">
+                    <h3 class="text-sm font-bold text-wahdah-900 mb-4 flex items-center gap-2 border-b border-wahdah-50 pb-3">
+                        <div class="w-8 h-8 rounded-lg bg-wahdah-50 text-wahdah-600 flex items-center justify-center"><i class="fa-solid fa-user-lock"></i></div>
+                        Ganti PIN Saya
+                    </h3>
+                    <p class="text-xs text-wahdah-500 mb-4">Ubah PIN akun Anda sendiri. Anda akan diminta memasukkan PIN lama sebagai verifikasi.</p>
+                    <button type="button" onclick="openChangePinDialog()" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-sm rounded-xl px-6 py-2.5 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-key"></i> Ganti PIN Saya
+                    </button>
+                </div>
+            </section>
+
         </main>
     </div>
 
@@ -1080,6 +1095,10 @@
                                     if (onSuccess) onSuccess(data.result);
                                 } else {
                                     const msg = (data && data.error) || 'Terjadi kesalahan pada server.';
+                                    // Jika sesi sudah habis/kedaluwarsa, tangani terpusat
+                                    // (arahkan ke login) & JANGAN tampilkan error generik
+                                    // dari masing-masing handler di bawah.
+                                    if (typeof handleSessionExpired === 'function' && handleSessionExpired(msg)) return;
                                     if (onFailure) onFailure({ message: msg });
                                     else console.error(msg);
                                 }
@@ -1107,6 +1126,54 @@
     let currentUser = null;
     let sessionToken = null; // token sesi dari server, dikirim di setiap aksi penting
 
+    // ==========================================
+    // KONFIGURASI TERPUSAT (bobot & poin bisnis)
+    // ==========================================
+    // Semua angka bisnis penting dikumpulkan di sini supaya perubahan tidak
+    // perlu dicari ke banyak tempat di dalam file.
+    const APP_CONFIG = {
+        poinSeragamLengkap: 2,       // poin bila karyawan berseragam rapi & lengkap
+        poinSeragamTidakLengkap: 0,  // poin bila tidak
+        bobotPersen: { kinerja: 50, kehadiran: 30, seragam: 20 },
+        maxLoginAttempts: 5
+    };
+
+    /**
+     * Dipanggil otomatis bila server melaporkan sesi sudah habis/kedaluwarsa,
+     * supaya user langsung diarahkan login ulang (bukan sekadar pesan error).
+     * @return {boolean} true jika pesan memang soal sesi & sudah ditangani.
+     */
+    function handleSessionExpired(message) {
+        const expired = /sesi (habis|tidak)/i.test(String(message || '')) || /login ulang/i.test(String(message || ''));
+        if (!expired) return false;
+
+        sessionToken = null;
+        currentUser = null;
+        db = { users: [], jobdesk: [], piket: [], kehadiran: [], seragam: [] };
+
+        document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.user-only, .admin-only, .operator-only').forEach(el => el.classList.add('hidden'));
+        const logoutBtn = document.getElementById('btnLogout');
+        if (logoutBtn) logoutBtn.classList.add('hidden');
+        const changePinBtn = document.getElementById('btnChangePin');
+        if (changePinBtn) changePinBtn.classList.add('hidden');
+        const loginView = document.getElementById('viewLogin');
+        if (loginView) loginView.classList.remove('hidden');
+
+        Swal.fire('Sesi Berakhir', 'Sesi Anda telah berakhir. Silakan login ulang.', 'warning');
+        return true;
+    }
+
+    /**
+     * Penanganan error API terpusat: kalau error ternyata soal sesi habis,
+     * arahkan ke login; kalau bukan, tampilkan pesan error seperti biasa.
+     */
+    function handleApiError(err) {
+        const msg = (err && err.message) ? err.message : String(err || 'Terjadi kesalahan.');
+        if (handleSessionExpired(msg)) return;
+        Swal.fire('Error', msg, 'error');
+    }
+
     // Mencegah XSS: selalu escape teks bebas dari user sebelum dimasukkan ke innerHTML
     function escapeHtml(str) {
         return String(str == null ? '' : str)
@@ -1115,6 +1182,31 @@
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
+    }
+
+    // Escape teks bebas dari user supaya AMAN disisipkan ke dalam string
+    // literal JS bertanda kutip tunggal, yang letaknya sendiri di dalam
+    // atribut HTML bertanda kutip ganda - pola yang banyak dipakai di file
+    // ini, mis: onclick="editUserTask('...', '${escJsAttr(desc)}', ...)".
+    //
+    // PENTING (perbaikan keamanan): versi sebelumnya cuma
+    // `str.replace(/'/g, "\\'").replace(/"/g, '&quot;')` TANPA meng-escape
+    // backslash. Itu membuka celah XSS: teks yang mengandung backslash tepat
+    // sebelum kutip (mis. deskripsi tugas, catatan admin, atau email/User_ID
+    // yang mengandung karakter aneh) bisa "meniadakan" escaping kutip yang
+    // ditambahkan sesudahnya dan lolos keluar dari string literal JS,
+    // menjalankan kode arbitrer (stored XSS).
+    //
+    // Perbaikannya: escape lewat JSON.stringify() dulu (ini meng-escape
+    // backslash DAN kutip ganda dengan benar & konsisten), baru escape kutip
+    // tunggal untuk pembungkus string literal '...' di kode ini, lalu ubah
+    // sisa kutip ganda (hasil escaping JSON) jadi entity HTML &quot; supaya
+    // tidak menutup atribut HTML lebih awal.
+    function escJsAttr(str) {
+        return JSON.stringify(String(str == null ? '' : str))
+            .slice(1, -1)              // buang tanda kutip ganda pembungkus dari JSON.stringify
+            .replace(/'/g, "\\'")      // escape kutip tunggal untuk string literal '...'
+            .replace(/"/g, '&quot;');  // escape kutip ganda (dari \" hasil JSON) untuk konteks atribut HTML
     }
 
     // Marker "[[ASSIGNED_BY:Nama Admin]] " disisipkan di depan Deskripsi_Tugas
@@ -1248,20 +1340,8 @@
         }
     }
 
-    function setResetPinButtonProcessing(isProcessing) {
-        const btn = document.getElementById('btnResetPinSubmit');
-        const label = document.getElementById('btnResetPinSubmitLabel');
-        const icon = document.getElementById('btnResetPinSubmitIcon');
-        if (!btn) return;
-        btn.disabled = isProcessing;
-        if (isProcessing) {
-            label.textContent = 'Memproses...';
-            icon.className = 'fa-solid fa-circle-notch fa-spin';
-        } else {
-            label.textContent = 'Ubah PIN';
-            icon.className = 'fa-solid fa-key';
-        }
-    }
+    // (Helper tombol "reset PIN" lama sudah dihapus. Reset PIN kini dilakukan
+    //  Admin lewat menu "Reset PIN Karyawan", lihat handleAdminResetPin().)
 
     /**
      * Batasi input PIN agar selalu tepat 6 digit angka: buang karakter
@@ -1320,49 +1400,104 @@
             .registerUser(nama, email, pin);
     }
 
-    function handleResetPin(e) {
+    function populateAdminResetPinDropdown() {
+        const selectEl = document.getElementById('inpAdminResetUser');
+        if (!selectEl) return;
+        const users = db.users.filter(u => u.Role === 'User');
+        selectEl.innerHTML = `<option value="" disabled selected>Pilih Karyawan...</option>` +
+            users.map(u => `<option value="${escapeHtml(u.User_ID)}">${escapeHtml(u.Nama)}</option>`).join('');
+    }
+
+    function handleAdminResetPin(e) {
         e.preventDefault();
-        const email = document.getElementById('inpResetPinEmail').value.trim().toLowerCase();
-        const pinBaru = document.getElementById('inpResetPinBaru').value.trim();
-        const pinBaruConfirm = document.getElementById('inpResetPinBaruConfirm').value.trim();
+        const email = document.getElementById('inpAdminResetUser').value;
+        const pinBaru = document.getElementById('inpAdminResetPinBaru').value.trim();
+        const pinBaruConfirm = document.getElementById('inpAdminResetPinConfirm').value.trim();
 
-        if (!email || !pinBaru || !pinBaruConfirm) {
-            return Swal.fire('Perhatian', 'Email, PIN baru, dan konfirmasi PIN baru wajib diisi.', 'warning');
-        }
-        if (!/^\d{6}$/.test(pinBaru)) {
-            return Swal.fire('Perhatian', 'PIN baru harus tepat 6 digit angka (tidak boleh lebih atau kurang).', 'warning');
-        }
-        if (pinBaru !== pinBaruConfirm) {
-            return Swal.fire('Perhatian', 'Konfirmasi PIN baru tidak cocok dengan PIN baru yang diisi.', 'warning');
-        }
+        if (!email) return Swal.fire('Perhatian', 'Pilih karyawan terlebih dahulu.', 'warning');
+        if (!/^\d{6}$/.test(pinBaru)) return Swal.fire('Perhatian', 'PIN baru harus tepat 6 digit angka.', 'warning');
+        if (pinBaru !== pinBaruConfirm) return Swal.fire('Perhatian', 'Konfirmasi PIN baru tidak cocok.', 'warning');
 
-        setResetPinButtonProcessing(true);
+        const btn = document.getElementById('btnAdminResetPinSubmit');
+        if (btn) btn.disabled = true;
 
         if (typeof google === 'undefined') {
-            setResetPinButtonProcessing(false);
-            Swal.fire('Info', 'Reset PIN hanya bisa diuji saat terhubung ke backend Apps Script.', 'info');
+            if (btn) btn.disabled = false;
+            Swal.fire('Info', 'Fitur ini hanya bisa diuji saat terhubung ke backend Apps Script.', 'info');
             return;
         }
 
         google.script.run
             .withSuccessHandler(res => {
-                setResetPinButtonProcessing(false);
-                if (res && res.error) {
-                    Swal.fire({ icon: 'error', title: 'Gagal Mengubah PIN', text: res.error, confirmButtonColor: '#177355' });
-                    return;
-                }
-                Swal.fire({ icon: 'success', title: 'PIN Berhasil Diubah', text: 'Silakan login dengan PIN baru Anda.', confirmButtonColor: '#177355' })
+                if (btn) btn.disabled = false;
+                if (res && res.error) { Swal.fire('Gagal', res.error, 'error'); return; }
+                Swal.fire({ icon: 'success', title: 'PIN Direset', text: 'PIN karyawan berhasil diubah. Sampaikan PIN baru kepada yang bersangkutan.', confirmButtonColor: '#177355' })
                     .then(() => {
-                        document.getElementById('formResetPin').reset();
-                        switchView('viewLogin');
+                        const form = document.getElementById('formAdminResetPin');
+                        if (form) form.reset();
                     });
             })
             .withFailureHandler(err => {
-                setResetPinButtonProcessing(false);
-                console.error(err);
-                Swal.fire('Error', (err && err.message) || 'Tidak dapat menghubungi server. Coba lagi.', 'error');
+                if (btn) btn.disabled = false;
+                handleApiError(err);
             })
-            .resetPin(email, pinBaru);
+            .resetPin(sessionToken, email, pinBaru);
+    }
+
+    /**
+     * Dialog "Ganti PIN Saya" (untuk semua user yang login). Meminta PIN lama
+     * sebagai verifikasi, lalu mengirim ke server lewat changePin().
+     */
+    function openChangePinDialog() {
+        Swal.fire({
+            title: 'Ganti PIN Saya',
+            width: 420,
+            html: `
+                <div class="text-left">
+                    <div class="mb-3">
+                        <label class="block text-xs font-semibold text-wahdah-700 mb-1">PIN Lama</label>
+                        <input id="swalPinLama" type="password" maxlength="6" inputmode="numeric" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;" oninput="sanitizePinInput(this)" class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white tracking-[0.3em] font-bold" style="box-sizing:border-box;">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">PIN Baru (6 Digit)</label>
+                            <input id="swalPinBaru" type="password" maxlength="6" inputmode="numeric" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;" oninput="sanitizePinInput(this)" class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white tracking-[0.3em] font-bold" style="box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">Konfirmasi PIN Baru</label>
+                            <input id="swalPinBaru2" type="password" maxlength="6" inputmode="numeric" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;" oninput="sanitizePinInput(this)" class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white tracking-[0.3em] font-bold" style="box-sizing:border-box;">
+                        </div>
+                    </div>
+                </div>
+            `,
+            confirmButtonText: 'Simpan',
+            confirmButtonColor: '#177355',
+            showCancelButton: true,
+            cancelButtonText: 'Batal',
+            focusConfirm: false,
+            preConfirm: () => {
+                const lama = (document.getElementById('swalPinLama').value || '').replace(/\D/g, '');
+                const baru = (document.getElementById('swalPinBaru').value || '').replace(/\D/g, '');
+                const ulang = (document.getElementById('swalPinBaru2').value || '').replace(/\D/g, '');
+                if (!/^\d{6}$/.test(lama)) { Swal.showValidationMessage('PIN lama harus 6 digit angka.'); return false; }
+                if (!/^\d{6}$/.test(baru)) { Swal.showValidationMessage('PIN baru harus 6 digit angka.'); return false; }
+                if (baru !== ulang) { Swal.showValidationMessage('Ulangi PIN baru tidak cocok.'); return false; }
+                return { lama: lama, baru: baru };
+            }
+        }).then(result => {
+            if (!result.isConfirmed || !result.value) return;
+            if (typeof google === 'undefined') {
+                Swal.fire('Info', 'Fitur ini hanya bisa diuji saat terhubung ke backend Apps Script.', 'info');
+                return;
+            }
+            google.script.run
+                .withSuccessHandler(res => {
+                    if (res && res.error) { Swal.fire('Gagal', res.error, 'error'); return; }
+                    Swal.fire({ icon: 'success', title: 'Berhasil', text: 'PIN Anda berhasil diubah.', confirmButtonColor: '#177355' });
+                })
+                .withFailureHandler(err => handleApiError(err))
+                .changePin(sessionToken, result.value.lama, result.value.baru);
+        });
     }
 
     function setJobdeskButtonProcessing(isProcessing) {
@@ -1501,6 +1636,7 @@
         document.getElementById('sidebarUserName').textContent = currentUser.Nama;
         document.getElementById('sidebarUserRole').textContent = currentUser.Role;
         document.getElementById('btnLogout').classList.remove('hidden');
+        document.getElementById('btnChangePin').classList.remove('hidden');
         document.getElementById('viewLogin').classList.add('hidden');
         document.getElementById('hamburgerBtn').classList.remove('hidden');
         document.getElementById('btnRefreshData').classList.remove('hidden');
@@ -1555,6 +1691,7 @@
         document.getElementById('sidebarUserName').textContent = 'Belum Login';
         document.getElementById('sidebarUserRole').textContent = '-';
         document.getElementById('btnLogout').classList.add('hidden');
+        document.getElementById('btnChangePin').classList.add('hidden');
         document.getElementById('hamburgerBtn').classList.add('hidden'); 
         document.getElementById('btnRefreshData').classList.add('hidden');
         
@@ -1648,6 +1785,9 @@
         }
         if(viewId === 'viewLeaderboardTotal') {
             resetLeaderboardTotalFilter();
+        }
+        if(viewId === 'viewAdminResetPin') {
+            populateAdminResetPinDropdown();
         }
     }
 
@@ -1959,8 +2099,12 @@
         const totalSeragamEl = document.getElementById('userTotalPoinSeragam');
         if (totalSeragamEl) totalSeragamEl.textContent = totalSeragam;
 
-        // Presentasi Persen gabungan: Kinerja 50% + Kehadiran 30% + Seragam 20%.
-        const persentase = (total * 0.5) + (totalKehadiran * 0.3) + (totalSeragam * 0.2);
+        // Presentasi Persen gabungan, memakai bobot dari APP_CONFIG
+        // (default: Kinerja 50% + Kehadiran 30% + Seragam 20%).
+        const bobot = APP_CONFIG.bobotPersen;
+        const persentase = (total * (bobot.kinerja / 100))
+            + (totalKehadiran * (bobot.kehadiran / 100))
+            + (totalSeragam * (bobot.seragam / 100));
         const persentaseEl = document.getElementById('userTotalPersentase');
         if (persentaseEl) persentaseEl.textContent = (Math.round(persentase * 100) / 100).toString();
     }
@@ -2170,9 +2314,9 @@
 
             // Edit Action Button (Delete goes to Bulk Action)
             let rawDesc = displayDesc.replace(/^Piket: /, ''); 
-            let escDesc = rawDesc.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-            let escStatusKerja = h.statusKerja;
-            let escAdminNama = assignedAdminNama ? assignedAdminNama.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
+            let escDesc = escJsAttr(rawDesc);
+            let escStatusKerja = escJsAttr(h.statusKerja);
+            let escAdminNama = assignedAdminNama ? escJsAttr(assignedAdminNama) : '';
             let actionBtns = h.status === 'Pending' 
                 ? `<button onclick="editUserTask('${h.type}', '${h.id}', '${escDesc}', '${escStatusKerja}', '${escAdminNama}')" class="text-blue-500 hover:bg-blue-50 p-1.5 rounded-lg transition-colors mr-1" title="Edit Tugas"><i class="fa-solid fa-pen-to-square"></i></button>`
                 : `<span class="text-wahdah-300 text-[10px] italic"><i class="fa-solid fa-lock mr-1"></i>Terkunci</span>`;
@@ -2333,7 +2477,7 @@
 
         listEl.innerHTML = users.map(u => `
             <label class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-wahdah-50 cursor-pointer">
-                <input type="checkbox" class="seragam-user-checkbox w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer" value="${escapeHtml(u.User_ID)}" ${selectedSeragamUserIds.includes(u.User_ID) ? 'checked' : ''} onchange="toggleSeragamUser('${u.User_ID}', this.checked)">
+                <input type="checkbox" class="seragam-user-checkbox w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer" value="${escapeHtml(u.User_ID)}" ${selectedSeragamUserIds.includes(u.User_ID) ? 'checked' : ''} onchange="toggleSeragamUser('${escJsAttr(u.User_ID)}', this.checked)">
                 <span class="text-wahdah-800">${escapeHtml(u.Nama)}</span>
             </label>
         `).join('') || `<p class="px-3 py-4 text-xs text-wahdah-400 text-center">Belum ada data karyawan.</p>`;
@@ -2872,7 +3016,7 @@
             // Escape catatan supaya aman disisipkan sebagai argumen string
             // JS bertanda kutip tunggal di dalam atribut onclick (sama pola
             // dengan escDesc di editUserTask).
-            let escCatatan = String(h.catatan || '').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n');
+            let escCatatan = escJsAttr(h.catatan || '');
 
             return `
                 <tr class="hover:bg-wahdah-50/50 transition-colors">
@@ -2910,13 +3054,14 @@
         const showCatatan = type === 'Piket';
         Swal.fire({
             title: showCatatan ? 'Edit Laporan Piket' : 'Edit Poin Laporan',
+            width: 420,
             html: `
                 <div class="text-left">
                     <label class="block text-xs font-semibold text-wahdah-700 mb-1">Poin</label>
-                    <input id="swalEditPoin" type="number" min="0" step="1" value="${currentPoin}" class="swal2-input" style="margin:0 0 12px;">
+                    <input id="swalEditPoin" type="number" min="0" step="1" value="${currentPoin}" class="swal2-input" style="width:100%;box-sizing:border-box;margin:0 0 12px;">
                     ${showCatatan ? `
                     <label class="block text-xs font-semibold text-wahdah-700 mb-1">Catatan Piket</label>
-                    <textarea id="swalEditCatatan" class="swal2-textarea" style="margin:0;" placeholder="Tulis catatan...">${escapeHtml(currentCatatan || '')}</textarea>
+                    <textarea id="swalEditCatatan" class="swal2-textarea" style="width:100%;box-sizing:border-box;margin:0;" placeholder="Tulis catatan...">${escapeHtml(currentCatatan || '')}</textarea>
                     ` : ''}
                 </div>
             `,
@@ -3084,7 +3229,7 @@
                 <td class="px-5 py-4 text-center font-bold text-blue-600">${item.totalSelesai}</td>
                 <td class="px-5 py-4 text-center font-bold text-gray-400">${item.totalBelumSelesai}</td>
                 <td class="px-5 py-4 text-right">
-                    <button type="button" onclick="showLeaderboardDetail('${item.userId.replace(/'/g, "\\'")}')" class="font-bold text-emerald-600 text-lg hover:text-emerald-800 hover:underline decoration-2 underline-offset-2 transition-colors cursor-pointer" title="Lihat rincian poin">${item.totalPoin}</button> <span class="text-[10px] text-wahdah-400 font-medium">pts</span>
+                    <button type="button" onclick="showLeaderboardDetail('${escJsAttr(item.userId)}')" class="font-bold text-emerald-600 text-lg hover:text-emerald-800 hover:underline decoration-2 underline-offset-2 transition-colors cursor-pointer" title="Lihat rincian poin">${item.totalPoin}</button> <span class="text-[10px] text-wahdah-400 font-medium">pts</span>
                 </td>
             </tr>`;
         }).join('');
@@ -3324,7 +3469,7 @@
                 </td>
                 <td class="px-5 py-4 font-bold text-wahdah-900 text-base">${escapeHtml(item.nama)}</td>
                 <td class="px-5 py-4 text-right">
-                    <button type="button" onclick="showKehadiranDetail('${item.userId.replace(/'/g, "\\'")}')" class="font-bold text-emerald-600 text-lg hover:text-emerald-800 hover:underline decoration-2 underline-offset-2 transition-colors cursor-pointer" title="Lihat rincian poin">${item.totalPoin}</button> <span class="text-[10px] text-wahdah-400 font-medium">pts</span>
+                    <button type="button" onclick="showKehadiranDetail('${escJsAttr(item.userId)}')" class="font-bold text-emerald-600 text-lg hover:text-emerald-800 hover:underline decoration-2 underline-offset-2 transition-colors cursor-pointer" title="Lihat rincian poin">${item.totalPoin}</button> <span class="text-[10px] text-wahdah-400 font-medium">pts</span>
                 </td>
             </tr>`;
         }).join('');
@@ -3341,7 +3486,7 @@
         const userIds = selectedSeragamUserIds.slice();
         const tanggal = document.getElementById('inpSeragamTanggal').value; // format: YYYY-MM-DD
         const isCeklis = document.getElementById('inpSeragamCeklis').checked;
-        const nilai = isCeklis ? 2 : 0;
+        const nilai = isCeklis ? APP_CONFIG.poinSeragamLengkap : APP_CONFIG.poinSeragamTidakLengkap;
 
         if (userIds.length === 0 || !tanggal) {
             Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Mohon pilih minimal 1 karyawan dan isi tanggal penilaian.', confirmButtonColor: '#25906a' });
@@ -3464,7 +3609,7 @@
                 </td>
                 <td class="px-5 py-4 font-bold text-wahdah-900 text-base">${escapeHtml(item.nama)}</td>
                 <td class="px-5 py-4 text-right">
-                    <button type="button" onclick="showSeragamDetail('${item.userId.replace(/'/g, "\\'")}')" class="font-bold text-sky-600 text-lg hover:text-sky-800 hover:underline decoration-2 underline-offset-2 transition-colors cursor-pointer" title="Lihat rincian poin">${item.totalPoin}</button> <span class="text-[10px] text-wahdah-400 font-medium">pts</span>
+                    <button type="button" onclick="showSeragamDetail('${escJsAttr(item.userId)}')" class="font-bold text-sky-600 text-lg hover:text-sky-800 hover:underline decoration-2 underline-offset-2 transition-colors cursor-pointer" title="Lihat rincian poin">${item.totalPoin}</button> <span class="text-[10px] text-wahdah-400 font-medium">pts</span>
                 </td>
             </tr>`;
         }).join('');
@@ -3683,11 +3828,13 @@
             }
         });
 
-        // Presentasi Persen: Kinerja 50% + Kehadiran 30% + Seragam 20%.
+        // Presentasi Persen, memakai bobot dari APP_CONFIG
+        // (default: Kinerja 50% + Kehadiran 30% + Seragam 20%).
+        const bobot = APP_CONFIG.bobotPersen;
         Object.values(scores).forEach(s => {
-            s.persenKinerja = s.poinKinerja * 0.5;
-            s.persenKehadiran = s.poinKehadiran * 0.3;
-            s.persenSeragam = s.poinSeragam * 0.2;
+            s.persenKinerja = s.poinKinerja * (bobot.kinerja / 100);
+            s.persenKehadiran = s.poinKehadiran * (bobot.kehadiran / 100);
+            s.persenSeragam = s.poinSeragam * (bobot.seragam / 100);
             s.totalPersen = s.persenKinerja + s.persenKehadiran + s.persenSeragam;
         });
 
