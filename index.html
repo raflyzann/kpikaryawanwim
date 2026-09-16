@@ -1477,7 +1477,10 @@
                         .withFailureHandler(err => {
                             setLoginButtonProcessing(false);
                             console.error(err);
-                            Swal.fire('Error', 'Gagal memuat data dari database.', 'error');
+                            // Sementara ditampilkan pesan error ASLI dari server (bukan teks
+                            // generik) supaya lebih mudah didiagnosa. Setelah masalah beres,
+                            // boleh dikembalikan lagi ke teks generik jika diinginkan.
+                            Swal.fire('Error', 'Gagal memuat data: ' + (err && err.message ? err.message : JSON.stringify(err)), 'error');
                         })
                         .getAllData(sessionToken);
                 } else {
