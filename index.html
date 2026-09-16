@@ -1147,9 +1147,15 @@
         const expired = /sesi (habis|tidak)/i.test(String(message || '')) || /login ulang/i.test(String(message || ''));
         if (!expired) return false;
 
+        clearStoredSession(); // sesi tersimpan juga dibuang, jangan dipakai lagi
         sessionToken = null;
         currentUser = null;
         db = { users: [], jobdesk: [], piket: [], kehadiran: [], seragam: [] };
+
+        // Tutup overlay loading bila sedang tampil (mis. saat memulihkan sesi
+        // di loadData), supaya halaman login tidak tertutup spinner.
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) loadingOverlay.classList.add('hidden');
 
         document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
         document.querySelectorAll('.user-only, .admin-only, .operator-only').forEach(el => el.classList.add('hidden'));
@@ -1172,6 +1178,55 @@
         const msg = (err && err.message) ? err.message : String(err || 'Terjadi kesalahan.');
         if (handleSessionExpired(msg)) return;
         Swal.fire('Error', msg, 'error');
+    }
+
+    // ==========================================
+    // PERSISTENSI SESI ("ingat login")
+    // ==========================================
+    // Token sesi disimpan di localStorage supaya ketika halaman dibuka kembali
+    // user TIDAK perlu login ulang. Token ini SELALU divalidasi ulang ke server
+    // (lewat getAllData) sebelum dipakai, jadi token palsu/kedaluwarsa tidak
+    // akan pernah bisa membuka dashboard. Masa berlaku tetap ditentukan server
+    // (SESSION_TTL_SECONDS = 6 jam), dan sesi langsung dihapus saat logout.
+    //
+    // Catatan keamanan: karena tersimpan di browser, siapa pun yang memakai
+    // perangkat & browser yang sama dalam rentang masa berlaku bisa membuka
+    // aplikasi sebagai user tersebut. Karena itu tombol Logout WAJIB dipakai
+    // pada perangkat bersama.
+    const SESSION_STORAGE_KEY = 'kpi_wim_session_v1';
+
+    function saveStoredSession(token, user) {
+        try {
+            // Token pratinjau lokal tidak pernah disimpan.
+            if (!token || token === 'DUMMY-TOKEN' || !user) return;
+            localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+                token: token,
+                user: { User_ID: user.User_ID, Nama: user.Nama, Role: user.Role },
+                savedAt: Date.now()
+            }));
+        } catch (e) {
+            // localStorage bisa diblokir (mode privat / cookie dimatikan).
+            // Bukan masalah fatal - aplikasi tetap jalan, hanya tanpa "ingat login".
+            console.warn('Gagal menyimpan sesi:', e);
+        }
+    }
+
+    function loadStoredSession() {
+        try {
+            const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            if (!parsed || !parsed.token || !parsed.user || !parsed.user.Role) return null;
+            return parsed;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function clearStoredSession() {
+        try {
+            localStorage.removeItem(SESSION_STORAGE_KEY);
+        } catch (e) { /* abaikan */ }
     }
 
     // Mencegah XSS: selalu escape teks bebas dari user sebelum dimasukkan ke innerHTML
@@ -1265,17 +1320,63 @@
     }
 
     function loadData() {
-        // PENTING: tidak lagi memanggil getAllData() di sini.
-        // Sebelum login, client tidak butuh (dan tidak boleh) menerima data apa pun
-        // dari server -- termasuk daftar user -- karena belum ada sesi yang tervalidasi.
-        // Data baru diambil lewat getAllData(token) setelah login() berhasil.
         const overlay = document.getElementById('loadingOverlay');
         const viewLogin = document.getElementById('viewLogin');
 
-        setTimeout(() => {
+        function showLogin() {
             overlay.classList.add('hidden');
             viewLogin.classList.remove('hidden');
-        }, typeof google === 'undefined' ? 800 : 300);
+            setLoginButtonProcessing(false);
+        }
+
+        // Mode pratinjau lokal (tanpa backend Apps Script) - tidak ada sesi
+        // server untuk dipulihkan, langsung tampilkan halaman login.
+        if (typeof google === 'undefined') {
+            setTimeout(showLogin, 800);
+            return;
+        }
+
+        const stored = loadStoredSession();
+        if (!stored) {
+            // Belum pernah login (atau sesi sudah dibuang) -> tampilkan login.
+            setTimeout(showLogin, 300);
+            return;
+        }
+
+        // Ada sesi tersimpan -> JANGAN langsung dipercaya: token wajib
+        // divalidasi ke server lewat getAllData(token). Kalau masih valid,
+        // user langsung masuk dashboard tanpa mengetik email/PIN lagi.
+        // Overlay loading dibiarkan tampil selama proses supaya halaman login
+        // tidak sempat "berkedip". Masa berlaku token tetap ditentukan server
+        // (SESSION_TTL_SECONDS di code.gs - saat ini 30 hari).
+        const overlayTitle = overlay.querySelector('h2');
+        if (overlayTitle) overlayTitle.textContent = 'Memulihkan sesi login...';
+
+        sessionToken = stored.token;
+        currentUser = stored.user;
+
+        google.script.run
+            .withSuccessHandler(allData => {
+                db = allData;
+                overlay.classList.add('hidden');
+                setupDashboard();
+            })
+            .withFailureHandler(err => {
+                // Catatan: bila penyebabnya sesi kedaluwarsa/tidak valid,
+                // penanganannya sudah dilakukan terpusat oleh
+                // handleSessionExpired() (dipanggil dari shim) - lihat shim di
+                // atas - sehingga blok ini umumnya hanya kena error lain
+                // (jaringan/HTTP). Karena itu token tersimpan sengaja TIDAK
+                // dihapus di sini, supaya user bisa dicoba lagi saat koneksi
+                // membaik tanpa perlu mengetik PIN ulang.
+                console.warn('Gagal memulihkan sesi:', err);
+                sessionToken = null;
+                currentUser = null;
+                if (overlayTitle) overlayTitle.textContent = 'Menghubungkan Database...';
+                showLogin();
+                Swal.fire('Gagal Memuat Data', (err && err.message) || 'Tidak dapat menghubungi server. Silakan muat ulang halaman.', 'warning');
+            })
+            .getAllData(sessionToken);
     }
 
     function getDummyData() {
@@ -1607,6 +1708,10 @@
                     google.script.run
                         .withSuccessHandler(allData => {
                             db = allData;
+                            // Simpan sesi ke localStorage supaya saat halaman
+                            // dibuka kembali user tidak perlu login ulang
+                            // (dipulihkan & divalidasi lagi di loadData()).
+                            saveStoredSession(sessionToken, currentUser);
                             setLoginButtonProcessing(false);
                             setupDashboard();
                         })
@@ -1682,6 +1787,11 @@
     }
 
     function logout() {
+        // Hapus sesi tersimpan DULU, supaya walaupun panggilan ke server gagal
+        // (mis. koneksi terputus) user tetap benar-benar ter-logout di
+        // perangkat ini dan tidak otomatis masuk lagi saat halaman dibuka ulang.
+        clearStoredSession();
+
         if (typeof google !== 'undefined' && sessionToken && sessionToken !== 'DUMMY-TOKEN') {
             google.script.run.logoutSession(sessionToken);
         }
