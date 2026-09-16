@@ -1492,7 +1492,7 @@
             .withFailureHandler(err => {
                 setLoginButtonProcessing(false);
                 console.error(err);
-                Swal.fire('Error', 'Tidak dapat menghubungi server. Coba lagi.', 'error');
+                Swal.fire('Error', (err && err.message) || 'Tidak dapat menghubungi server. Coba lagi.', 'error');
             })
             .login(email, pin);
     }
