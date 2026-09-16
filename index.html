@@ -98,8 +98,9 @@
             </button>
 
             <p class="px-3 text-[11px] uppercase tracking-wider text-wahdah-300 font-semibold mt-6 mb-2 admin-only hidden">Menu Admin</p>
+            <p class="px-3 text-[11px] uppercase tracking-wider text-wahdah-300 font-semibold mt-6 mb-2 operator-only hidden">Menu Operator</p>
             
-            <button type="button" id="navAdminDashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewAdminDashboard', this)">
+            <button type="button" id="navAdminDashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only operator-only hidden" onclick="switchView('viewAdminDashboard', this)">
                 <i class="fa-solid fa-clipboard-check w-5 text-center"></i>
                 <span>Antrean Persetujuan</span>
             </button>
@@ -114,12 +115,12 @@
                 <span>Catat Penugasan</span>
             </button>
 
-            <button type="button" id="navInputKehadiran" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewInputKehadiran', this)">
+            <button type="button" id="navInputKehadiran" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only operator-only hidden" onclick="switchView('viewInputKehadiran', this)">
                 <i class="fa-solid fa-calendar-check w-5 text-center"></i>
                 <span>Inputan & Nilai Kehadiran</span>
             </button>
 
-            <button type="button" id="navInputSeragam" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewInputSeragam', this)">
+            <button type="button" id="navInputSeragam" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only operator-only hidden" onclick="switchView('viewInputSeragam', this)">
                 <i class="fa-solid fa-shirt w-5 text-center"></i>
                 <span>Penilaian Seragam</span>
             </button>
@@ -1506,6 +1507,7 @@
 
         document.querySelectorAll('.user-only').forEach(el => el.classList.add('hidden'));
         document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.operator-only').forEach(el => el.classList.add('hidden'));
         
         if(currentUser.Role === 'User') {
             document.querySelectorAll('.user-only').forEach(el => el.classList.remove('hidden'));
@@ -1519,6 +1521,26 @@
         } else if (currentUser.Role === 'Admin') {
             document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
             populateAdminFilter();
+            document.getElementById('navAdminDashboard').click();
+        } else if (currentUser.Role === 'Operator') {
+            // Operator hanya kebagian 3 menu: Antrean Persetujuan (khusus
+            // laporan Piket), Inputan & Nilai Kehadiran, dan Penilaian
+            // Seragam. Menu admin lainnya (Riwayat Kinerja, Catat Penugasan,
+            // Leaderboard, dll) tetap tersembunyi karena tidak diberi kelas
+            // "operator-only".
+            document.querySelectorAll('.operator-only').forEach(el => el.classList.remove('hidden'));
+            populateAdminFilter();
+
+            // Kunci filter "Jenis Laporan" di Antrean Persetujuan ke "Laporan
+            // Piket" saja dan nonaktifkan supaya Operator tidak bisa melihat
+            // ataupun menyetujui laporan Tugas - baik dari sisi tampilan
+            // maupun percobaan approve (yang tetap akan ditolak di server).
+            const jenisFilterEl = document.getElementById('adminQueueFilterJenis');
+            if (jenisFilterEl) {
+                jenisFilterEl.value = 'Piket';
+                jenisFilterEl.disabled = true;
+            }
+
             document.getElementById('navAdminDashboard').click();
         }
     }
@@ -1536,8 +1558,18 @@
         document.getElementById('hamburgerBtn').classList.add('hidden'); 
         document.getElementById('btnRefreshData').classList.add('hidden');
         
-        document.querySelectorAll('.user-only, .admin-only').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.user-only, .admin-only, .operator-only').forEach(el => el.classList.add('hidden'));
         document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+
+        // Pulihkan filter "Jenis Laporan" di Antrean Persetujuan yang mungkin
+        // dikunci ke "Piket" saat sesi sebelumnya login sebagai Operator,
+        // supaya kalau role lain login berikutnya di tab yang sama, filternya
+        // tidak ikut-ikutan terkunci.
+        const jenisFilterEl = document.getElementById('adminQueueFilterJenis');
+        if (jenisFilterEl) {
+            jenisFilterEl.disabled = false;
+            jenisFilterEl.value = 'ALL';
+        }
         
         document.getElementById('formLogin').reset();
         setLoginButtonProcessing(false);
@@ -1575,7 +1607,10 @@
             btnElement.classList.remove('text-wahdah-100');
             
             document.getElementById('pageTitle').textContent = btnElement.querySelector('span').textContent;
-            document.getElementById('pageSubtitle').textContent = currentUser.Role === 'Admin' ? 'Mode Administrator' : 'Mode Karyawan';
+            let modeLabel = 'Mode Karyawan';
+            if (currentUser.Role === 'Admin') modeLabel = 'Mode Administrator';
+            else if (currentUser.Role === 'Operator') modeLabel = 'Mode Operator';
+            document.getElementById('pageSubtitle').textContent = modeLabel;
         }
 
         document.getElementById('sidebar').classList.add('-translate-x-full');
@@ -1678,7 +1713,7 @@
 
         google.script.run.withSuccessHandler(res => {
             db = res;
-            if (currentUser && currentUser.Role === 'Admin') {
+            if (currentUser && (currentUser.Role === 'Admin' || currentUser.Role === 'Operator')) {
                 populateAdminFilter();
             }
             rerenderCurrentView();
