@@ -87,24 +87,17 @@
     }
 
     /**
-     * Simpan laporan piket: panggil Edge Function `upload-piket` yang
-     * mencatat baris lewat RPC kpi_save_piket.
+     * Simpan laporan piket: panggil RPC kpi_save_piket langsung tanpa
+     * melalui Edge Function, karena fitur upload foto sudah dinonaktifkan.
      */
     function callUploadPiket(token, data) {
-        const payload = Object.assign({}, data || {}, { token: token });
-        return fetch(SUPABASE_URL + '/functions/v1/upload-piket', {
-            method: 'POST',
-            headers: {
-                'apikey': SUPABASE_ANON_KEY,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        }).then(function (res) {
-            return res.json().then(function (body) {
-                if (!body) throw new Error('Balasan server kosong.');
-                if (body.ok) return body.result;
-                throw new Error(body.error || ('HTTP ' + res.status));
-            });
+        return callRpc('kpi_save_piket', {
+            p_token: token,
+            p_data: {
+                tanggal: (data && data.tanggal) || null,
+                jenis: (data && data.jenis) || null,
+                isSelesai: (data && data.isSelesai) || false
+            }
         });
     }
 
