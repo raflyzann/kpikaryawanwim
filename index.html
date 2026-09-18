@@ -895,12 +895,6 @@
             </section>
 
             <section id="viewLeaderboardTotal" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
-                <!-- Summary Card: Peraih Skor Tertinggi -->
-                <div class="bg-gradient-to-br from-wahdah-700 to-wahdah-900 rounded-2xl shadow-soft p-5 text-white pattern-bg">
-                    <p class="text-xs font-semibold text-wahdah-200 mb-1">Peraih Skor Tertinggi</p>
-                    <p id="ltSummaryTopScorer" class="text-xl font-bold truncate">-</p>
-                </div>
-
                 <!-- Filter Rentang Tanggal -->
                 <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-4 flex flex-col md:flex-row gap-4 items-end">
                     <div class="flex-1 w-full">
@@ -3766,10 +3760,6 @@
         Object.values(scores).forEach(s => { s.totalPoin = s.poinKinerja + s.poinSeragam + s.poinKehadiran; });
 
         const sortedBoard = Object.values(scores).sort((a, b) => b.totalPoin - a.totalPoin);
-
-        const topScorer = sortedBoard.length > 0 && sortedBoard[0].totalPoin > 0 ? sortedBoard[0].nama : '-';
-        const topScorerEl = document.getElementById('ltSummaryTopScorer');
-        if (topScorerEl) topScorerEl.textContent = topScorer;
 
         const labels = sortedBoard.map(s => s.nama);
         const dataPoints = sortedBoard.map(s => s.totalPoin);
