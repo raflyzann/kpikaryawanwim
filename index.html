@@ -1036,88 +1036,8 @@
         </main>
     </div>
 
+    <script src="supabase/shim-supabase.js"></script>
 <script>
-    // ==========================================
-    // 0. KONEKSI KE BACKEND GOOGLE APPS SCRIPT
-    // ==========================================
-    // Halaman ini sekarang di-hosting di GitHub Pages (bukan lagi dari
-    // Apps Script), sedangkan seluruh logika & database tetap di code.gs
-    // (Google Apps Script + Google Sheets).
-    //
-    // >>> WAJIB DIISI: ganti dengan URL Web App hasil "Deploy > New deployment"
-    // dari project Apps Script Anda (yang berakhiran /exec). <<<
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyPMqkHV7pETxrcqUOOQDmCdDthAQ4eCd43CVabXv9_zhpGPOunyCUB0iry-24stqg/exec';
-
-    // Shim (penyesuaian) supaya SELURUH pemanggilan google.script.run(...)
-    // yang sudah ada di file ini (di bawah) tetap berjalan tanpa diubah,
-    // tapi sebenarnya diarahkan lewat fetch() ke Web App Apps Script di atas.
-    // Jika file ini suatu saat dijalankan LANGSUNG dari dalam Apps Script,
-    // shim ini otomatis tidak aktif karena google.script.run asli sudah ada.
-    (function () {
-        if (typeof google !== 'undefined' && google.script && google.script.run) return;
-
-        function callAppsScript(fnName, args) {
-            return fetch(APPS_SCRIPT_URL, {
-                method: 'POST',
-                // Pakai text/plain supaya browser TIDAK mengirim preflight
-                // OPTIONS (yang tidak didukung Apps Script) sebelum request asli.
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ fn: fnName, args: args })
-            }).then(res => {
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                return res.json();
-            });
-        }
-
-        function createRunner() {
-            let successHandler = null;
-            let failureHandler = null;
-
-            const runner = new Proxy(function () {}, {
-                get(_target, prop) {
-                    if (prop === 'withSuccessHandler') {
-                        return function (fn) { successHandler = fn; return runner; };
-                    }
-                    if (prop === 'withFailureHandler') {
-                        return function (fn) { failureHandler = fn; return runner; };
-                    }
-                    // Properti lain dianggap sebagai nama fungsi server yang dipanggil,
-                    // persis seperti google.script.run.namaFungsi(arg1, arg2, ...)
-                    return function (...args) {
-                        const onSuccess = successHandler;
-                        const onFailure = failureHandler;
-                        successHandler = null;
-                        failureHandler = null;
-
-                        callAppsScript(String(prop), args)
-                            .then(data => {
-                                if (data && data.ok) {
-                                    if (onSuccess) onSuccess(data.result);
-                                } else {
-                                    const msg = (data && data.error) || 'Terjadi kesalahan pada server.';
-                                    // Jika sesi sudah habis/kedaluwarsa, tangani terpusat
-                                    // (arahkan ke login) & JANGAN tampilkan error generik
-                                    // dari masing-masing handler di bawah.
-                                    if (typeof handleSessionExpired === 'function' && handleSessionExpired(msg)) return;
-                                    if (onFailure) onFailure({ message: msg });
-                                    else console.error(msg);
-                                }
-                            })
-                            .catch(err => {
-                                if (onFailure) onFailure({ message: 'Tidak dapat menghubungi server: ' + err.message });
-                                else console.error(err);
-                            });
-
-                        return runner;
-                    };
-                }
-            });
-
-            return runner;
-        }
-
-        window.google = { script: { run: createRunner() } };
-    })();
 
     // ==========================================
     // 1. STATE & INISIALISASI
