@@ -2310,13 +2310,16 @@
                 assignedAdminNama = parsed.adminNama;
             }
 
-            // Edit Action Button (Delete goes to Bulk Action)
+            // Edit & Delete Action Buttons
             let rawDesc = displayDesc.replace(/^Piket: /, ''); 
             let escDesc = escJsAttr(rawDesc);
             let escStatusKerja = escJsAttr(h.statusKerja);
             let escAdminNama = assignedAdminNama ? escJsAttr(assignedAdminNama) : '';
             let actionBtns = h.status === 'Pending' 
-                ? `<button onclick="editUserTask('${h.type}', '${h.id}', '${escDesc}', '${escStatusKerja}', '${escAdminNama}')" class="text-blue-500 hover:bg-blue-50 p-1.5 rounded-lg transition-colors mr-1" title="Edit Tugas"><i class="fa-solid fa-pen-to-square"></i></button>`
+                ? `<div class="flex items-center justify-center gap-1.5">
+                    <button onclick="editUserTask('${h.type}', '${h.id}', '${escDesc}', '${escStatusKerja}', '${escAdminNama}')" class="text-blue-500 hover:bg-blue-50 p-1.5 rounded-lg transition-colors" title="Edit Tugas"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="deleteUserHistoryItem('${h.id}', '${h.type}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Hapus"><i class="fa-solid fa-trash-can"></i></button>
+                   </div>`
                 : `<span class="text-wahdah-300 text-[10px] italic"><i class="fa-solid fa-lock mr-1"></i>Terkunci</span>`;
 
             return `
@@ -2408,6 +2411,56 @@
                 Swal.fire('Error', (err && err.message) || 'Gagal menyimpan perubahan.', 'error');
             }).updateTask(sessionToken, payload);
         }
+    }
+
+    // Fungsi Hapus Aktivitas (Karyawan)
+    function deleteUserHistoryItem(id, type) {
+        Swal.fire({
+            title: 'Hapus Aktivitas Ini?',
+            text: 'Tindakan ini tidak dapat dibatalkan.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fa-solid fa-trash-can mr-1"></i> Hapus',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#ef4444'
+        }).then(result => {
+            if (!result.isConfirmed) return;
+
+            if (typeof google === 'undefined') {
+                const item = type === 'Task'
+                    ? db.jobdesk.find(t => t.Task_ID === id)
+                    : db.piket.find(p => p.Schedule_ID === id);
+
+                if (!item) {
+                    Swal.fire('Error', 'Laporan tidak ditemukan.', 'error');
+                    return;
+                }
+                if (item.User_ID !== currentUser.User_ID) {
+                    Swal.fire('Error', 'Anda tidak boleh menghapus laporan milik orang lain.', 'error');
+                    return;
+                }
+                if (item.Status === 'Approved') {
+                    Swal.fire('Error', 'Laporan yang sudah disetujui tidak bisa dihapus.', 'error');
+                    return;
+                }
+
+                if (type === 'Task') db.jobdesk = db.jobdesk.filter(t => t.Task_ID !== id);
+                else db.piket = db.piket.filter(p => p.Schedule_ID !== id);
+
+                renderUserHistory();
+                Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Aktivitas dihapus', showConfirmButton: false, timer: 1500 });
+                return;
+            }
+
+            google.script.run.withSuccessHandler(res => {
+                db = res;
+                renderUserHistory();
+                Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Aktivitas dihapus', showConfirmButton: false, timer: 1500 });
+            }).withFailureHandler(err => {
+                console.error(err);
+                Swal.fire('Error', (err && err.message) || 'Gagal menghapus aktivitas.', 'error');
+            }).deleteTask(sessionToken, id);
+        });
     }
 
     // ==========================================
