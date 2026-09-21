@@ -923,6 +923,26 @@
                     </button>
                 </div>
 
+                <!-- Summary: Karyawan dengan Poin Tertinggi (Persen) -->
+                <div id="ltTopSummaryCard" class="bg-gradient-to-br from-wahdah-900 via-wahdah-800 to-wahdah-950 rounded-2xl shadow-soft p-6 text-white pattern-bg">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <p class="text-wahdah-200 text-xs font-semibold mb-1 flex items-center gap-1.5">
+                                <i class="fa-solid fa-crown text-gold-400"></i> Karyawan dengan Poin Tertinggi (Persen)
+                            </p>
+                            <p id="ltTopSummaryName" class="text-xl font-bold break-words">-</p>
+                            <p id="ltTopSummaryPeriod" class="text-[11px] text-wahdah-300 mt-1">Semua periode</p>
+                        </div>
+                        <div class="flex flex-col items-start md:items-end gap-3">
+                            <div class="flex items-baseline gap-2">
+                                <span id="ltTopSummaryPersen" class="text-4xl font-bold">0</span>
+                                <span class="text-sm text-wahdah-300">%</span>
+                            </div>
+                            <div id="ltTopSummaryBreakdown" class="flex items-center gap-2 text-[11px] font-semibold flex-wrap"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Grafik Peringkat Karyawan -->
                 <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5">
                     <h3 class="text-sm font-bold text-wahdah-900 mb-4">Grafik Peringkat Karyawan</h3>
@@ -4124,6 +4144,8 @@
 
         const sortedBoard = Object.values(scores).sort((a, b) => b.totalPersen - a.totalPersen);
 
+        renderLeaderboardTopSummary(sortedBoard, startDateStr, endDateStr);
+
         const labels = sortedBoard.map(s => s.nama);
         const dataPoints = sortedBoard.map(s => s.totalPersen);
         renderLeaderboardPersenChart(labels, dataPoints);
@@ -4465,6 +4487,75 @@
                 }
             }
         });
+    }
+
+    function renderLeaderboardTopSummary(sortedBoard, startDateStr, endDateStr) {
+        const nameEl = document.getElementById('ltTopSummaryName');
+        const persenEl = document.getElementById('ltTopSummaryPersen');
+        const periodEl = document.getElementById('ltTopSummaryPeriod');
+        const breakdownEl = document.getElementById('ltTopSummaryBreakdown');
+        if (!nameEl || !persenEl || !periodEl || !breakdownEl) return;
+
+        const bobot = APP_CONFIG.bobotPersen;
+
+        if (sortedBoard.length === 0 || sortedBoard[0].totalPersen <= 0) {
+            nameEl.textContent = 'Belum ada data pada periode ini';
+            persenEl.textContent = '0';
+            breakdownEl.innerHTML = '';
+            periodEl.textContent = formatLeaderboardPeriod(startDateStr, endDateStr);
+            return;
+        }
+
+        const topScore = Math.round(sortedBoard[0].totalPersen * 100) / 100;
+        const winners = sortedBoard.filter(s => Math.round(s.totalPersen * 100) / 100 === topScore);
+        const showBreakdown = winners.length === 1;
+
+        if (winners.length === 1) {
+            nameEl.textContent = winners[0].nama;
+            persenEl.textContent = topScore.toString();
+        } else {
+            const maxNames = 3;
+            const displayNames = winners.slice(0, maxNames).map(w => escapeHtml(w.nama));
+            const suffix = winners.length > maxNames ? ` +${winners.length - maxNames} lainnya` : '';
+            nameEl.textContent = displayNames.join(' & ') + suffix;
+            persenEl.textContent = topScore.toString();
+        }
+
+        periodEl.textContent = formatLeaderboardPeriod(startDateStr, endDateStr);
+
+        if (showBreakdown) {
+            const winner = winners[0];
+            const chips = [
+                { label: 'Kinerja', value: winner.persenKinerja, icon: 'fa-medal', color: 'text-gold-400' },
+                { label: 'Kehadiran', value: winner.persenKehadiran, icon: 'fa-calendar-check', color: 'text-sky-300' },
+                { label: 'Kedisiplinan', value: winner.persenSeragam, icon: 'fa-shirt', color: 'text-white' }
+            ];
+            breakdownEl.innerHTML = chips.map(c => `
+                <span class="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 flex items-center gap-1.5">
+                    <i class="fa-solid ${c.icon} ${c.color}"></i> ${c.label} ${c.value}%
+                </span>
+            `).join('');
+        } else {
+            breakdownEl.innerHTML = `<span class="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 flex items-center gap-1.5"><i class="fa-solid fa-users text-gold-400"></i> Peringkat 1 bersama</span>`;
+        }
+    }
+
+    function formatLeaderboardPeriod(startDateStr, endDateStr) {
+        const fmt = (ds) => {
+            if (!ds) return null;
+            const d = new Date(ds);
+            if (isNaN(d.getTime())) return null;
+            const dd = String(d.getDate()).padStart(2, '0');
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const yyyy = d.getFullYear();
+            return `${dd} ${NAMA_BULAN_ID[d.getMonth()]} ${yyyy}`;
+        };
+        const start = fmt(startDateStr);
+        const end = fmt(endDateStr);
+        if (start && end) return `${start} - ${end}`;
+        if (start) return `Mulai ${start}`;
+        if (end) return `Sampai ${end}`;
+        return 'Semua periode';
     }
 
     // ==========================================
