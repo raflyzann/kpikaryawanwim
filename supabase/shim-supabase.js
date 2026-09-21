@@ -58,6 +58,8 @@
         updateMultipleTaskStatus: { rpc: 'kpi_update_multiple_status', params: ['p_token', 'p_ids'] },
         saveKehadiran:         { rpc: 'kpi_save_kehadiran',      params: ['p_token', 'p_data'] },
         saveSeragam:           { rpc: 'kpi_save_seragam',        params: ['p_token', 'p_data'] },
+        updateSeragamPoin:     { rpc: 'kpi_update_seragam_poin', params: ['p_token', 'p_data'] },
+        deleteSeragam:         { rpc: 'kpi_delete_seragam',      params: ['p_token', 'p_id'] },
         // Fungsi tambahan (fitur baru, tidak ada di code.gs):
         getConfig:             { rpc: 'kpi_get_config',          params: ['p_token'] },
         setConfig:             { rpc: 'kpi_set_config',          params: ['p_token', 'p_key', 'p_value'] },

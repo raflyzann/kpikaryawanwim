@@ -153,12 +153,13 @@ create table if not exists public."Seragam" (
   "Tanggal"    date not null default current_date,
   "Nilai"      numeric(10, 2) not null default 0
                check ("Nilai" >= 0),
+  "Rincian"    jsonb,
   created_at   timestamptz not null default now(),
   updated_at   timestamptz not null default now(),
   constraint uq_seragam_user_tanggal unique ("User_ID", "Tanggal")
 );
 
-comment on table public."Seragam" is 'Penilaian seragam harian per karyawan (pengganti sheet Seragam).';
+comment on table public."Seragam" is 'Penilaian kedisiplinan harian per karyawan (pengganti sheet Seragam).';
 
 create index if not exists idx_seragam_tanggal on public."Seragam" ("Tanggal" desc);
 

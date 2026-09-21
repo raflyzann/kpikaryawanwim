@@ -122,7 +122,7 @@
 
             <button type="button" id="navInputSeragam" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only operator-only hidden" onclick="switchView('viewInputSeragam', this)">
                 <i class="fa-solid fa-shirt w-5 text-center"></i>
-                <span>Penilaian Seragam</span>
+                <span>Penilaian Kedisiplinan</span>
             </button>
 
             <button type="button" id="navLeaderboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewLeaderboard', this)">
@@ -256,7 +256,7 @@
 
             <!-- ================= VIEW: KARYAWAN (RUANG KERJA SAYA) ================= -->
             <section id="viewDashboardPoin" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
-                <!-- Card Presentasi Persen (Kinerja 50% + Kehadiran 30% + Seragam 20%) -->
+                <!-- Card Presentasi Persen (Kinerja 50% + Kehadiran 30% + Kedisiplinan 20%) -->
                 <div class="bg-gradient-to-br from-wahdah-900 via-wahdah-800 to-wahdah-950 rounded-2xl shadow-soft p-6 text-white pattern-bg">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
@@ -265,12 +265,12 @@
                                 <span id="userTotalPersentase" class="text-4xl font-bold">0</span>
                                 <span class="text-sm text-wahdah-300">%</span>
                             </div>
-                            <p class="text-[11px] text-wahdah-300 mt-1">Kinerja 50% + Kehadiran 30% + Seragam 20%</p>
+                            <p class="text-[11px] text-wahdah-300 mt-1">Kinerja 50% + Kehadiran 30% + Kedisiplinan 20%</p>
                         </div>
                         <div class="flex items-center gap-3 text-[11px] font-semibold">
                             <span class="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 flex items-center gap-1.5"><i class="fa-solid fa-medal text-gold-400"></i> Kinerja 50%</span>
                             <span class="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 flex items-center gap-1.5"><i class="fa-solid fa-calendar-check"></i> Kehadiran 30%</span>
-                            <span class="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 flex items-center gap-1.5"><i class="fa-solid fa-shirt"></i> Seragam 20%</span>
+                            <span class="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 flex items-center gap-1.5"><i class="fa-solid fa-shirt"></i> Kedisiplinan 20%</span>
                         </div>
                     </div>
                 </div>
@@ -291,7 +291,7 @@
                     </div>
                     <div class="bg-gradient-to-br from-sky-700 to-sky-900 rounded-2xl shadow-soft p-6 text-white pattern-bg flex items-center justify-between">
                         <div>
-                            <p class="text-sky-200 text-xs font-medium mb-1">Total Poin Seragam Anda</p>
+                            <p class="text-sky-200 text-xs font-medium mb-1">Total Poin Kedisiplinan Anda</p>
                             <div class="flex items-baseline gap-2">
                                 <span id="userTotalPoinSeragam" class="text-4xl font-bold">0</span>
                                 <span class="text-sm text-sky-300">Poin</span>
@@ -767,13 +767,13 @@
                 </div>
             </section>
 
-            <!-- ================= VIEW: ADMIN (PENILAIAN SERAGAM) ================= -->
+             <!-- ================= VIEW: ADMIN (PENILAIAN KEDISIPLINAN) ================= -->
             <section id="viewInputSeragam" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
-                <!-- Form Input Penilaian Seragam -->
+                <!-- Form Input Penilaian Kedisiplinan -->
                 <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5 md:p-6">
                     <h3 class="text-sm font-bold text-wahdah-900 mb-4 flex items-center gap-2 border-b border-wahdah-50 pb-3">
                         <div class="w-8 h-8 rounded-lg bg-wahdah-50 text-wahdah-600 flex items-center justify-center"><i class="fa-solid fa-shirt"></i></div>
-                        Penilaian Seragam Karyawan
+                        Penilaian Kedisiplinan Karyawan
                     </h3>
                     <form id="formSeragam" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end" onsubmit="submitSeragam(event)">
                         <div class="md:col-span-2">
@@ -797,26 +797,35 @@
                             <input type="date" id="inpSeragamTanggal" required class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">Penilaian</label>
-                            <label class="w-full flex items-center gap-2 rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm bg-white cursor-pointer select-none hover:bg-wahdah-50/50 transition-colors">
-                                <input type="checkbox" id="inpSeragamCeklis" class="w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer">
-                                <span class="text-wahdah-700">Berseragam Rapi & Lengkap</span>
-                            </label>
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">Penilaian <span class="font-normal text-wahdah-400">(bisa pilih lebih dari satu)</span></label>
+                            <div class="relative">
+                                <button type="button" id="kedisiplinanItemMultiSelectBtn" onclick="toggleKedisiplinanItemDropdown()" class="w-full flex items-center justify-between gap-2 rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white text-left">
+                                    <span id="kedisiplinanItemMultiSelectLabel" class="truncate text-wahdah-400">Pilih Penilaian...</span>
+                                    <i class="fa-solid fa-chevron-down text-xs text-wahdah-400 shrink-0"></i>
+                                </button>
+                                <div id="kedisiplinanItemDropdownPanel" class="hidden absolute right-0 z-20 mt-1.5 md:min-w-[18rem] w-full bg-white border border-wahdah-200 rounded-xl shadow-lg max-h-64 overflow-y-auto">
+                                    <label class="flex items-center gap-2 px-3 py-2.5 text-sm border-b border-wahdah-100 hover:bg-wahdah-50 cursor-pointer font-semibold text-wahdah-700 sticky top-0 bg-white">
+                                        <input type="checkbox" id="kedisiplinanItemSelectAll" onchange="toggleAllKedisiplinanItems(this.checked)" class="w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer">
+                                        Pilih Semua Penilaian
+                                    </label>
+                                    <div id="kedisiplinanItemCheckboxList"></div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="md:col-span-4 flex items-center justify-between flex-wrap gap-2">
+                        <div class="md:col-span-3 flex items-center justify-between flex-wrap gap-2">
                             <button type="submit" id="btnSubmitSeragam" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-sm rounded-xl px-6 py-2.5 transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
-                                <i id="btnSubmitSeragamIcon" class="fa-solid fa-floppy-disk"></i> <span id="btnSubmitSeragamLabel">Simpan Penilaian Seragam</span>
+                                <i id="btnSubmitSeragamIcon" class="fa-solid fa-floppy-disk"></i> <span id="btnSubmitSeragamLabel">Simpan Penilaian Kedisiplinan</span>
                             </button>
-                            <p class="text-[10px] text-wahdah-400">Tercentang = 2 Poin &bull; Tidak tercentang = 0 Poin</p>
+                            <p class="text-[10px] text-wahdah-400">Setiap item tercentang = 2 Poin • Tidak tercentang = 0 Poin</p>
                         </div>
                     </form>
                 </div>
 
-                <!-- Leaderboard Poin Seragam -->
+                <!-- Leaderboard Poin Kedisiplinan -->
                 <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
                     <div class="px-5 py-4 border-b border-wahdah-100 bg-wahdah-50/50">
                         <h3 class="text-sm font-bold text-wahdah-900 flex items-center gap-2 mb-3">
-                            <i class="fa-solid fa-shirt text-wahdah-600"></i> Leaderboard Poin Seragam
+                            <i class="fa-solid fa-shirt text-wahdah-600"></i> Leaderboard Poin Kedisiplinan
                         </h3>
                         <div class="flex flex-col md:flex-row gap-3 items-end">
                             <div class="flex-1 w-full">
@@ -841,7 +850,7 @@
                                 <tr class="text-wahdah-700 text-xs uppercase tracking-wide">
                                     <th class="text-center font-semibold px-5 py-4 w-20">Peringkat</th>
                                     <th class="text-left font-semibold px-5 py-4">Karyawan</th>
-                                    <th class="text-right font-semibold px-5 py-4 w-40">Poin Seragam</th>
+                                    <th class="text-right font-semibold px-5 py-4 w-40">Poin Kedisiplinan</th>
                                 </tr>
                             </thead>
                             <tbody id="leaderboardSeragam-tbody" class="divide-y divide-wahdah-50">
@@ -852,11 +861,11 @@
                     <div id="leaderboardSeragam-pagination" class="flex items-center justify-between px-5 py-3 border-t border-wahdah-100 bg-white"></div>
                 </div>
 
-                <!-- Riwayat Inputan Seragam -->
+                <!-- Riwayat Inputan Kedisiplinan -->
                 <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
                     <div class="px-5 py-4 border-b border-wahdah-100 bg-wahdah-50/50">
                         <h3 class="text-sm font-bold text-wahdah-900 flex items-center gap-2 mb-3">
-                            <i class="fa-solid fa-clock-rotate-left text-wahdah-600"></i> Riwayat Inputan Seragam
+                            <i class="fa-solid fa-clock-rotate-left text-wahdah-600"></i> Riwayat Inputan Kedisiplinan
                         </h3>
                         <div class="flex flex-col md:flex-row gap-3 items-end">
                             <div class="flex-1 w-full">
@@ -883,6 +892,7 @@
                                     <th class="text-left font-semibold px-5 py-4">Karyawan</th>
                                     <th class="text-center font-semibold px-5 py-4 whitespace-nowrap">Penilaian</th>
                                     <th class="text-right font-semibold px-5 py-4 w-32">Poin</th>
+                                    <th class="text-center font-semibold px-5 py-4 w-32">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="riwayatSeragam-tbody" class="divide-y divide-wahdah-50">
@@ -929,13 +939,13 @@
                     </div>
                 </div>
 
-                <!-- Leaderboard Total Akumulasi (Kinerja + Seragam + Kehadiran) -->
+                <!-- Leaderboard Total Akumulasi (Kinerja + Kedisiplinan + Kehadiran) -->
                 <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
                     <div class="px-5 py-4 border-b border-wahdah-100 bg-wahdah-50/50">
                         <h3 class="text-sm font-bold text-wahdah-900 flex items-center gap-2">
-                            <i class="fa-solid fa-trophy text-gold-500"></i> Leaderboard Total Akumulasi (Kinerja + Seragam + Kehadiran)
+                            <i class="fa-solid fa-trophy text-gold-500"></i> Leaderboard Total Akumulasi (Kinerja + Kedisiplinan + Kehadiran)
                         </h3>
-                        <p class="text-[11px] text-wahdah-400 mt-1">Total Poin Kinerja (Jobdesk & Piket) ditambah Total Poin Seragam dan Total Poin Kehadiran keseluruhan.</p>
+                        <p class="text-[11px] text-wahdah-400 mt-1">Total Poin Kinerja (Jobdesk & Piket) ditambah Total Poin Kedisiplinan dan Total Poin Kehadiran keseluruhan.</p>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
@@ -944,12 +954,12 @@
                                     <th class="text-center font-semibold px-5 py-4 w-20">Peringkat</th>
                                     <th class="text-left font-semibold px-5 py-4">Nama Karyawan</th>
                                     <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Poin Kinerja</th>
-                                    <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Poin Seragam</th>
+                                    <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Poin Kedisiplinan</th>
                                     <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Poin Kehadiran</th>
                                     <th class="text-right font-semibold px-5 py-4 w-40">Total Poin Keseluruhan</th>
-                                </tr>
-                            </thead>
-                            <tbody id="leaderboardAkumulasi-tbody" class="divide-y divide-wahdah-50">
+                                 </tr>
+                             </thead>
+                             <tbody id="leaderboardAkumulasi-tbody" class="divide-y divide-wahdah-50">
                                 <!-- Injected via JS -->
                             </tbody>
                         </table>
@@ -957,13 +967,13 @@
                     <div id="leaderboardAkumulasi-pagination" class="flex items-center justify-between px-5 py-3 border-t border-wahdah-100 bg-white"></div>
                 </div>
 
-                <!-- Leaderboard Presentasi Persen (Kinerja 50% + Kehadiran 30% + Seragam 20%) -->
+                <!-- Leaderboard Presentasi Persen (Kinerja 50% + Kehadiran 30% + Kedisiplinan 20%) -->
                 <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
                     <div class="px-5 py-4 border-b border-wahdah-100 bg-wahdah-50/50">
                         <h3 class="text-sm font-bold text-wahdah-900 flex items-center gap-2">
                             <i class="fa-solid fa-percent text-gold-500"></i> Leaderboard Presentasi Persen
                         </h3>
-                        <p class="text-[11px] text-wahdah-400 mt-1">Komposisi: Poin Kinerja 50% + Poin Kehadiran 30% + Poin Seragam 20% dari total poin masing-masing kategori.</p>
+                        <p class="text-[11px] text-wahdah-400 mt-1">Komposisi: Poin Kinerja 50% + Poin Kehadiran 30% + Poin Kedisiplinan 20% dari total poin masing-masing kategori.</p>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
@@ -972,12 +982,12 @@
                                     <th class="text-center font-semibold px-5 py-4 w-20">Peringkat</th>
                                     <th class="text-left font-semibold px-5 py-4">Nama Karyawan</th>
                                     <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Poin Kinerja</th>
-                                    <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Poin Seragam</th>
+                                    <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Poin Kedisiplinan</th>
                                     <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Poin Kehadiran</th>
                                     <th class="text-right font-semibold px-5 py-4 w-40">Total Poin Keseluruhan</th>
-                                </tr>
-                            </thead>
-                            <tbody id="leaderboardPersentase-tbody" class="divide-y divide-wahdah-50">
+                                 </tr>
+                             </thead>
+                             <tbody id="leaderboardPersentase-tbody" class="divide-y divide-wahdah-50">
                                 <!-- Injected via JS -->
                             </tbody>
                         </table>
@@ -1048,8 +1058,12 @@
     // Semua angka bisnis penting dikumpulkan di sini supaya perubahan tidak
     // perlu dicari ke banyak tempat di dalam file.
     const APP_CONFIG = {
-        poinSeragamLengkap: 2,       // poin bila karyawan berseragam rapi & lengkap
-        poinSeragamTidakLengkap: 0,  // poin bila tidak
+        poinPerItemKedisiplinan: 2,
+        itemKedisiplinan: [
+            { key: 'rapi_lengkap', label: 'Berseragam Rapi & Lengkap' },
+            { key: 'parkir', label: 'Kerapian Parkir Kendaraan' },
+            { key: 'alas_kaki', label: 'Kerapian Penempatan Alas Kaki' }
+        ],
         bobotPersen: { kinerja: 50, kehadiran: 30, seragam: 20 },
         maxLoginAttempts: 5
     };
@@ -1318,8 +1332,8 @@
                 { Kehadiran_ID: 'KHD-2', User_ID: 'budi@mail.com', Bulan: bulanIni, Nilai: 6 }
             ],
             seragam: [
-                { Seragam_ID: 'SRG-1', User_ID: 'user@mail.com', Tanggal: today, Nilai: 2 },
-                { Seragam_ID: 'SRG-2', User_ID: 'budi@mail.com', Tanggal: today, Nilai: 0 }
+                { Seragam_ID: 'SRG-1', User_ID: 'user@mail.com', Tanggal: today, Nilai: 2, Rincian: { rapi_lengkap: true, parkir: false, alas_kaki: false } },
+                { Seragam_ID: 'SRG-2', User_ID: 'budi@mail.com', Tanggal: today, Nilai: 0, Rincian: { rapi_lengkap: false, parkir: false, alas_kaki: false } }
             ]
         };
     }
@@ -1572,7 +1586,7 @@
             label.textContent = 'Menyimpan...';
             icon.className = 'fa-solid fa-circle-notch fa-spin';
         } else {
-            label.textContent = 'Simpan Penilaian Seragam';
+            label.textContent = 'Simpan Penilaian Kedisiplinan';
             icon.className = 'fa-solid fa-floppy-disk';
         }
     }
@@ -1682,7 +1696,7 @@
         } else if (currentUser.Role === 'Operator') {
             // Operator hanya kebagian 3 menu: Antrean Persetujuan (khusus
             // laporan Piket), Inputan & Nilai Kehadiran, dan Penilaian
-            // Seragam. Menu admin lainnya (Riwayat Kinerja, Catat Penugasan,
+            // Kedisiplinan. Menu admin lainnya (Riwayat Kinerja, Catat Penugasan,
             // Leaderboard, dll) tetap tersembunyi karena tidak diberi kelas
             // "operator-only".
             document.querySelectorAll('.operator-only').forEach(el => el.classList.remove('hidden'));
@@ -1802,7 +1816,9 @@
         }
         if(viewId === 'viewInputSeragam') {
             selectedSeragamUserIds = [];
+            selectedKedisiplinanItems = [];
             populateSeragamUserDropdown();
+            populateKedisiplinanItemDropdown();
             resetSeragamFilter();
         }
         if(viewId === 'viewAdminCatatPenugasan') {
@@ -1842,6 +1858,7 @@
                 break;
             case 'viewInputSeragam':
                 populateSeragamUserDropdown();
+                populateKedisiplinanItemDropdown();
                 renderLeaderboardSeragam();
                 break;
             case 'viewAdminCatatPenugasan':
@@ -2086,7 +2103,7 @@
         const totalKehadiranEl = document.getElementById('userTotalPoinKehadiran');
         if (totalKehadiranEl) totalKehadiranEl.textContent = totalKehadiran;
 
-        // Total Poin Seragam: jumlahkan nilai seragam milik user yang
+        // Total Poin Kedisiplinan: jumlahkan nilai kedisiplinan milik user yang
         // tanggalnya berada dalam rentang filter tanggal di atas.
         let totalSeragam = 0;
         const mySeragam = (db.seragam || []).filter(s => s.User_ID === currentUser.User_ID);
@@ -2100,7 +2117,7 @@
         if (totalSeragamEl) totalSeragamEl.textContent = totalSeragam;
 
         // Presentasi Persen gabungan, memakai bobot dari APP_CONFIG
-        // (default: Kinerja 50% + Kehadiran 30% + Seragam 20%).
+        // (default: Kinerja 50% + Kehadiran 30% + Kedisiplinan 20%).
         const bobot = APP_CONFIG.bobotPersen;
         const persentase = (total * (bobot.kinerja / 100))
             + (totalKehadiran * (bobot.kehadiran / 100))
@@ -2517,7 +2534,7 @@
         }
     }
 
-    // --- Dropdown Multi-Select Karyawan (Penilaian Seragam) ---
+    // --- Dropdown Multi-Select Karyawan (Penilaian Kedisiplinan) ---
     let selectedSeragamUserIds = [];
 
     function populateSeragamUserDropdown() {
@@ -2583,13 +2600,86 @@
         }
     }
 
+    // --- Dropdown Multi-Select Item Penilaian (Penilaian Kedisiplinan) ---
+    let selectedKedisiplinanItems = [];
+
+    function populateKedisiplinanItemDropdown() {
+        const listEl = document.getElementById('kedisiplinanItemCheckboxList');
+        if (!listEl) return;
+
+        const items = APP_CONFIG.itemKedisiplinan || [];
+        selectedKedisiplinanItems = selectedKedisiplinanItems.filter(key => items.some(it => it.key === key));
+
+        listEl.innerHTML = items.map(it => `
+            <label class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-wahdah-50 cursor-pointer">
+                <input type="checkbox" class="kedisiplinan-item-checkbox w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer" value="${escapeHtml(it.key)}" ${selectedKedisiplinanItems.includes(it.key) ? 'checked' : ''} onchange="toggleKedisiplinanItem('${escJsAttr(it.key)}', this.checked)">
+                <span class="text-wahdah-800">${escapeHtml(it.label)}</span>
+            </label>
+        `).join('') || `<p class="px-3 py-4 text-xs text-wahdah-400 text-center">Belum ada item penilaian.</p>`;
+
+        updateKedisiplinanItemSelectUI();
+    }
+
+    function toggleKedisiplinanItemDropdown() {
+        const panel = document.getElementById('kedisiplinanItemDropdownPanel');
+        if (!panel) return;
+        panel.classList.toggle('hidden');
+    }
+
+    function toggleKedisiplinanItem(key, checked) {
+        if (checked) {
+            if (!selectedKedisiplinanItems.includes(key)) selectedKedisiplinanItems.push(key);
+        } else {
+            selectedKedisiplinanItems = selectedKedisiplinanItems.filter(k => k !== key);
+        }
+        updateKedisiplinanItemSelectUI();
+    }
+
+    function toggleAllKedisiplinanItems(checked) {
+        const items = APP_CONFIG.itemKedisiplinan || [];
+        selectedKedisiplinanItems = checked ? items.map(it => it.key) : [];
+        document.querySelectorAll('.kedisiplinan-item-checkbox').forEach(cb => { cb.checked = checked; });
+        updateKedisiplinanItemSelectUI();
+    }
+
+    function updateKedisiplinanItemSelectUI() {
+        const items = APP_CONFIG.itemKedisiplinan || [];
+        const label = document.getElementById('kedisiplinanItemMultiSelectLabel');
+        const selectAllCb = document.getElementById('kedisiplinanItemSelectAll');
+
+        if (label) {
+            if (selectedKedisiplinanItems.length === 0) {
+                label.textContent = 'Pilih Penilaian...';
+                label.classList.add('text-wahdah-400');
+            } else if (selectedKedisiplinanItems.length === 1) {
+                const item = items.find(it => it.key === selectedKedisiplinanItems[0]);
+                label.textContent = item ? item.label : '1 item dipilih';
+                label.classList.remove('text-wahdah-400');
+            } else {
+                label.textContent = `${selectedKedisiplinanItems.length} item dipilih`;
+                label.classList.remove('text-wahdah-400');
+            }
+        }
+        if (selectAllCb) {
+            selectAllCb.checked = items.length > 0 && selectedKedisiplinanItems.length === items.length;
+        }
+    }
+
     // Tutup panel dropdown kalau user klik di luar area dropdown.
     document.addEventListener('click', function(e) {
-        const panel = document.getElementById('seragamUserDropdownPanel');
-        const btn = document.getElementById('seragamUserMultiSelectBtn');
-        if (!panel || panel.classList.contains('hidden')) return;
-        if (panel.contains(e.target) || (btn && btn.contains(e.target))) return;
-        panel.classList.add('hidden');
+        const userPanel = document.getElementById('seragamUserDropdownPanel');
+        const userBtn = document.getElementById('seragamUserMultiSelectBtn');
+        if (userPanel && !userPanel.classList.contains('hidden')) {
+            if (userPanel.contains(e.target) || (userBtn && userBtn.contains(e.target))) return;
+            userPanel.classList.add('hidden');
+        }
+
+        const itemPanel = document.getElementById('kedisiplinanItemDropdownPanel');
+        const itemBtn = document.getElementById('kedisiplinanItemMultiSelectBtn');
+        if (itemPanel && !itemPanel.classList.contains('hidden')) {
+            if (itemPanel.contains(e.target) || (itemBtn && itemBtn.contains(e.target))) return;
+            itemPanel.classList.add('hidden');
+        }
     });
 
     // --- Bulk Action Logic (Admin Queue) ---
@@ -3051,6 +3141,13 @@
             // JS bertanda kutip tunggal di dalam atribut onclick (sama pola
             // dengan escDesc di editUserTask).
             let escCatatan = escJsAttr(h.catatan || '');
+            let escDeskripsi = '';
+            let escAdminNama = '';
+            if (h.type === 'Task') {
+                const parsed = formatTugasDeskripsi(h.desc);
+                escDeskripsi = escJsAttr(parsed.desc);
+                escAdminNama = escJsAttr(parsed.adminNama || '');
+            }
 
             return `
                 <tr class="hover:bg-wahdah-50/50 transition-colors">
@@ -3068,7 +3165,7 @@
                     <td class="px-5 py-3 text-right font-bold ${h.poin > 0 ? 'text-wahdah-600' : 'text-wahdah-300'}">${h.poin > 0 ? h.poin : '-'}</td>
                     <td class="px-5 py-3 text-center">
                         <div class="flex items-center justify-center gap-1.5">
-                            <button onclick="editAdminHistoryPoin('${h.id}', '${h.type}', ${h.poin || 0}, '${escCatatan}')" class="w-7 h-7 bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 rounded-lg flex items-center justify-center transition-colors" title="Edit Laporan">
+                            <button onclick="editAdminHistoryPoin('${h.id}', '${h.type}', ${h.poin || 0}, '${escCatatan}', '${escDeskripsi}', '${escAdminNama}')" class="w-7 h-7 bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 rounded-lg flex items-center justify-center transition-colors" title="Edit Laporan">
                                 <i class="fa-solid fa-pen text-xs"></i>
                             </button>
                             <button onclick="deleteAdminHistoryItem('${h.id}', '${h.type}')" class="w-7 h-7 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 rounded-lg flex items-center justify-center transition-colors" title="Hapus Laporan">
@@ -3083,15 +3180,20 @@
         renderPagination('admin-history-pagination', paginationState.adminHistory, totalPages, 'renderAdminHistory');
     }
 
-    function editAdminHistoryPoin(id, type, currentPoin, currentCatatan) {
+    function editAdminHistoryPoin(id, type, currentPoin, currentCatatan, currentDeskripsi, adminNama) {
         const showCatatan = type === 'Piket';
+        const showDeskripsi = type === 'Task';
         Swal.fire({
-            title: showCatatan ? 'Edit Laporan Piket' : 'Edit Poin Laporan',
+            title: showDeskripsi ? 'Edit Laporan Tugas' : (showCatatan ? 'Edit Laporan Piket' : 'Edit Poin Laporan'),
             width: 420,
             html: `
                 <div class="text-left">
                     <label class="block text-xs font-semibold text-wahdah-700 mb-1">Poin</label>
                     <input id="swalEditPoin" type="number" min="0" step="1" value="${currentPoin}" class="swal2-input" style="width:100%;box-sizing:border-box;margin:0 0 12px;">
+                    ${showDeskripsi ? `
+                    <label class="block text-xs font-semibold text-wahdah-700 mb-1">Laporan Tugas</label>
+                    <textarea id="swalEditDeskripsi" class="swal2-textarea" style="width:100%;box-sizing:border-box;margin:0;" placeholder="Tulis laporan tugas...">${escapeHtml(currentDeskripsi || '')}</textarea>
+                    ` : ''}
                     ${showCatatan ? `
                     <label class="block text-xs font-semibold text-wahdah-700 mb-1">Catatan Piket</label>
                     <textarea id="swalEditCatatan" class="swal2-textarea" style="width:100%;box-sizing:border-box;margin:0;" placeholder="Tulis catatan...">${escapeHtml(currentCatatan || '')}</textarea>
@@ -3110,21 +3212,39 @@
                     Swal.showValidationMessage('Masukkan nilai poin yang valid.');
                     return false;
                 }
-                const catatanEl = document.getElementById('swalEditCatatan');
-                return {
-                    poin: parseInt(poinVal) || 0,
-                    catatan: catatanEl ? catatanEl.value : null
+                const result = {
+                    poin: parseInt(poinVal) || 0
                 };
+                if (showDeskripsi) {
+                    const descEl = document.getElementById('swalEditDeskripsi');
+                    const descVal = descEl ? descEl.value.trim() : '';
+                    if (descVal.length < 10) {
+                        Swal.showValidationMessage('Deskripsi minimal 10 karakter!');
+                        return false;
+                    }
+                    result.deskripsi = descVal;
+                }
+                if (showCatatan) {
+                    const catatanEl = document.getElementById('swalEditCatatan');
+                    result.catatan = catatanEl ? catatanEl.value : null;
+                }
+                return result;
             }
         }).then(result => {
             if (!result.isConfirmed) return;
-            const { poin, catatan } = result.value;
+            const { poin, deskripsi, catatan } = result.value;
             const data = { id: id, type: type, poin: poin, catatan: catatan };
+            if (showDeskripsi && deskripsi !== undefined) {
+                data.deskripsi = deskripsi;
+            }
 
             if (typeof google === 'undefined') {
                 let found = type === 'Task' ? db.jobdesk.find(t => t.Task_ID === id) : db.piket.find(p => p.Schedule_ID === id);
                 if (found) {
                     found.Poin = poin;
+                    if (type === 'Task' && deskripsi !== undefined) {
+                        found.Deskripsi_Tugas = reattachAssignedByMarker(deskripsi, adminNama);
+                    }
                     if (showCatatan && catatan !== null) found.Catatan_Admin = catatan;
                 }
                 renderAdminHistory();
@@ -3511,15 +3631,20 @@
     }
 
     // ==========================================
-    // 4d. FUNGSI PENILAIAN SERAGAM (ADMIN)
+    // 4d. FUNGSI PENILAIAN KEDISIPLINAN (ADMIN)
     // ==========================================
     function submitSeragam(e) {
         e.preventDefault();
 
         const userIds = selectedSeragamUserIds.slice();
-        const tanggal = document.getElementById('inpSeragamTanggal').value; // format: YYYY-MM-DD
-        const isCeklis = document.getElementById('inpSeragamCeklis').checked;
-        const nilai = isCeklis ? APP_CONFIG.poinSeragamLengkap : APP_CONFIG.poinSeragamTidakLengkap;
+        const tanggal = document.getElementById('inpSeragamTanggal').value;
+        const rincian = {
+            rapi_lengkap: selectedKedisiplinanItems.includes('rapi_lengkap'),
+            parkir: selectedKedisiplinanItems.includes('parkir'),
+            alas_kaki: selectedKedisiplinanItems.includes('alas_kaki')
+        };
+        const nilai = APP_CONFIG.poinPerItemKedisiplinan *
+            ((rincian.rapi_lengkap ? 1 : 0) + (rincian.parkir ? 1 : 0) + (rincian.alas_kaki ? 1 : 0));
 
         if (userIds.length === 0 || !tanggal) {
             Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Mohon pilih minimal 1 karyawan dan isi tanggal penilaian.', confirmButtonColor: '#25906a' });
@@ -3529,16 +3654,16 @@
         setSeragamButtonProcessing(true);
 
         if (typeof google === 'undefined') {
-            // Mode pratinjau lokal (di luar Apps Script) - simpan di memori saja.
             if (!db.seragam) db.seragam = [];
             let updateCount = 0;
             userIds.forEach(userId => {
                 const existing = db.seragam.find(s => s.User_ID === userId && s.Tanggal === tanggal);
                 if (existing) {
                     existing.Nilai = nilai;
+                    existing.Rincian = rincian;
                     updateCount++;
                 } else {
-                    db.seragam.push({ Seragam_ID: 'SRG-' + Date.now() + '-' + userId, User_ID: userId, Tanggal: tanggal, Nilai: nilai });
+                    db.seragam.push({ Seragam_ID: 'SRG-' + Date.now() + '-' + userId, User_ID: userId, Tanggal: tanggal, Nilai: nilai, Rincian: rincian });
                 }
             });
             finalizeSeragamSubmit(userIds.length, updateCount);
@@ -3552,9 +3677,9 @@
                 .withFailureHandler(err => {
                     console.error(err);
                     setSeragamButtonProcessing(false);
-                    Swal.fire('Error', (err && err.message) || 'Gagal menyimpan penilaian seragam.', 'error');
+                    Swal.fire('Error', (err && err.message) || 'Gagal menyimpan penilaian kedisiplinan.', 'error');
                 })
-                .saveSeragam(sessionToken, { userIds: userIds, tanggal: tanggal, nilai: nilai });
+                .saveSeragam(sessionToken, { userIds: userIds, tanggal: tanggal, nilai: nilai, rincian: rincian });
         }
     }
 
@@ -3562,8 +3687,11 @@
         const form = document.getElementById('formSeragam');
         if (form) form.reset();
         selectedSeragamUserIds = [];
+        selectedKedisiplinanItems = [];
         document.querySelectorAll('.seragam-user-checkbox').forEach(cb => { cb.checked = false; });
+        document.querySelectorAll('.kedisiplinan-item-checkbox').forEach(cb => { cb.checked = false; });
         updateSeragamUserSelectUI();
+        updateKedisiplinanItemSelectUI();
         renderLeaderboardSeragam();
         renderLeaderboardAkumulasi();
         setSeragamButtonProcessing(false);
@@ -3571,12 +3699,12 @@
         const newCount = totalCount - updateCount;
         let msg;
         if (totalCount === 1) {
-            msg = updateCount > 0 ? 'Penilaian seragam diperbarui!' : 'Penilaian seragam disimpan!';
+            msg = updateCount > 0 ? 'Penilaian kedisiplinan diperbarui!' : 'Penilaian kedisiplinan disimpan!';
         } else {
             const parts = [];
             if (newCount > 0) parts.push(`${newCount} baru`);
             if (updateCount > 0) parts.push(`${updateCount} diperbarui`);
-            msg = `Penilaian seragam ${totalCount} karyawan disimpan (${parts.join(', ')})!`;
+            msg = `Penilaian kedisiplinan ${totalCount} karyawan disimpan (${parts.join(', ')})!`;
         }
         Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: msg, showConfirmButton: false, timer: 2000 });
     }
@@ -3618,7 +3746,7 @@
         const sortedBoard = Object.values(scores).sort((a, b) => b.totalPoin - a.totalPoin);
 
         if (sortedBoard.length === 0) {
-            boardBody.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-wahdah-400">Belum ada data seragam untuk periode ini.</td></tr>`;
+            boardBody.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-wahdah-400">Belum ada data kedisiplinan untuk periode ini.</td></tr>`;
             document.getElementById('leaderboardSeragam-pagination').innerHTML = '';
             return;
         }
@@ -3680,7 +3808,7 @@
         history.sort((a, b) => new Date(String(b.Tanggal || '').slice(0, 10)) - new Date(String(a.Tanggal || '').slice(0, 10)));
 
         if (history.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-wahdah-400">Belum ada riwayat inputan seragam untuk periode ini.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-wahdah-400">Belum ada riwayat inputan kedisiplinan untuk periode ini.</td></tr>`;
             document.getElementById('riwayatSeragam-pagination').innerHTML = '';
             return;
         }
@@ -3692,9 +3820,25 @@
 
         tbody.innerHTML = pageData.map(s => {
             const poin = s.Nilai || 0;
-            const penilaianBadge = poin > 0
-                ? '<span class="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-1 rounded-full font-bold border border-emerald-200 uppercase">Rapi &amp; Lengkap</span>'
-                : '<span class="bg-gray-100 text-gray-500 text-[10px] px-2 py-1 rounded-full font-bold border border-gray-200 uppercase">Tidak Lengkap</span>';
+            const rincian = s.Rincian;
+            let penilaianBadge = '';
+            if (rincian) {
+                const fulfilled = [];
+                if (rincian.rapi_lengkap) fulfilled.push('Berseragam Rapi & Lengkap');
+                if (rincian.parkir) fulfilled.push('Kerapian Parkir Kendaraan');
+                if (rincian.alas_kaki) fulfilled.push('Kerapian Penempatan Alas Kaki');
+                if (fulfilled.length === 0) {
+                    penilaianBadge = '<span class="bg-gray-100 text-gray-500 text-[10px] px-2 py-1 rounded-full font-bold border border-gray-200">Tidak ada yang terpenuhi</span>';
+                } else {
+                    penilaianBadge = fulfilled.map(label =>
+                        `<span class="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-1 rounded-full font-bold border border-emerald-200">${escapeHtml(label)}</span>`
+                    ).join(' ');
+                }
+            } else if (poin > 0) {
+                penilaianBadge = '<span class="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-1 rounded-full font-bold border border-emerald-200 uppercase">Rapi &amp; Lengkap</span>';
+            } else {
+                penilaianBadge = '<span class="bg-gray-100 text-gray-500 text-[10px] px-2 py-1 rounded-full font-bold border border-gray-200 uppercase">Tidak Lengkap</span>';
+            }
 
             return `
             <tr class="hover:bg-wahdah-50/30 transition-colors">
@@ -3702,10 +3846,121 @@
                 <td class="px-5 py-4 font-semibold text-wahdah-800">${escapeHtml(getUserName(s.User_ID))}</td>
                 <td class="px-5 py-4 text-center">${penilaianBadge}</td>
                 <td class="px-5 py-4 text-right font-bold text-sky-600">${poin} <span class="text-[10px] text-wahdah-400 font-medium">pts</span></td>
+                <td class="px-5 py-4 text-center">
+                    <div class="flex items-center justify-end gap-2">
+                        <button onclick="editSeragamPoin('${s.Seragam_ID}')" class="w-7 h-7 bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 rounded-lg flex items-center justify-center transition-colors" title="Edit Poin">
+                            <i class="fa-solid fa-pen text-xs"></i>
+                        </button>
+                        <button onclick="deleteSeragamItem('${s.Seragam_ID}')" class="w-7 h-7 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 rounded-lg flex items-center justify-center transition-colors" title="Hapus Inputan">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+                </td>
             </tr>`;
         }).join('');
 
         renderPagination('riwayatSeragam-pagination', paginationState.seragamHistory, totalPages, 'renderRiwayatSeragam');
+    }
+
+    function editSeragamPoin(id) {
+        const item = db.seragam.find(s => s.Seragam_ID === id);
+        const rincian = item ? item.Rincian : null;
+        const rapiChecked = rincian ? (rincian.rapi_lengkap ? 'checked' : '') : (item && item.Nilai > 0 ? 'checked' : '');
+        const parkirChecked = rincian ? (rincian.parkir ? 'checked' : '') : '';
+        const alasChecked = rincian ? (rincian.alas_kaki ? 'checked' : '') : '';
+
+        Swal.fire({
+            title: 'Edit Poin Kedisiplinan',
+            html: `
+                <div class="text-left space-y-2">
+                    <label class="flex items-center gap-2 text-sm text-wahdah-700">
+                        <input type="checkbox" id="swalEditKedisiplinanRapi" ${rapiChecked} class="w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500">
+                        <span>Berseragam Rapi & Lengkap</span>
+                    </label>
+                    <label class="flex items-center gap-2 text-sm text-wahdah-700">
+                        <input type="checkbox" id="swalEditKedisiplinanParkir" ${parkirChecked} class="w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500">
+                        <span>Kerapian Parkir Kendaraan</span>
+                    </label>
+                    <label class="flex items-center gap-2 text-sm text-wahdah-700">
+                        <input type="checkbox" id="swalEditKedisiplinanAlas" ${alasChecked} class="w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500">
+                        <span>Kerapian Penempatan Alas Kaki</span>
+                    </label>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Simpan',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#177355',
+            focusConfirm: false,
+            preConfirm: () => {
+                const rincianBaru = {
+                    rapi_lengkap: document.getElementById('swalEditKedisiplinanRapi').checked,
+                    parkir: document.getElementById('swalEditKedisiplinanParkir').checked,
+                    alas_kaki: document.getElementById('swalEditKedisiplinanAlas').checked
+                };
+                const nilaiBaru = APP_CONFIG.poinPerItemKedisiplinan *
+                    ((rincianBaru.rapi_lengkap ? 1 : 0) + (rincianBaru.parkir ? 1 : 0) + (rincianBaru.alas_kaki ? 1 : 0));
+                return { nilai: nilaiBaru, rincian: rincianBaru };
+            }
+        }).then(result => {
+            if (!result.isConfirmed) return;
+            const { nilai, rincian } = result.value;
+            const data = { id: id, nilai: nilai, rincian: rincian };
+
+            if (typeof google === 'undefined') {
+                const item = db.seragam.find(s => s.Seragam_ID === id);
+                if (item) {
+                    item.Nilai = nilai;
+                    item.Rincian = rincian;
+                }
+                renderLeaderboardSeragam();
+                renderLeaderboardAkumulasi();
+                Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Poin kedisiplinan diperbarui', showConfirmButton: false, timer: 1500 });
+                return;
+            }
+
+            google.script.run.withSuccessHandler(res => {
+                db = res;
+                renderLeaderboardSeragam();
+                renderLeaderboardAkumulasi();
+                Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Poin kedisiplinan diperbarui', showConfirmButton: false, timer: 1500 });
+            }).withFailureHandler(err => {
+                console.error(err);
+                Swal.fire('Error', (err && err.message) || 'Gagal memperbarui poin kedisiplinan.', 'error');
+            }).updateSeragamPoin(sessionToken, data);
+        });
+    }
+
+    function deleteSeragamItem(id) {
+        Swal.fire({
+            title: 'Hapus Inputan Kedisiplinan Ini?',
+            text: 'Tindakan ini tidak dapat dibatalkan.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fa-solid fa-trash-can mr-1"></i> Hapus',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#ef4444'
+        }).then(result => {
+            if (!result.isConfirmed) return;
+
+            if (typeof google === 'undefined') {
+                db.seragam = db.seragam.filter(s => s.Seragam_ID !== id);
+                renderLeaderboardSeragam();
+                renderLeaderboardAkumulasi();
+                Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Inputan kedisiplinan dihapus', showConfirmButton: false, timer: 1500 });
+                return;
+            }
+
+            google.script.run.withSuccessHandler(res => {
+                db = res;
+                renderLeaderboardSeragam();
+                renderLeaderboardAkumulasi();
+                Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Inputan kedisiplinan dihapus', showConfirmButton: false, timer: 1500 });
+            }).withFailureHandler(err => {
+                console.error(err);
+                Swal.fire('Error', (err && err.message) || 'Gagal menghapus inputan kedisiplinan.', 'error');
+            }).deleteSeragam(sessionToken, id);
+        });
     }
 
     function resetLeaderboardTotalFilter() {
@@ -3858,7 +4113,7 @@
         });
 
         // Presentasi Persen, memakai bobot dari APP_CONFIG
-        // (default: Kinerja 50% + Kehadiran 30% + Seragam 20%).
+        // (default: Kinerja 50% + Kehadiran 30% + Kedisiplinan 20%).
         const bobot = APP_CONFIG.bobotPersen;
         Object.values(scores).forEach(s => {
             s.persenKinerja = s.poinKinerja * (bobot.kinerja / 100);
@@ -4054,7 +4309,16 @@
                 const itemDate = new Date(String(s.Tanggal || '').slice(0, 10));
                 return itemDate >= startDate && itemDate <= endDate;
             })
-            .map(s => ({ tanggal: s.Tanggal, poin: s.Nilai || 0 }))
+            .map(s => {
+                const r = s.Rincian;
+                const labels = [];
+                if (r) {
+                    if (r.rapi_lengkap) labels.push('Berseragam Rapi & Lengkap');
+                    if (r.parkir) labels.push('Kerapian Parkir Kendaraan');
+                    if (r.alas_kaki) labels.push('Kerapian Penempatan Alas Kaki');
+                }
+                return { tanggal: s.Tanggal, poin: s.Nilai || 0, labels: labels, hasRincian: !!r };
+            })
             .sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
         const totalSkor = items.reduce((sum, a) => sum + a.poin, 0);
@@ -4065,18 +4329,26 @@
                     <span class="w-5 h-5 rounded-full bg-sky-600 text-white flex items-center justify-center text-[10px]"><i class="fa-solid fa-shirt"></i></span>
                     ${formatTanggalID(a.tanggal)}
                 </div>
-                <span class="font-bold text-emerald-600 text-sm whitespace-nowrap">+${a.poin}</span>
+                <div class="flex items-center gap-1.5 flex-wrap justify-end">
+                    ${a.hasRincian
+                        ? (a.labels.length > 0
+                            ? a.labels.map(l => `<span class="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold border border-emerald-200">${escapeHtml(l)}</span>`).join(' ')
+                            : '<span class="bg-gray-100 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold border border-gray-200">Tidak ada yang terpenuhi</span>')
+                        : (a.poin > 0
+                            ? '<span class="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold border border-emerald-200 uppercase">Rapi &amp; Lengkap</span>'
+                            : '<span class="bg-gray-100 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold border border-gray-200 uppercase">Tidak Lengkap</span>')}
+                </div>
             </div>
-        `).join('') : `<p class="text-center text-wahdah-400 text-sm py-6">Belum ada data seragam pada periode ini.</p>`;
+        `).join('') : `<p class="text-center text-wahdah-400 text-sm py-6">Belum ada data kedisiplinan pada periode ini.</p>`;
 
         Swal.fire({
             html: `
                 <div class="text-left">
                     <h3 class="text-xl font-bold text-wahdah-900">${escapeHtml(user.Nama)}</h3>
-                    <p class="text-xs text-wahdah-500 mt-1 mb-3">Daftar poin seragam per tanggal pada periode terpilih.</p>
+                    <p class="text-xs text-wahdah-500 mt-1 mb-3">Daftar poin kedisiplinan per tanggal pada periode terpilih.</p>
                     <div class="space-y-2.5 max-h-72 overflow-y-auto pr-1">${itemsHtml}</div>
                     <div class="flex items-center justify-between border-t border-wahdah-100 mt-4 pt-3">
-                        <span class="text-sm font-semibold text-wahdah-700">Total Poin Seragam</span>
+                        <span class="text-sm font-semibold text-wahdah-700">Total Poin Kedisiplinan</span>
                         <span class="text-lg font-bold text-wahdah-900">${totalSkor}</span>
                     </div>
                 </div>

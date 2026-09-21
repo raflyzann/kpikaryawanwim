@@ -112,12 +112,13 @@ begin
              'Seragam_ID', s."Seragam_ID",
              'User_ID',    s."User_ID",
              'Tanggal',    to_char(s."Tanggal", 'YYYY-MM-DD'),
-             'Nilai',      trim_scale(s."Nilai")
+             'Nilai',      trim_scale(s."Nilai"),
+             'Rincian',    s."Rincian"
            ) order by s."Tanggal", s."User_ID"
          ), '[]'::jsonb)
     into v_seragam
-  from public."Seragam" s
-  where v_full_access or s."User_ID" = v_uid;
+    from public."Seragam" s
+    where v_full_access or s."User_ID" = v_uid;
 
   return jsonb_build_object(
     'users',     v_users,
@@ -822,8 +823,9 @@ $$;
 -- ---------------------------------------------------------------------
 -- 14. Poin + catatan sekaligus: kpi_update_task_poin_catatan
 -- ---------------------------------------------------------------------
--- p_data = {"id":"...","type":"Task"|"Piket","poin":10,"catatan":"..."}
--- Menggabungkan update poin + catatan jadi satu panggilan atomik.
+-- p_data = {"id":"...","type":"Task"|"Piket","poin":10,"catatan":"...","deskripsi":"..."}
+-- - Untuk Task: opsional mengganti Deskripsi_Tugas (minimal 10 karakter).
+-- - Untuk Piket: "deskripsi" tidak diterima.
 create or replace function public.kpi_update_task_poin_catatan(
   p_token text,
   p_data  jsonb
@@ -839,6 +841,7 @@ declare
   v_poin    numeric;
   v_has_cat boolean;
   v_catatan text;
+  v_deskripsi text;
 begin
   perform public._kpi_require_session(p_token, array['Admin']);
 
@@ -856,8 +859,20 @@ begin
                     else null end;
 
   if v_type = 'Task' then
-    update public."Jobdesk" set "Poin" = v_poin where "Task_ID" = v_id;
+    if p_data ? 'deskripsi' and jsonb_typeof(p_data -> 'deskripsi') <> 'null' then
+      v_deskripsi := left(btrim(coalesce(p_data ->> 'deskripsi', '')), 1000);
+      if length(v_deskripsi) < 10 then
+        raise exception 'Deskripsi minimal 10 karakter.';
+      end if;
+    end if;
+    update public."Jobdesk"
+       set "Poin" = v_poin,
+           "Deskripsi_Tugas" = coalesce(v_deskripsi, "Deskripsi_Tugas")
+     where "Task_ID" = v_id;
   else
+    if p_data ? 'deskripsi' and jsonb_typeof(p_data -> 'deskripsi') <> 'null' then
+      raise exception 'Tipe Piket tidak boleh mengganti deskripsi tugas.';
+    end if;
     update public."Piket"
        set "Poin" = v_poin,
            "Catatan_Admin" = case when v_has_cat then v_catatan else "Catatan_Admin" end
@@ -1012,11 +1027,11 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------
--- 18. Penilaian seragam: kpi_save_seragam (Admin & Operator)
+-- 18. Penilaian kedisiplinan: kpi_save_seragam (Admin & Operator)
 -- ---------------------------------------------------------------------
--- p_data = {"userIds":["a@mail.com","b@mail.com"],"tanggal":"YYYY-MM-DD","nilai":2}
--- Nilai default 2 poin bila tidak dikirim (sesuai APP_CONFIG di
--- index.html: poinSeragamLengkap = 2).
+-- p_data = {"userIds":["a@mail.com","b@mail.com"],"tanggal":"YYYY-MM-DD","nilai":2,"rincian":{"rapi_lengkap":true,"parkir":false,"alas_kaki":true}}
+-- Nilai dihitung ulang dari rincian bila rincian dikirim (2 poin per item).
+-- Backward compatible: tanpa rincian, nilai tetap dibaca dari payload.
 create or replace function public.kpi_save_seragam(
   p_token text,
   p_data  jsonb
@@ -1031,10 +1046,10 @@ declare
   v_nilai   numeric;
   v_ids     text[];
   v_bad     text;
+  v_rincian jsonb;
 begin
   perform public._kpi_require_session(p_token, array['Admin', 'Operator']);
 
-  -- Terima format baru (userIds: array) maupun format lama (userId: string).
   select coalesce(array_agg(distinct lower(btrim(t.id))), '{}')
     into v_ids
   from jsonb_array_elements_text(
@@ -1051,10 +1066,27 @@ begin
   end if;
 
   v_tanggal := public._kpi_parse_tanggal(p_data ->> 'tanggal');
-  v_nilai   := case
-                 when p_data ? 'nilai' then public._kpi_parse_nilai(p_data -> 'nilai', 'seragam')
+
+  if p_data ? 'rincian' and jsonb_typeof(p_data -> 'rincian') = 'object' then
+    v_rincian := p_data -> 'rincian';
+    if array(select jsonb_object_keys(v_rincian)) <@ array['rapi_lengkap','parkir','alas_kaki'] then
+      if jsonb_typeof(v_rincian -> 'rapi_lengkap') <> 'boolean'
+         or jsonb_typeof(v_rincian -> 'parkir') <> 'boolean'
+         or jsonb_typeof(v_rincian -> 'alas_kaki') <> 'boolean' then
+        raise exception 'Rincian kedisiplinan harus berupa boolean.';
+      end if;
+    else
+      raise exception 'Key rincian kedisiplinan tidak diizinkan.';
+    end if;
+    v_nilai := (case when (v_rincian ->> 'rapi_lengkap')::boolean then 1 else 0 end
+              + case when (v_rincian ->> 'parkir')::boolean then 1 else 0 end
+              + case when (v_rincian ->> 'alas_kaki')::boolean then 1 else 0 end) * 2;
+  else
+    v_nilai := case
+                 when p_data ? 'nilai' then public._kpi_parse_nilai(p_data -> 'nilai', 'kedisiplinan')
                  else 2
                end;
+  end if;
 
   select x.id into v_bad
   from unnest(v_ids) as x(id)
@@ -1064,18 +1096,109 @@ begin
     raise exception 'Karyawan tidak ditemukan: %', v_bad;
   end if;
 
-  insert into public."Seragam" ("Seragam_ID", "User_ID", "Tanggal", "Nilai")
-  select 'SRG-' || gen_random_uuid(), x.id, v_tanggal, v_nilai
+  insert into public."Seragam" ("Seragam_ID", "User_ID", "Tanggal", "Nilai", "Rincian")
+  select 'SRG-' || gen_random_uuid(), x.id, v_tanggal, v_nilai, v_rincian
   from unnest(v_ids) as x(id)
   on conflict ("User_ID", "Tanggal") do update
-    set "Nilai" = excluded."Nilai";
+    set "Nilai" = excluded."Nilai",
+        "Rincian" = excluded."Rincian";
+
+  return public._kpi_all_data(p_token);
+end;
+$$;
+
+-- ---------------------------------------------------------------------
+-- 19. Edit poin kedisiplinan: kpi_update_seragam_poin
+-- ---------------------------------------------------------------------
+-- p_data = {"id":"SRG-...","poin":2,"rincian":{"rapi_lengkap":true,"parkir":false,"alas_kaki":true}}
+-- Bila rincian dikirim, nilai dihitung ulang (2 poin per item true).
+create or replace function public.kpi_update_seragam_poin(
+  p_token text,
+  p_data  jsonb
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_id      text := btrim(coalesce(p_data ->> 'id', ''));
+  v_nilai   numeric;
+  v_rincian jsonb;
+begin
+  perform public._kpi_require_session(p_token, array['Admin', 'Operator']);
+
+  if v_id = '' then
+    raise exception 'ID kedisiplinan wajib diisi.';
+  end if;
+
+  if p_data ? 'rincian' and jsonb_typeof(p_data -> 'rincian') = 'object' then
+    v_rincian := p_data -> 'rincian';
+    if array(select jsonb_object_keys(v_rincian)) <@ array['rapi_lengkap','parkir','alas_kaki'] then
+      if jsonb_typeof(v_rincian -> 'rapi_lengkap') <> 'boolean'
+         or jsonb_typeof(v_rincian -> 'parkir') <> 'boolean'
+         or jsonb_typeof(v_rincian -> 'alas_kaki') <> 'boolean' then
+        raise exception 'Rincian kedisiplinan harus berupa boolean.';
+      end if;
+    else
+      raise exception 'Key rincian kedisiplinan tidak diizinkan.';
+    end if;
+    v_nilai := (case when (v_rincian ->> 'rapi_lengkap')::boolean then 1 else 0 end
+              + case when (v_rincian ->> 'parkir')::boolean then 1 else 0 end
+              + case when (v_rincian ->> 'alas_kaki')::boolean then 1 else 0 end) * 2;
+  else
+    v_nilai := public._kpi_parse_nilai(p_data -> 'poin', 'kedisiplinan');
+  end if;
+
+  update public."Seragam"
+     set "Nilai" = v_nilai,
+         "Rincian" = v_rincian,
+         updated_at = now()
+   where "Seragam_ID" = v_id;
+
+  if not found then
+    raise exception 'Inputan kedisiplinan dengan ID % tidak ditemukan.', v_id;
+  end if;
+
+  return public._kpi_all_data(p_token);
+end;
+$$;
+
+-- ---------------------------------------------------------------------
+-- 20. Hapus inputan kedisiplinan: kpi_delete_seragam
+-- ---------------------------------------------------------------------
+-- p_id = "SRG-..."
+create or replace function public.kpi_delete_seragam(
+  p_token text,
+  p_id    text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_id text := btrim(coalesce(p_id, ''));
+begin
+  perform public._kpi_require_session(p_token, array['Admin', 'Operator']);
+
+  if v_id = '' then
+    raise exception 'ID kedisiplinan wajib diisi.';
+  end if;
+
+  delete from public."Seragam"
+   where "Seragam_ID" = v_id;
+
+  if not found then
+    raise exception 'Inputan kedisiplinan dengan ID % tidak ditemukan.', v_id;
+  end if;
 
   return public._kpi_all_data(p_token);
 end;
 $$;
 
 -- =====================================================================
--- 19. HAK AKSES (GRANT) untuk seluruh RPC data
+-- 21. HAK AKSES (GRANT) untuk seluruh RPC data
 -- =====================================================================
 grant execute on function public.kpi_get_all_data(text)                     to anon, authenticated;
 grant execute on function public.kpi_save_jobdesk(text, jsonb)              to anon, authenticated;
@@ -1093,6 +1216,8 @@ grant execute on function public.kpi_delete_multiple_tasks(text, jsonb)     to a
 grant execute on function public.kpi_update_multiple_status(text, jsonb)    to anon, authenticated;
 grant execute on function public.kpi_save_kehadiran(text, jsonb)            to anon, authenticated;
 grant execute on function public.kpi_save_seragam(text, jsonb)              to anon, authenticated;
+grant execute on function public.kpi_update_seragam_poin(text, jsonb)         to anon, authenticated;
+grant execute on function public.kpi_delete_seragam(text, text)               to anon, authenticated;
 
 -- Fungsi internal: jangan pernah bisa dipanggil dari luar.
 revoke all on function public._kpi_all_data(text)               from anon, authenticated;
