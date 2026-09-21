@@ -1029,8 +1029,8 @@ $$;
 -- ---------------------------------------------------------------------
 -- 18. Penilaian kedisiplinan: kpi_save_seragam (Admin & Operator)
 -- ---------------------------------------------------------------------
--- p_data = {"userIds":["a@mail.com","b@mail.com"],"tanggal":"YYYY-MM-DD","nilai":2,"rincian":{"rapi_lengkap":true,"parkir":false,"alas_kaki":true}}
--- Nilai dihitung ulang dari rincian bila rincian dikirim (2 poin per item).
+-- p_data = {"userIds":["a@mail.com","b@mail.com"],"tanggal":"YYYY-MM-DD","nilai":1,"rincian":{"rapi_lengkap":true,"parkir":false,"alas_kaki":true}}
+-- Nilai dihitung ulang dari rincian bila rincian dikirim (1 poin per item).
 -- Backward compatible: tanpa rincian, nilai tetap dibaca dari payload.
 create or replace function public.kpi_save_seragam(
   p_token text,
@@ -1080,11 +1080,11 @@ begin
     end if;
     v_nilai := (case when (v_rincian ->> 'rapi_lengkap')::boolean then 1 else 0 end
               + case when (v_rincian ->> 'parkir')::boolean then 1 else 0 end
-              + case when (v_rincian ->> 'alas_kaki')::boolean then 1 else 0 end) * 2;
+              + case when (v_rincian ->> 'alas_kaki')::boolean then 1 else 0 end) * 1;
   else
     v_nilai := case
                  when p_data ? 'nilai' then public._kpi_parse_nilai(p_data -> 'nilai', 'kedisiplinan')
-                 else 2
+                 else 0
                end;
   end if;
 
@@ -1110,8 +1110,8 @@ $$;
 -- ---------------------------------------------------------------------
 -- 19. Edit poin kedisiplinan: kpi_update_seragam_poin
 -- ---------------------------------------------------------------------
--- p_data = {"id":"SRG-...","poin":2,"rincian":{"rapi_lengkap":true,"parkir":false,"alas_kaki":true}}
--- Bila rincian dikirim, nilai dihitung ulang (2 poin per item true).
+-- p_data = {"id":"SRG-...","poin":1,"rincian":{"rapi_lengkap":true,"parkir":false,"alas_kaki":true}}
+-- Bila rincian dikirim, nilai dihitung ulang (1 poin per item true).
 create or replace function public.kpi_update_seragam_poin(
   p_token text,
   p_data  jsonb
@@ -1145,7 +1145,7 @@ begin
     end if;
     v_nilai := (case when (v_rincian ->> 'rapi_lengkap')::boolean then 1 else 0 end
               + case when (v_rincian ->> 'parkir')::boolean then 1 else 0 end
-              + case when (v_rincian ->> 'alas_kaki')::boolean then 1 else 0 end) * 2;
+              + case when (v_rincian ->> 'alas_kaki')::boolean then 1 else 0 end) * 1;
   else
     v_nilai := public._kpi_parse_nilai(p_data -> 'poin', 'kedisiplinan');
   end if;
