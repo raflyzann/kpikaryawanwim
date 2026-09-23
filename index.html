@@ -497,6 +497,13 @@
                                 </select>
                             </div>
                             <div class="flex items-center gap-2 w-full sm:w-auto">
+                                <select id="adminQueueFilterProgres" class="w-full sm:w-40 text-xs border border-wahdah-200 rounded-lg px-2 py-1.5 focus:ring-1 focus:ring-wahdah-400 outline-none bg-white" onchange="paginationState.adminQueue.page = 1; adminQueueSelectedIds.clear(); renderAdminQueue()">
+                                    <option value="ALL">Semua Progres</option>
+                                    <option value="Selesai">Selesai</option>
+                                    <option value="Belum Selesai">Belum Selesai</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-2 w-full sm:w-auto">
                                 <select id="adminQueueFilterNama" class="w-full sm:w-48 text-xs border border-wahdah-200 rounded-lg px-2 py-1.5 focus:ring-1 focus:ring-wahdah-400 outline-none bg-white" onchange="paginationState.adminQueue.page = 1; adminQueueSelectedIds.clear(); renderAdminQueue()">
                                     <option value="ALL">Semua Karyawan</option>
                                 </select>
@@ -563,6 +570,14 @@
                                     <option value="ALL">Semua Laporan</option>
                                     <option value="Task">Laporan Tugas</option>
                                     <option value="Piket">Laporan Piket</option>
+                                </select>
+                            </div>
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Progres</label>
+                                <select id="adminFilterProgres" class="w-full text-xs border border-wahdah-200 rounded-lg px-2 py-2 focus:ring-1 focus:ring-wahdah-400 outline-none bg-white" onchange="paginationState.adminHistory.page = 1; renderAdminHistory()">
+                                    <option value="ALL">Semua Progres</option>
+                                    <option value="Selesai">Selesai</option>
+                                    <option value="Belum Selesai">Belum Selesai</option>
                                 </select>
                             </div>
                             <div class="flex-1 w-full">
@@ -696,6 +711,62 @@
                             <i id="btnSubmitPenugasanIcon" class="fa-solid fa-paper-plane"></i> <span id="btnSubmitPenugasanLabel">Kirim Penugasan</span>
                         </button>
                     </form>
+                </div>
+
+                <!-- Riwayat Inputan Penugasan -->
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
+                    <div class="px-5 py-4 border-b border-wahdah-100 bg-wahdah-50/50">
+                        <h3 class="text-sm font-bold text-wahdah-900 flex items-center gap-2 mb-3">
+                            <i class="fa-solid fa-list-check text-wahdah-600"></i> Riwayat Inputan Penugasan
+                        </h3>
+                        <div class="flex flex-col md:flex-row gap-3 items-end">
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Nama Karyawan</label>
+                                <select id="penugasanHistoryFilterNama" class="w-full text-xs border border-wahdah-200 rounded-lg px-2 py-2 focus:ring-1 focus:ring-wahdah-400 outline-none bg-white" onchange="paginationState.penugasanHistory.page = 1; renderPenugasanHistory()">
+                                    <option value="ALL">Semua Karyawan</option>
+                                </select>
+                            </div>
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Progres</label>
+                                <select id="penugasanHistoryFilterProgres" class="w-full text-xs border border-wahdah-200 rounded-lg px-2 py-2 focus:ring-1 focus:ring-wahdah-400 outline-none bg-white" onchange="paginationState.penugasanHistory.page = 1; renderPenugasanHistory()">
+                                    <option value="ALL">Semua Progres</option>
+                                    <option value="Selesai">Selesai</option>
+                                    <option value="Belum Selesai">Belum Selesai</option>
+                                </select>
+                            </div>
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Mulai Tanggal</label>
+                                <input type="date" id="phFilterStart" class="w-full rounded-lg border border-wahdah-200 px-3 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
+                            </div>
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Sampai Tanggal</label>
+                                <input type="date" id="phFilterEnd" class="w-full rounded-lg border border-wahdah-200 px-3 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
+                            </div>
+                            <button type="button" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-xs rounded-lg px-4 py-2 transition-colors shadow-sm" onclick="paginationState.penugasanHistory.page = 1; renderPenugasanHistory()">
+                                Terapkan
+                            </button>
+                            <button type="button" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-xs rounded-lg px-4 py-2 transition-colors border border-gray-200" onclick="resetPenugasanHistoryFilter()">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto min-h-[300px]">
+                        <table class="w-full text-sm">
+                            <thead class="bg-wahdah-50 border-b border-wahdah-100">
+                                <tr class="text-wahdah-700 text-xs uppercase tracking-wide">
+                                    <th class="text-left font-semibold px-5 py-3.5 whitespace-nowrap">Tanggal</th>
+                                    <th class="text-left font-semibold px-5 py-3.5 whitespace-nowrap">Karyawan</th>
+                                    <th class="text-left font-semibold px-5 py-3.5 min-w-[200px]">Deskripsi Tugas</th>
+                                    <th class="text-center font-semibold px-5 py-3.5 whitespace-nowrap">Progres</th>
+                                    <th class="text-center font-semibold px-5 py-3.5 whitespace-nowrap w-24">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="penugasan-history-tbody" class="divide-y divide-wahdah-50 bg-white">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="penugasan-history-pagination" class="flex items-center justify-between px-5 py-3 border-t border-wahdah-100 bg-white"></div>
                 </div>
             </section>
 
@@ -1244,6 +1315,7 @@
         userHistory: { page: 1, pageSize: 10 },
         adminQueue: { page: 1, pageSize: 10 },
         adminHistory: { page: 1, pageSize: 10 },
+        penugasanHistory: { page: 1, pageSize: 10 },
         leaderboard: { page: 1, pageSize: 10 },
         kehadiranBoard: { page: 1, pageSize: 10 },
         seragamBoard: { page: 1, pageSize: 10 },
@@ -1844,6 +1916,7 @@
         if(viewId === 'viewAdminCatatPenugasan') {
             populateAdminPenugasanUserDropdown();
             resetPenugasanForm();
+            renderPenugasanHistory();
         }
         if(viewId === 'viewLeaderboardTotal') {
             resetLeaderboardTotalFilter();
@@ -2538,6 +2611,16 @@
         if (currentValue && users.some(u => u.User_ID === currentValue)) {
             selectPenugasan.value = currentValue;
         }
+
+        const historyFilter = document.getElementById('penugasanHistoryFilterNama');
+        if (historyFilter) {
+            const currentFilter = historyFilter.value;
+            historyFilter.innerHTML = `<option value="ALL">Semua Karyawan</option>` +
+                users.map(u => `<option value="${escapeHtml(u.User_ID)}">${escapeHtml(u.Nama)}</option>`).join('');
+            if (currentFilter && (currentFilter === 'ALL' || users.some(u => u.User_ID === currentFilter))) {
+                historyFilter.value = currentFilter;
+            }
+        }
     }
 
     function populateKehadiranUserDropdown() {
@@ -2871,16 +2954,18 @@
 
     function renderAdminQueue() {
         const tbody = document.getElementById('admin-queue-tbody');
-        const filterUserId = document.getElementById('adminQueueFilterNama').value;
         const filterJenisEl = document.getElementById('adminQueueFilterJenis');
         const filterJenis = filterJenisEl ? filterJenisEl.value : 'ALL';
+        const filterUserId = document.getElementById('adminQueueFilterNama').value;
+        const filterProgresEl = document.getElementById('adminQueueFilterProgres');
+        const filterProgres = filterProgresEl ? filterProgresEl.value : 'ALL';
 
         let queue = [];
         let _seq = 0;
 
         if (filterJenis === 'ALL' || filterJenis === 'Task') {
             db.jobdesk.filter(t => t.Status === 'Pending').forEach(t => {
-                if (filterUserId === 'ALL' || t.User_ID === filterUserId) {
+                if ((filterUserId === 'ALL' || t.User_ID === filterUserId) && (filterProgres === 'ALL' || (t.Status_Kerja || 'Selesai') === filterProgres)) {
                     queue.push({ type: 'Task', id: t.Task_ID, userId: t.User_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, statusKerja: t.Status_Kerja || 'Selesai', _seq: _seq++ });
                 }
             });
@@ -2888,7 +2973,7 @@
 
         if (filterJenis === 'ALL' || filterJenis === 'Piket') {
             db.piket.filter(p => p.Status === 'Pending').forEach(p => {
-                if (filterUserId === 'ALL' || p.User_ID === filterUserId) {
+                if ((filterUserId === 'ALL' || p.User_ID === filterUserId) && (filterProgres === 'ALL' || (p.Status_Kerja || 'Selesai') === filterProgres)) {
                     queue.push({ type: 'Piket', id: p.Schedule_ID, userId: p.User_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, statusKerja: p.Status_Kerja || 'Selesai', catatan: p.Catatan_Admin || '', _seq: _seq++ });
                 }
             });
@@ -3087,6 +3172,7 @@
     function resetAdminHistoryFilter() {
         document.getElementById('adminFilterNama').value = 'ALL';
         document.getElementById('adminFilterJenis').value = 'ALL';
+        document.getElementById('adminFilterProgres').value = 'ALL';
         document.getElementById('ahFilterStart').value = '';
         document.getElementById('ahFilterEnd').value = '';
         paginationState.adminHistory.page = 1;
@@ -3098,6 +3184,8 @@
         const filterUserId = document.getElementById('adminFilterNama').value;
         const filterJenisEl = document.getElementById('adminFilterJenis');
         const filterJenis = filterJenisEl ? filterJenisEl.value : 'ALL';
+        const filterProgresEl = document.getElementById('adminFilterProgres');
+        const filterProgres = filterProgresEl ? filterProgresEl.value : 'ALL';
         const startDateStr = document.getElementById('ahFilterStart').value;
         const endDateStr = document.getElementById('ahFilterEnd').value;
 
@@ -3112,7 +3200,7 @@
             db.jobdesk.forEach(t => {
                 if(filterUserId === 'ALL' || t.User_ID === filterUserId) {
                     let itemDate = new Date(t.Tanggal);
-                    if(itemDate >= startDate && itemDate <= endDate) {
+                    if(itemDate >= startDate && itemDate <= endDate && (filterProgres === 'ALL' || (t.Status_Kerja || 'Selesai') === filterProgres)) {
                         history.push({ id: t.Task_ID, type: 'Task', userId: t.User_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', _seq: _seq++ });
                     }
                 }
@@ -3122,7 +3210,7 @@
             db.piket.forEach(p => {
                 if(filterUserId === 'ALL' || p.User_ID === filterUserId) {
                     let itemDate = new Date(p.Tanggal);
-                    if(itemDate >= startDate && itemDate <= endDate) {
+                    if(itemDate >= startDate && itemDate <= endDate && (filterProgres === 'ALL' || (p.Status_Kerja || 'Selesai') === filterProgres)) {
                         history.push({ id: p.Schedule_ID, type: 'Piket', userId: p.User_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, status: p.Status, poin: p.Poin, statusKerja: p.Status_Kerja || 'Selesai', catatan: p.Catatan_Admin || '', _seq: _seq++ });
                     }
                 }
@@ -3200,7 +3288,82 @@
         renderPagination('admin-history-pagination', paginationState.adminHistory, totalPages, 'renderAdminHistory');
     }
 
-    function editAdminHistoryPoin(id, type, currentPoin, currentCatatan, currentDeskripsi, adminNama) {
+    function renderPenugasanHistory() {
+        const tbody = document.getElementById('penugasan-history-tbody');
+        const filterUserId = document.getElementById('penugasanHistoryFilterNama').value;
+        const filterProgresEl = document.getElementById('penugasanHistoryFilterProgres');
+        const filterProgres = filterProgresEl ? filterProgresEl.value : 'ALL';
+        const startDateStr = document.getElementById('phFilterStart').value;
+        const endDateStr = document.getElementById('phFilterEnd').value;
+
+        let startDate = startDateStr ? new Date(startDateStr) : new Date('2000-01-01');
+        let endDate = endDateStr ? new Date(endDateStr) : new Date('2100-01-01');
+        endDate.setHours(23, 59, 59, 999);
+
+        let history = [];
+        let _seq = 0;
+
+        db.jobdesk.forEach(t => {
+            if (filterUserId === 'ALL' || t.User_ID === filterUserId) {
+                const itemDate = new Date(t.Tanggal);
+                if (itemDate >= startDate && itemDate <= endDate && (filterProgres === 'ALL' || (t.Status_Kerja || 'Selesai') === filterProgres)) {
+                    const parsed = formatTugasDeskripsi(t.Deskripsi_Tugas);
+                    if (parsed.adminNama && parsed.adminNama === currentUser.Nama) {
+                        history.push({ id: t.Task_ID, userId: t.User_ID, date: t.Tanggal, desc: parsed.desc, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', _seq: _seq++ });
+                    }
+                }
+            }
+        });
+
+        history.sort((a, b) => (new Date(b.date) - new Date(a.date)) || (b._seq - a._seq));
+
+        if (history.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-wahdah-400">Belum ada riwayat penugasan yang Anda buat.</td></tr>`;
+            document.getElementById('penugasan-history-pagination').innerHTML = '';
+            return;
+        }
+
+        const totalPages = Math.max(1, Math.ceil(history.length / paginationState.penugasanHistory.pageSize));
+        if (paginationState.penugasanHistory.page > totalPages) paginationState.penugasanHistory.page = totalPages;
+        const start = (paginationState.penugasanHistory.page - 1) * paginationState.penugasanHistory.pageSize;
+        const pageData = history.slice(start, start + paginationState.penugasanHistory.pageSize);
+
+        tbody.innerHTML = pageData.map(h => {
+            let kerjaBadge = h.statusKerja === 'Selesai' ? '<span class="bg-blue-100 text-blue-600 text-[10px] px-2 py-1 rounded-full font-bold border border-blue-200 uppercase">Selesai</span>' : '<span class="bg-gray-100 text-gray-500 text-[10px] px-2 py-1 rounded-full font-bold border border-gray-200 uppercase">Belum Selesai</span>';
+            const escDesc = escJsAttr(h.desc);
+            return `
+                <tr class="hover:bg-wahdah-50/30 transition-colors">
+                    <td class="px-5 py-3 text-wahdah-600 text-xs">${escapeHtml(h.date)}</td>
+                    <td class="px-5 py-3 font-semibold text-wahdah-900">${escapeHtml(getUserName(h.userId))}</td>
+                    <td class="px-5 py-3 text-wahdah-700">${escapeHtml(h.desc)}</td>
+                    <td class="px-5 py-3 text-center">${kerjaBadge}</td>
+                    <td class="px-5 py-3 text-center">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="editAdminHistoryPoin('${h.id}', 'Task', ${h.poin || 0}, '', '${escDesc}', '', false)" class="w-7 h-7 bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 rounded-lg flex items-center justify-center transition-colors" title="Edit Laporan">
+                                <i class="fa-solid fa-pen text-xs"></i>
+                            </button>
+                            <button onclick="deleteAdminHistoryItem('${h.id}', 'Task')" class="w-7 h-7 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 rounded-lg flex items-center justify-center transition-colors" title="Hapus Laporan">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        renderPagination('penugasan-history-pagination', paginationState.penugasanHistory, totalPages, 'renderPenugasanHistory');
+    }
+
+    function resetPenugasanHistoryFilter() {
+        document.getElementById('penugasanHistoryFilterNama').value = 'ALL';
+        document.getElementById('penugasanHistoryFilterProgres').value = 'ALL';
+        document.getElementById('phFilterStart').value = '';
+        document.getElementById('phFilterEnd').value = '';
+        paginationState.penugasanHistory.page = 1;
+        renderPenugasanHistory();
+    }
+
+    function editAdminHistoryPoin(id, type, currentPoin, currentCatatan, currentDeskripsi, adminNama, allowEditPoin = true) {
         const showCatatan = type === 'Piket';
         const showDeskripsi = type === 'Task';
         Swal.fire({
@@ -3208,8 +3371,10 @@
             width: 420,
             html: `
                 <div class="text-left">
+                    ${allowEditPoin ? `
                     <label class="block text-xs font-semibold text-wahdah-700 mb-1">Poin</label>
                     <input id="swalEditPoin" type="number" min="0" step="1" value="${currentPoin}" class="swal2-input" style="width:100%;box-sizing:border-box;margin:0 0 12px;">
+                    ` : ''}
                     ${showDeskripsi ? `
                     <label class="block text-xs font-semibold text-wahdah-700 mb-1">Laporan Tugas</label>
                     <textarea id="swalEditDeskripsi" class="swal2-textarea" style="width:100%;box-sizing:border-box;margin:0;" placeholder="Tulis laporan tugas...">${escapeHtml(currentDeskripsi || '')}</textarea>
@@ -3226,15 +3391,18 @@
             confirmButtonColor: '#177355',
             focusConfirm: false,
             preConfirm: () => {
-                const poinInput = document.getElementById('swalEditPoin');
-                const poinVal = poinInput ? poinInput.value : '';
-                if (poinVal === '' || Number(poinVal) < 0) {
-                    Swal.showValidationMessage('Masukkan nilai poin yang valid.');
-                    return false;
+                const result = {};
+                if (allowEditPoin) {
+                    const poinInput = document.getElementById('swalEditPoin');
+                    const poinVal = poinInput ? poinInput.value : '';
+                    if (poinVal === '' || Number(poinVal) < 0) {
+                        Swal.showValidationMessage('Masukkan nilai poin yang valid.');
+                        return false;
+                    }
+                    result.poin = parseInt(poinVal) || 0;
+                } else {
+                    result.poin = currentPoin;
                 }
-                const result = {
-                    poin: parseInt(poinVal) || 0
-                };
                 if (showDeskripsi) {
                     const descEl = document.getElementById('swalEditDeskripsi');
                     const descVal = descEl ? descEl.value.trim() : '';
@@ -3255,7 +3423,7 @@
             const { poin, deskripsi, catatan } = result.value;
             const data = { id: id, type: type, poin: poin, catatan: catatan };
             if (showDeskripsi && deskripsi !== undefined) {
-                data.deskripsi = deskripsi;
+                data.deskripsi = reattachAssignedByMarker(deskripsi, adminNama);
             }
 
             if (typeof google === 'undefined') {
@@ -3268,6 +3436,8 @@
                     if (showCatatan && catatan !== null) found.Catatan_Admin = catatan;
                 }
                 renderAdminHistory();
+                const penugasanTbody = document.getElementById('penugasan-history-tbody');
+                if (penugasanTbody) renderPenugasanHistory();
                 Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Laporan diperbarui', showConfirmButton: false, timer: 1500 });
                 return;
             }
@@ -3275,6 +3445,8 @@
             google.script.run.withSuccessHandler(res => {
                 db = res;
                 renderAdminHistory();
+                const penugasanTbody = document.getElementById('penugasan-history-tbody');
+                if (penugasanTbody) renderPenugasanHistory();
                 Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Laporan diperbarui', showConfirmButton: false, timer: 1500 });
             }).withFailureHandler(err => {
                 console.error(err);
@@ -3299,6 +3471,8 @@
                 if (type === 'Task') db.jobdesk = db.jobdesk.filter(t => t.Task_ID !== id);
                 else db.piket = db.piket.filter(p => p.Schedule_ID !== id);
                 renderAdminHistory();
+                const penugasanTbody = document.getElementById('penugasan-history-tbody');
+                if (penugasanTbody) renderPenugasanHistory();
                 Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Laporan dihapus', showConfirmButton: false, timer: 1500 });
                 return;
             }
@@ -3306,6 +3480,8 @@
             google.script.run.withSuccessHandler(res => {
                 db = res;
                 renderAdminHistory();
+                const penugasanTbody = document.getElementById('penugasan-history-tbody');
+                if (penugasanTbody) renderPenugasanHistory();
                 Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Laporan dihapus', showConfirmButton: false, timer: 1500 });
             }).withFailureHandler(err => {
                 console.error(err);
@@ -3531,6 +3707,7 @@
     function finalizeAdminPenugasanSubmit(count, namaKaryawan) {
         resetPenugasanForm();
         setPenugasanButtonProcessing(false);
+        renderPenugasanHistory();
         Swal.fire({ icon: 'success', title: 'Sukses', text: `${count} tugas berhasil ditugaskan kepada ${namaKaryawan}.`, timer: 1800, showConfirmButton: false });
     }
 
