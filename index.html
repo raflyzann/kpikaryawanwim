@@ -3309,7 +3309,7 @@
                 if (itemDate >= startDate && itemDate <= endDate && (filterProgres === 'ALL' || (t.Status_Kerja || 'Selesai') === filterProgres)) {
                     const parsed = formatTugasDeskripsi(t.Deskripsi_Tugas);
                     if (parsed.adminNama && parsed.adminNama === currentUser.Nama) {
-                        history.push({ id: t.Task_ID, userId: t.User_ID, date: t.Tanggal, desc: parsed.desc, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', _seq: _seq++ });
+                        history.push({ id: t.Task_ID, userId: t.User_ID, date: t.Tanggal, desc: parsed.desc, adminNama: parsed.adminNama, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', _seq: _seq++ });
                     }
                 }
             }
@@ -3331,6 +3331,7 @@
         tbody.innerHTML = pageData.map(h => {
             let kerjaBadge = h.statusKerja === 'Selesai' ? '<span class="bg-blue-100 text-blue-600 text-[10px] px-2 py-1 rounded-full font-bold border border-blue-200 uppercase">Selesai</span>' : '<span class="bg-gray-100 text-gray-500 text-[10px] px-2 py-1 rounded-full font-bold border border-gray-200 uppercase">Belum Selesai</span>';
             const escDesc = escJsAttr(h.desc);
+            const escAdminNama = escJsAttr(h.adminNama || '');
             return `
                 <tr class="hover:bg-wahdah-50/30 transition-colors">
                     <td class="px-5 py-3 text-wahdah-600 text-xs">${escapeHtml(h.date)}</td>
@@ -3339,7 +3340,7 @@
                     <td class="px-5 py-3 text-center">${kerjaBadge}</td>
                     <td class="px-5 py-3 text-center">
                         <div class="flex items-center justify-center gap-1.5">
-                            <button onclick="editAdminHistoryPoin('${h.id}', 'Task', ${h.poin || 0}, '', '${escDesc}', '', false)" class="w-7 h-7 bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 rounded-lg flex items-center justify-center transition-colors" title="Edit Laporan">
+                            <button onclick="editAdminHistoryPoin('${h.id}', 'Task', ${h.poin || 0}, '', '${escDesc}', '${escAdminNama}', false)" class="w-7 h-7 bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 rounded-lg flex items-center justify-center transition-colors" title="Edit Laporan">
                                 <i class="fa-solid fa-pen text-xs"></i>
                             </button>
                             <button onclick="deleteAdminHistoryItem('${h.id}', 'Task')" class="w-7 h-7 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 rounded-lg flex items-center justify-center transition-colors" title="Hapus Laporan">
