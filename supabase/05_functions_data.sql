@@ -64,20 +64,21 @@ begin
   from public."Users" u
   where u.is_active;
 
-  select coalesce(jsonb_agg(
-           jsonb_build_object(
-             'Task_ID',         j."Task_ID",
-             'User_ID',         j."User_ID",
-             'Tanggal',         to_char(j."Tanggal", 'YYYY-MM-DD'),
-             'Deskripsi_Tugas', j."Deskripsi_Tugas",
-             'Status',          j."Status",
-             'Poin',            trim_scale(j."Poin"),
-             'Status_Kerja',    j."Status_Kerja"
-           ) order by j."Tanggal", j."Task_ID"
-         ), '[]'::jsonb)
-    into v_jobdesk
-  from public."Jobdesk" j
-  where v_full_access or j."User_ID" = v_uid;
+   select coalesce(jsonb_agg(
+            jsonb_build_object(
+              'Task_ID',         j."Task_ID",
+              'User_ID',         j."User_ID",
+              'Tanggal',         to_char(j."Tanggal", 'YYYY-MM-DD'),
+              'Deskripsi_Tugas', j."Deskripsi_Tugas",
+              'Status',          j."Status",
+              'Poin',            trim_scale(j."Poin"),
+              'Status_Kerja',    j."Status_Kerja",
+              'Catatan_Admin',   j."Catatan_Admin"
+            ) order by j."Tanggal", j."Task_ID"
+          ), '[]'::jsonb)
+     into v_jobdesk
+   from public."Jobdesk" j
+   where v_full_access or j."User_ID" = v_uid;
 
   select coalesce(jsonb_agg(
            jsonb_build_object(
@@ -422,8 +423,7 @@ begin
   end if;
 
   v_poin := public._kpi_parse_nilai(p_data -> 'poin', 'poin');
-  v_has_cat := (not v_is_task)
-               and (p_data ? 'catatan')
+  v_has_cat := (p_data ? 'catatan')
                and jsonb_typeof(p_data -> 'catatan') <> 'null';
   v_catatan := case when v_has_cat
                     then left(btrim(coalesce(p_data ->> 'catatan', '')), 500)
@@ -431,7 +431,9 @@ begin
 
   if v_is_task then
     update public."Jobdesk"
-       set "Status" = 'Approved', "Poin" = v_poin
+       set "Status" = 'Approved',
+           "Poin" = v_poin,
+           "Catatan_Admin" = case when v_has_cat then v_catatan else "Catatan_Admin" end
      where "Task_ID" = v_id;
     if not found then
       raise exception 'Laporan dengan ID % tidak ditemukan.', v_id;
@@ -499,8 +501,7 @@ begin
     end if;
 
     v_poin  := public._kpi_parse_nilai(v_item -> 'poin', 'poin');
-    v_has_cat := (v_id not like 'TSK%')
-                 and (v_item ? 'catatan')
+    v_has_cat := (v_item ? 'catatan')
                  and jsonb_typeof(v_item -> 'catatan') <> 'null';
     v_catatan := case when v_has_cat
                       then left(btrim(coalesce(v_item ->> 'catatan', '')), 500)
@@ -508,7 +509,9 @@ begin
 
     if v_id like 'TSK%' then
       update public."Jobdesk"
-         set "Status" = 'Approved', "Poin" = v_poin
+         set "Status" = 'Approved',
+             "Poin" = v_poin,
+             "Catatan_Admin" = case when v_has_cat then v_catatan else "Catatan_Admin" end
        where "Task_ID" = v_id;
     else
       update public."Piket"
@@ -785,10 +788,11 @@ as $$
 $$;
 
 -- ---------------------------------------------------------------------
--- 13. Catatan manual piket: kpi_update_task_catatan
+-- 13. Catatan manual: kpi_update_task_catatan
 -- ---------------------------------------------------------------------
--- p_data = {"id":"PKT-...","catatan":"lantainya kurang bersih"}
--- Admin & Operator boleh mengisi catatan; selalu menulis ke tabel Piket.
+-- p_data = {"id":"TSK-.../PKT-...","catatan":"..."}
+-- Admin & Operator boleh mengisi catatan; menulis ke tabel Jobdesk
+-- untuk Task dan tabel Piket untuk Piket.
 create or replace function public.kpi_update_task_catatan(
   p_token text,
   p_data  jsonb
@@ -801,6 +805,7 @@ as $$
 declare
   v_id      text := btrim(coalesce(p_data ->> 'id', ''));
   v_catatan text := left(btrim(coalesce(p_data ->> 'catatan', '')), 500);
+  v_is_task boolean;
 begin
   perform public._kpi_require_session(p_token, array['Admin', 'Operator']);
 
@@ -808,12 +813,22 @@ begin
     raise exception 'ID laporan wajib diisi.';
   end if;
 
-  update public."Piket"
-     set "Catatan_Admin" = v_catatan
-   where "Schedule_ID" = v_id;
+  v_is_task := v_id like 'TSK%';
 
-  if not found then
-    raise exception 'Laporan piket dengan ID % tidak ditemukan.', v_id;
+  if v_is_task then
+    update public."Jobdesk"
+       set "Catatan_Admin" = v_catatan
+     where "Task_ID" = v_id;
+    if not found then
+      raise exception 'Laporan tugas dengan ID % tidak ditemukan.', v_id;
+    end if;
+  else
+    update public."Piket"
+       set "Catatan_Admin" = v_catatan
+     where "Schedule_ID" = v_id;
+    if not found then
+      raise exception 'Laporan piket dengan ID % tidak ditemukan.', v_id;
+    end if;
   end if;
 
   return public._kpi_all_data(p_token);
@@ -851,8 +866,7 @@ begin
 
   v_type    := public._kpi_resolve_type(p_data ->> 'type', v_id);
   v_poin    := public._kpi_parse_nilai(p_data -> 'poin', 'poin');
-  v_has_cat := (v_type = 'Piket')
-               and (p_data ? 'catatan')
+  v_has_cat := (p_data ? 'catatan')
                and jsonb_typeof(p_data -> 'catatan') <> 'null';
   v_catatan := case when v_has_cat
                     then left(btrim(coalesce(p_data ->> 'catatan', '')), 500)
@@ -867,7 +881,8 @@ begin
     end if;
     update public."Jobdesk"
        set "Poin" = v_poin,
-           "Deskripsi_Tugas" = coalesce(v_deskripsi, "Deskripsi_Tugas")
+           "Deskripsi_Tugas" = coalesce(v_deskripsi, "Deskripsi_Tugas"),
+           "Catatan_Admin" = case when v_has_cat then v_catatan else "Catatan_Admin" end
      where "Task_ID" = v_id;
   else
     if p_data ? 'deskripsi' and jsonb_typeof(p_data -> 'deskripsi') <> 'null' then
@@ -1096,12 +1111,10 @@ begin
     raise exception 'Karyawan tidak ditemukan: %', v_bad;
   end if;
 
-  insert into public."Seragam" ("Seragam_ID", "User_ID", "Tanggal", "Nilai", "Rincian")
-  select 'SRG-' || gen_random_uuid(), x.id, v_tanggal, v_nilai, v_rincian
-  from unnest(v_ids) as x(id)
-  on conflict ("User_ID", "Tanggal") do update
-    set "Nilai" = excluded."Nilai",
-        "Rincian" = excluded."Rincian";
+   insert into public."Seragam" ("Seragam_ID", "User_ID", "Tanggal", "Nilai", "Rincian")
+   select 'SRG-' || gen_random_uuid(), x.id, v_tanggal, v_nilai, v_rincian
+   from unnest(v_ids) as x(id)
+   on conflict ("User_ID", "Tanggal") do nothing;
 
   return public._kpi_all_data(p_token);
 end;
@@ -1197,6 +1210,48 @@ begin
 end;
 $$;
 
+-- ---------------------------------------------------------------------
+-- 20b. Hapus banyak inputan kedisiplinan: kpi_delete_multiple_seragam
+-- ---------------------------------------------------------------------
+-- p_ids = ["SRG-...", "SRG-..."]
+-- Admin & Operator boleh menghapus banyak baris sekaligus.
+create or replace function public.kpi_delete_multiple_seragam(
+  p_token text,
+  p_ids   jsonb
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_sess jsonb;
+  v_role text;
+  v_uid  text;
+  v_ids  text[];
+begin
+  v_sess := public._kpi_require_session(p_token, array['Admin', 'Operator']);
+  v_role := v_sess ->> 'role';
+  v_uid  := v_sess ->> 'user_id';
+
+  if p_ids is null
+     or jsonb_typeof(p_ids) <> 'array'
+     or jsonb_array_length(p_ids) = 0 then
+    return public._kpi_all_data(p_token);
+  end if;
+
+  select coalesce(array_agg(btrim(t.id)), '{}')
+    into v_ids
+  from jsonb_array_elements_text(p_ids) as t(id)
+  where btrim(t.id) <> '';
+
+  delete from public."Seragam"
+    where "Seragam_ID" = any (v_ids);
+
+  return public._kpi_all_data(p_token);
+end;
+$$;
+
 -- =====================================================================
 -- 21. HAK AKSES (GRANT) untuk seluruh RPC data
 -- =====================================================================
@@ -1218,6 +1273,7 @@ grant execute on function public.kpi_save_kehadiran(text, jsonb)            to a
 grant execute on function public.kpi_save_seragam(text, jsonb)              to anon, authenticated;
 grant execute on function public.kpi_update_seragam_poin(text, jsonb)         to anon, authenticated;
 grant execute on function public.kpi_delete_seragam(text, text)               to anon, authenticated;
+grant execute on function public.kpi_delete_multiple_seragam(text, jsonb)      to anon, authenticated;
 
 -- Fungsi internal: jangan pernah bisa dipanggil dari luar.
 revoke all on function public._kpi_all_data(text)               from anon, authenticated;

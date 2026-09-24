@@ -535,7 +535,7 @@
                                     <th class="text-left font-semibold px-3 py-3.5 whitespace-nowrap">Karyawan</th>
                                     <th class="text-left font-semibold px-3 py-3.5 min-w-[200px]">Laporan</th>
                                     <th class="text-center font-semibold px-3 py-3.5 whitespace-nowrap">Progres</th>
-                                    <th class="text-left font-semibold px-3 py-3.5 min-w-[180px]">Catatan (Piket)</th>
+                                    <th class="text-left font-semibold px-3 py-3.5 min-w-[180px]">Catatan</th>
                                     <th class="text-center font-semibold px-3 py-3.5 whitespace-nowrap">Aksi / Poin</th>
                                 </tr>
                             </thead>
@@ -888,8 +888,62 @@
                                 <i id="btnSubmitSeragamIcon" class="fa-solid fa-floppy-disk"></i> <span id="btnSubmitSeragamLabel">Simpan Penilaian Kedisiplinan</span>
                             </button>
                             <p class="text-[10px] text-wahdah-400">Setiap item tercentang = 1 Poin • Tidak tercentang = 0 Poin</p>
+                            <p class="text-[10px] text-wahdah-500">Karyawan yang sudah punya penilaian di tanggal ini tidak akan tertimpa — ubah lewat tombol Edit pada tabel di bawah.</p>
                         </div>
                     </form>
+                </div>
+
+                <!-- Riwayat Inputan Kedisiplinan -->
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
+                    <div class="px-5 py-4 border-b border-wahdah-100 bg-wahdah-50/50">
+                        <h3 class="text-sm font-bold text-wahdah-900 flex items-center gap-2 mb-3">
+                            <i class="fa-solid fa-clock-rotate-left text-wahdah-600"></i> Riwayat Inputan Kedisiplinan
+                        </h3>
+                        <div class="flex flex-col md:flex-row gap-3 items-end">
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Mulai Tanggal</label>
+                                <input type="date" id="shFilterStart" class="w-full rounded-lg border border-wahdah-200 px-3 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
+                            </div>
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Sampai Tanggal</label>
+                                <input type="date" id="shFilterEnd" class="w-full rounded-lg border border-wahdah-200 px-3 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
+                            </div>
+                            <button type="button" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-xs rounded-lg px-4 py-2 transition-colors shadow-sm" onclick="paginationState.seragamHistory.page = 1; renderRiwayatSeragam()">
+                                Terapkan
+                            </button>
+                            <button type="button" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-xs rounded-lg px-4 py-2 transition-colors border border-gray-200" onclick="resetRiwayatSeragamFilter()">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div id="kedisiplinanBulkActionsBar" class="hidden px-5 py-3 border-b border-wahdah-100 bg-wahdah-50/80 flex items-center justify-between transition-all">
+                        <span class="text-xs font-semibold text-wahdah-700"><span id="kedisiplinanSelectedCount" class="font-bold text-wahdah-900 text-sm">0</span> data dipilih</span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="bulkDeleteKedisiplinan()" class="text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg font-bold transition-colors shadow-sm flex items-center gap-1.5">
+                                <i class="fa-solid fa-trash-can"></i> Hapus
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-wahdah-50 border-b border-wahdah-100">
+                                <tr class="text-wahdah-700 text-xs uppercase tracking-wide">
+                                    <th class="text-center font-semibold px-3 py-4 w-10">
+                                        <input type="checkbox" id="selectAllKedisiplinanCheckbox" onchange="toggleAllKedisiplinanCheckboxes(this.checked)" class="w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer">
+                                    </th>
+                                    <th class="text-left font-semibold px-5 py-4 whitespace-nowrap">Tanggal</th>
+                                    <th class="text-left font-semibold px-5 py-4">Karyawan</th>
+                                    <th class="text-center font-semibold px-5 py-4 whitespace-nowrap">Penilaian</th>
+                                    <th class="text-right font-semibold px-5 py-4 w-32">Poin</th>
+                                    <th class="text-center font-semibold px-5 py-4 w-32">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="riwayatSeragam-tbody" class="divide-y divide-wahdah-50">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="riwayatSeragam-pagination" class="flex items-center justify-between px-5 py-3 border-t border-wahdah-100 bg-white"></div>
                 </div>
 
                 <!-- Leaderboard Poin Kedisiplinan -->
@@ -930,48 +984,6 @@
                         </table>
                     </div>
                     <div id="leaderboardSeragam-pagination" class="flex items-center justify-between px-5 py-3 border-t border-wahdah-100 bg-white"></div>
-                </div>
-
-                <!-- Riwayat Inputan Kedisiplinan -->
-                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
-                    <div class="px-5 py-4 border-b border-wahdah-100 bg-wahdah-50/50">
-                        <h3 class="text-sm font-bold text-wahdah-900 flex items-center gap-2 mb-3">
-                            <i class="fa-solid fa-clock-rotate-left text-wahdah-600"></i> Riwayat Inputan Kedisiplinan
-                        </h3>
-                        <div class="flex flex-col md:flex-row gap-3 items-end">
-                            <div class="flex-1 w-full">
-                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Mulai Tanggal</label>
-                                <input type="date" id="shFilterStart" class="w-full rounded-lg border border-wahdah-200 px-3 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
-                            </div>
-                            <div class="flex-1 w-full">
-                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Sampai Tanggal</label>
-                                <input type="date" id="shFilterEnd" class="w-full rounded-lg border border-wahdah-200 px-3 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
-                            </div>
-                            <button type="button" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-xs rounded-lg px-4 py-2 transition-colors shadow-sm" onclick="paginationState.seragamHistory.page = 1; renderRiwayatSeragam()">
-                                Terapkan
-                            </button>
-                            <button type="button" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-xs rounded-lg px-4 py-2 transition-colors border border-gray-200" onclick="resetRiwayatSeragamFilter()">
-                                Reset
-                            </button>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead class="bg-wahdah-50 border-b border-wahdah-100">
-                                <tr class="text-wahdah-700 text-xs uppercase tracking-wide">
-                                    <th class="text-left font-semibold px-5 py-4 whitespace-nowrap">Tanggal</th>
-                                    <th class="text-left font-semibold px-5 py-4">Karyawan</th>
-                                    <th class="text-center font-semibold px-5 py-4 whitespace-nowrap">Penilaian</th>
-                                    <th class="text-right font-semibold px-5 py-4 w-32">Poin</th>
-                                    <th class="text-center font-semibold px-5 py-4 w-32">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="riwayatSeragam-tbody" class="divide-y divide-wahdah-50">
-                                <!-- Injected via JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                    <div id="riwayatSeragam-pagination" class="flex items-center justify-between px-5 py-3 border-t border-wahdah-100 bg-white"></div>
                 </div>
             </section>
 
@@ -1331,6 +1343,8 @@
     let currentUserHistoryIds = [];
     let adminQueueSelectedIds = new Set();
     let currentAdminQueueIds = [];
+    let kedisiplinanSelectedIds = new Set();
+    let currentKedisiplinanIds = [];
 
     window.addEventListener('DOMContentLoaded', loadData);
 
@@ -1909,6 +1923,8 @@
         if(viewId === 'viewInputSeragam') {
             selectedSeragamUserIds = [];
             selectedKedisiplinanItems = [];
+            kedisiplinanSelectedIds.clear();
+            currentKedisiplinanIds = [];
             populateSeragamUserDropdown();
             populateKedisiplinanItemDropdown();
             resetSeragamFilter();
@@ -1953,6 +1969,7 @@
                 populateSeragamUserDropdown();
                 populateKedisiplinanItemDropdown();
                 renderLeaderboardSeragam();
+                renderRiwayatSeragam();
                 break;
             case 'viewAdminCatatPenugasan':
                 populateAdminPenugasanUserDropdown();
@@ -2367,7 +2384,7 @@
             db.jobdesk.filter(t => t.User_ID === currentUser.User_ID).forEach(t => {
                 let itemDate = new Date(t.Tanggal);
                 if(itemDate >= startDate && itemDate <= endDate) {
-                    history.push({ type: 'Task', id: t.Task_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', _seq: _seq++ });
+                    history.push({ type: 'Task', id: t.Task_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', catatan: t.Catatan_Admin || '', _seq: _seq++ });
                 }
             });
         }
@@ -2952,6 +2969,86 @@
         Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: msg, showConfirmButton: false, timer: 1500});
     }
 
+    // --- Bulk Action Logic (Riwayat Inputan Kedisiplinan) ---
+    function toggleAllKedisiplinanCheckboxes(checked) {
+        if (checked) {
+            currentKedisiplinanIds.forEach(id => kedisiplinanSelectedIds.add(id));
+        } else {
+            kedisiplinanSelectedIds.clear();
+        }
+        document.querySelectorAll('.kedisiplinan-row-checkbox').forEach(cb => {
+            cb.checked = kedisiplinanSelectedIds.has(cb.value);
+        });
+        updateKedisiplinanBulkActionUI();
+    }
+
+    function toggleKedisiplinanRowSelection(id, checked) {
+        if (checked) kedisiplinanSelectedIds.add(id);
+        else kedisiplinanSelectedIds.delete(id);
+        updateKedisiplinanBulkActionUI();
+    }
+
+    function updateKedisiplinanBulkActionUI() {
+        const count = kedisiplinanSelectedIds.size;
+        const bar = document.getElementById('kedisiplinanBulkActionsBar');
+        const countEl = document.getElementById('kedisiplinanSelectedCount');
+        if (countEl) countEl.textContent = count;
+        if (count > 0) bar.classList.remove('hidden');
+        else bar.classList.add('hidden');
+
+        const selectAllCb = document.getElementById('selectAllKedisiplinanCheckbox');
+        if (selectAllCb) {
+            selectAllCb.checked = currentKedisiplinanIds.length > 0 && currentKedisiplinanIds.every(id => kedisiplinanSelectedIds.has(id));
+        }
+    }
+
+    function getKedisiplinanSelectedIds() {
+        return Array.from(kedisiplinanSelectedIds);
+    }
+
+    function bulkDeleteKedisiplinan() {
+        const ids = getKedisiplinanSelectedIds();
+        if (ids.length === 0) return;
+
+        Swal.fire({
+            title: 'Hapus N Penilaian Terpilih?',
+            text: 'Tindakan ini tidak dapat dibatalkan.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fa-solid fa-trash-can mr-1"></i> Hapus',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#dc2626',
+            focusConfirm: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if (typeof google === 'undefined') {
+                    ids.forEach(id => {
+                        db.seragam = db.seragam.filter(x => x.Seragam_ID !== id);
+                    });
+                    finalizeKedisiplinanBulkDelete('Penilaian kedisiplinan berhasil dihapus!');
+                } else {
+                    Swal.fire({title: 'Menghapus...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+                    google.script.run.withSuccessHandler(res => {
+                        db = res;
+                        finalizeKedisiplinanBulkDelete('Penilaian kedisiplinan berhasil dihapus!');
+                    }).withFailureHandler(err => {
+                        console.error(err);
+                        Swal.fire('Error', (err && err.message) || 'Gagal menghapus penilaian kedisiplinan.', 'error');
+                    }).deleteMultipleSeragam(sessionToken, ids);
+                }
+            }
+        });
+    }
+
+    function finalizeKedisiplinanBulkDelete(msg) {
+        kedisiplinanSelectedIds.clear();
+        document.getElementById('kedisiplinanBulkActionsBar').classList.add('hidden');
+        renderRiwayatSeragam();
+        renderLeaderboardSeragam();
+        renderLeaderboardAkumulasi();
+        Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: msg, showConfirmButton: false, timer: 1500});
+    }
+
     function renderAdminQueue() {
         const tbody = document.getElementById('admin-queue-tbody');
         const filterJenisEl = document.getElementById('adminQueueFilterJenis');
@@ -2966,7 +3063,7 @@
         if (filterJenis === 'ALL' || filterJenis === 'Task') {
             db.jobdesk.filter(t => t.Status === 'Pending').forEach(t => {
                 if ((filterUserId === 'ALL' || t.User_ID === filterUserId) && (filterProgres === 'ALL' || (t.Status_Kerja || 'Selesai') === filterProgres)) {
-                    queue.push({ type: 'Task', id: t.Task_ID, userId: t.User_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, statusKerja: t.Status_Kerja || 'Selesai', _seq: _seq++ });
+                    queue.push({ type: 'Task', id: t.Task_ID, userId: t.User_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, statusKerja: t.Status_Kerja || 'Selesai', catatan: t.Catatan_Admin || '', _seq: _seq++ });
                 }
             });
         }
@@ -3017,20 +3114,16 @@
                 displayDesc = parsed.desc;
             }
             
-            // Kolom Catatan: hanya untuk laporan Piket. Admin bisa menulis
-            // catatan manual (mis. "lantainya kurang bersih") yang otomatis
-            // tersinkron ke halaman karyawan > Riwayat Aktivitas.
-            let catatanCell = `<span class="text-wahdah-300 text-xs">-</span>`;
-            if (q.type === 'Piket') {
-                const escCatatan = String(q.catatan || '').replace(/"/g, '&quot;');
-                catatanCell = `
-                    <div class="flex items-start gap-1.5">
-                        <textarea id="catatan-${q.id}" rows="1" placeholder="Tulis catatan..." class="w-full min-w-[140px] text-xs border border-wahdah-200 rounded-lg px-2 py-1.5 outline-none focus:border-wahdah-400 resize-none bg-white">${escapeHtml(q.catatan || '')}</textarea>
-                        <button type="button" id="btnCatatan-${q.id}" onclick="saveCatatanPiket('${q.id}')" title="Simpan catatan" class="shrink-0 bg-wahdah-100 hover:bg-wahdah-200 text-wahdah-700 rounded-lg w-7 h-7 flex items-center justify-center transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
-                            <i class="fa-solid fa-floppy-disk text-xs"></i>
-                        </button>
-                    </div>`;
-            }
+            // Kolom Catatan: admin bisa menulis catatan manual untuk
+            // laporan Task maupun Piket.
+            const escCatatan = String(q.catatan || '').replace(/"/g, '&quot;');
+            const catatanCell = `
+                <div class="flex items-start gap-1.5">
+                    <textarea id="catatan-${q.id}" rows="1" placeholder="Tulis catatan..." class="w-full min-w-[140px] text-xs border border-wahdah-200 rounded-lg px-2 py-1.5 outline-none focus:border-wahdah-400 resize-none bg-white">${escapeHtml(q.catatan || '')}</textarea>
+                    <button type="button" id="btnCatatan-${q.id}" onclick="saveCatatanAdmin('${q.id}', '${q.type}')" title="Simpan catatan" class="shrink-0 bg-wahdah-100 hover:bg-wahdah-200 text-wahdah-700 rounded-lg w-7 h-7 flex items-center justify-center transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-floppy-disk text-xs"></i>
+                    </button>
+                </div>`;
 
             let isChecked = adminQueueSelectedIds.has(q.id) ? 'checked' : '';
             let cbHtml = `<input type="checkbox" class="admin-row-checkbox w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer" value="${q.id}" ${isChecked} onchange="toggleAdminRowSelection('${q.id}', this.checked)">`;
@@ -3076,11 +3169,10 @@
     }
 
     /**
-     * Simpan catatan manual admin (khusus laporan Piket) di Antrean
-     * Persetujuan. Setelah tersimpan, catatan ini otomatis muncul juga di
-     * halaman karyawan > Riwayat Aktivitas karena sama-sama membaca db.piket.
+     * Simpan catatan manual admin di Antrean Persetujuan.
+     * Berlaku untuk laporan Task maupun Piket.
      */
-    function saveCatatanPiket(id) {
+    function saveCatatanAdmin(id, type) {
         const textarea = document.getElementById(`catatan-${id}`);
         if (!textarea) return;
         const catatan = textarea.value;
@@ -3094,8 +3186,13 @@
         }
 
         if (typeof google === 'undefined') {
-            const found = db.piket.find(p => p.Schedule_ID === id);
-            if (found) found.Catatan_Admin = catatan;
+            if (type === 'Task') {
+                const found = db.jobdesk.find(t => t.Task_ID === id);
+                if (found) found.Catatan_Admin = catatan;
+            } else {
+                const found = db.piket.find(p => p.Schedule_ID === id);
+                if (found) found.Catatan_Admin = catatan;
+            }
             textarea.disabled = false;
             if (btn) { btn.disabled = false; btn.innerHTML = originalBtnHtml; }
             Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Catatan disimpan', showConfirmButton: false, timer: 1500 });
@@ -3139,7 +3236,7 @@
 
         if (typeof google === 'undefined') {
             let found = db.jobdesk.find(t => t.Task_ID === id);
-            if(found) { found.Status = 'Approved'; found.Poin = poin; }
+            if(found) { found.Status = 'Approved'; found.Poin = poin; if (data.catatan !== undefined) found.Catatan_Admin = data.catatan; }
             else {
                 found = db.piket.find(p => p.Schedule_ID === id);
                 if(found) {
@@ -3201,7 +3298,7 @@
                 if(filterUserId === 'ALL' || t.User_ID === filterUserId) {
                     let itemDate = new Date(t.Tanggal);
                     if(itemDate >= startDate && itemDate <= endDate && (filterProgres === 'ALL' || (t.Status_Kerja || 'Selesai') === filterProgres)) {
-                        history.push({ id: t.Task_ID, type: 'Task', userId: t.User_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', _seq: _seq++ });
+                        history.push({ id: t.Task_ID, type: 'Task', userId: t.User_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', catatan: t.Catatan_Admin || '', _seq: _seq++ });
                     }
                 }
             });
@@ -3309,7 +3406,7 @@
                 if (itemDate >= startDate && itemDate <= endDate && (filterProgres === 'ALL' || (t.Status_Kerja || 'Selesai') === filterProgres)) {
                     const parsed = formatTugasDeskripsi(t.Deskripsi_Tugas);
                     if (parsed.adminNama && parsed.adminNama === currentUser.Nama) {
-                        history.push({ id: t.Task_ID, userId: t.User_ID, date: t.Tanggal, desc: parsed.desc, adminNama: parsed.adminNama, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', _seq: _seq++ });
+                        history.push({ id: t.Task_ID, userId: t.User_ID, date: t.Tanggal, desc: parsed.desc, adminNama: parsed.adminNama, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', catatan: t.Catatan_Admin || '', _seq: _seq++ });
                     }
                 }
             }
@@ -3332,6 +3429,7 @@
             let kerjaBadge = h.statusKerja === 'Selesai' ? '<span class="bg-blue-100 text-blue-600 text-[10px] px-2 py-1 rounded-full font-bold border border-blue-200 uppercase">Selesai</span>' : '<span class="bg-gray-100 text-gray-500 text-[10px] px-2 py-1 rounded-full font-bold border border-gray-200 uppercase">Belum Selesai</span>';
             const escDesc = escJsAttr(h.desc);
             const escAdminNama = escJsAttr(h.adminNama || '');
+            const escCatatan = escJsAttr(h.catatan || '');
             return `
                 <tr class="hover:bg-wahdah-50/30 transition-colors">
                     <td class="px-5 py-3 text-wahdah-600 text-xs">${escapeHtml(h.date)}</td>
@@ -3340,7 +3438,7 @@
                     <td class="px-5 py-3 text-center">${kerjaBadge}</td>
                     <td class="px-5 py-3 text-center">
                         <div class="flex items-center justify-center gap-1.5">
-                            <button onclick="editAdminHistoryPoin('${h.id}', 'Task', ${h.poin || 0}, '', '${escDesc}', '${escAdminNama}', false)" class="w-7 h-7 bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 rounded-lg flex items-center justify-center transition-colors" title="Edit Laporan">
+                            <button onclick="editAdminHistoryPoin('${h.id}', 'Task', ${h.poin || 0}, '${escCatatan}', '${escDesc}', '${escAdminNama}', false)" class="w-7 h-7 bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-600 rounded-lg flex items-center justify-center transition-colors" title="Edit Laporan">
                                 <i class="fa-solid fa-pen text-xs"></i>
                             </button>
                             <button onclick="deleteAdminHistoryItem('${h.id}', 'Task')" class="w-7 h-7 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 rounded-lg flex items-center justify-center transition-colors" title="Hapus Laporan">
@@ -3365,10 +3463,11 @@
     }
 
     function editAdminHistoryPoin(id, type, currentPoin, currentCatatan, currentDeskripsi, adminNama, allowEditPoin = true) {
-        const showCatatan = type === 'Piket';
         const showDeskripsi = type === 'Task';
+        const showCatatan = true;
+        const catatanLabel = type === 'Task' ? 'Catatan Tugas' : 'Catatan Piket';
         Swal.fire({
-            title: showDeskripsi ? 'Edit Laporan Tugas' : (showCatatan ? 'Edit Laporan Piket' : 'Edit Poin Laporan'),
+            title: showDeskripsi ? 'Edit Laporan Tugas' : 'Edit Laporan Piket',
             width: 420,
             html: `
                 <div class="text-left">
@@ -3376,13 +3475,13 @@
                     <label class="block text-xs font-semibold text-wahdah-700 mb-1">Poin</label>
                     <input id="swalEditPoin" type="number" min="0" step="1" value="${currentPoin}" class="swal2-input" style="width:100%;box-sizing:border-box;margin:0 0 12px;">
                     ` : ''}
+                    ${showCatatan ? `
+                    <label class="block text-xs font-semibold text-wahdah-700 mb-1">${catatanLabel}</label>
+                    <textarea id="swalEditCatatan" class="swal2-textarea" style="width:100%;box-sizing:border-box;margin:0 0 12px;" placeholder="Tulis catatan...">${escapeHtml(currentCatatan || '')}</textarea>
+                    ` : ''}
                     ${showDeskripsi ? `
                     <label class="block text-xs font-semibold text-wahdah-700 mb-1">Laporan Tugas</label>
                     <textarea id="swalEditDeskripsi" class="swal2-textarea" style="width:100%;box-sizing:border-box;margin:0;" placeholder="Tulis laporan tugas...">${escapeHtml(currentDeskripsi || '')}</textarea>
-                    ` : ''}
-                    ${showCatatan ? `
-                    <label class="block text-xs font-semibold text-wahdah-700 mb-1">Catatan Piket</label>
-                    <textarea id="swalEditCatatan" class="swal2-textarea" style="width:100%;box-sizing:border-box;margin:0;" placeholder="Tulis catatan...">${escapeHtml(currentCatatan || '')}</textarea>
                     ` : ''}
                 </div>
             `,
@@ -3404,6 +3503,10 @@
                 } else {
                     result.poin = currentPoin;
                 }
+                if (showCatatan) {
+                    const catatanEl = document.getElementById('swalEditCatatan');
+                    result.catatan = catatanEl ? catatanEl.value : null;
+                }
                 if (showDeskripsi) {
                     const descEl = document.getElementById('swalEditDeskripsi');
                     const descVal = descEl ? descEl.value.trim() : '';
@@ -3413,15 +3516,11 @@
                     }
                     result.deskripsi = descVal;
                 }
-                if (showCatatan) {
-                    const catatanEl = document.getElementById('swalEditCatatan');
-                    result.catatan = catatanEl ? catatanEl.value : null;
-                }
                 return result;
             }
         }).then(result => {
             if (!result.isConfirmed) return;
-            const { poin, deskripsi, catatan } = result.value;
+            const { poin, catatan, deskripsi } = result.value;
             const data = { id: id, type: type, poin: poin, catatan: catatan };
             if (showDeskripsi && deskripsi !== undefined) {
                 data.deskripsi = reattachAssignedByMarker(deskripsi, adminNama);
@@ -3831,81 +3930,108 @@
     // ==========================================
     // 4d. FUNGSI PENILAIAN KEDISIPLINAN (ADMIN)
     // ==========================================
-    function submitSeragam(e) {
-        e.preventDefault();
+     function submitSeragam(e) {
+         e.preventDefault();
 
-        const userIds = selectedSeragamUserIds.slice();
-        const tanggal = document.getElementById('inpSeragamTanggal').value;
-        const rincian = {
-            rapi_lengkap: selectedKedisiplinanItems.includes('rapi_lengkap'),
-            parkir: selectedKedisiplinanItems.includes('parkir'),
-            alas_kaki: selectedKedisiplinanItems.includes('alas_kaki')
-        };
-        const nilai = APP_CONFIG.poinPerItemKedisiplinan *
-            ((rincian.rapi_lengkap ? 1 : 0) + (rincian.parkir ? 1 : 0) + (rincian.alas_kaki ? 1 : 0));
+         const selectedIds = selectedSeragamUserIds.slice();
+         const tanggal = document.getElementById('inpSeragamTanggal').value;
+         const rincian = {
+             rapi_lengkap: selectedKedisiplinanItems.includes('rapi_lengkap'),
+             parkir: selectedKedisiplinanItems.includes('parkir'),
+             alas_kaki: selectedKedisiplinanItems.includes('alas_kaki')
+         };
+         const nilai = APP_CONFIG.poinPerItemKedisiplinan *
+             ((rincian.rapi_lengkap ? 1 : 0) + (rincian.parkir ? 1 : 0) + (rincian.alas_kaki ? 1 : 0));
 
-        if (userIds.length === 0 || !tanggal) {
-            Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Mohon pilih minimal 1 karyawan dan isi tanggal penilaian.', confirmButtonColor: '#25906a' });
-            return;
-        }
+         if (selectedIds.length === 0 || !tanggal) {
+             Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Mohon pilih minimal 1 karyawan dan isi tanggal penilaian.', confirmButtonColor: '#25906a' });
+             return;
+         }
 
-        setSeragamButtonProcessing(true);
+         const existingSeragam = (db.seragam || []);
+         const newUserIds = [];
+         const skippedUsers = [];
+         selectedIds.forEach(userId => {
+             if (existingSeragam.some(s => s.User_ID === userId && s.Tanggal === tanggal)) {
+                 skippedUsers.push({ userId, nama: getUserName(userId) });
+             } else {
+                 newUserIds.push(userId);
+             }
+         });
 
-        if (typeof google === 'undefined') {
-            if (!db.seragam) db.seragam = [];
-            let updateCount = 0;
-            userIds.forEach(userId => {
-                const existing = db.seragam.find(s => s.User_ID === userId && s.Tanggal === tanggal);
-                if (existing) {
-                    existing.Nilai = nilai;
-                    existing.Rincian = rincian;
-                    updateCount++;
-                } else {
-                    db.seragam.push({ Seragam_ID: 'SRG-' + Date.now() + '-' + userId, User_ID: userId, Tanggal: tanggal, Nilai: nilai, Rincian: rincian });
-                }
-            });
-            finalizeSeragamSubmit(userIds.length, updateCount);
-        } else {
-            const updateCount = userIds.filter(userId => (db.seragam || []).some(s => s.User_ID === userId && s.Tanggal === tanggal)).length;
-            google.script.run
-                .withSuccessHandler(res => {
-                    db = res;
-                    finalizeSeragamSubmit(userIds.length, updateCount);
-                })
-                .withFailureHandler(err => {
-                    console.error(err);
-                    setSeragamButtonProcessing(false);
-                    Swal.fire('Error', (err && err.message) || 'Gagal menyimpan penilaian kedisiplinan.', 'error');
-                })
-                .saveSeragam(sessionToken, { userIds: userIds, tanggal: tanggal, nilai: nilai, rincian: rincian });
-        }
-    }
+         if (newUserIds.length === 0) {
+             const names = skippedUsers.map(u => u.nama);
+             const preview = names.slice(0, 5).join(', ') + (names.length > 5 ? ` +${names.length - 5} lainnya` : '');
+             Swal.fire({
+                 icon: 'info',
+                 title: 'Semua Karyawan Sudah Dinilai',
+                 html: `Karyawan yang dipilih sudah memiliki penilaian kedisiplinan pada tanggal <strong>${tanggal}</strong>.<br><br>Untuk mengubah nilai, gunakan tombol edit pada tabel <strong>Riwayat Inputan Kedisiplinan</strong> di bawah.<br><br><span class="text-wahdah-600">${preview}</span>`,
+                 confirmButtonColor: '#25906a'
+             });
+             return;
+         }
 
-    function finalizeSeragamSubmit(totalCount, updateCount) {
-        const form = document.getElementById('formSeragam');
-        if (form) form.reset();
-        selectedSeragamUserIds = [];
-        selectedKedisiplinanItems = [];
-        document.querySelectorAll('.seragam-user-checkbox').forEach(cb => { cb.checked = false; });
-        document.querySelectorAll('.kedisiplinan-item-checkbox').forEach(cb => { cb.checked = false; });
-        updateSeragamUserSelectUI();
-        updateKedisiplinanItemSelectUI();
-        renderLeaderboardSeragam();
-        renderLeaderboardAkumulasi();
-        setSeragamButtonProcessing(false);
+         setSeragamButtonProcessing(true);
 
-        const newCount = totalCount - updateCount;
-        let msg;
-        if (totalCount === 1) {
-            msg = updateCount > 0 ? 'Penilaian kedisiplinan diperbarui!' : 'Penilaian kedisiplinan disimpan!';
-        } else {
-            const parts = [];
-            if (newCount > 0) parts.push(`${newCount} baru`);
-            if (updateCount > 0) parts.push(`${updateCount} diperbarui`);
-            msg = `Penilaian kedisiplinan ${totalCount} karyawan disimpan (${parts.join(', ')})!`;
-        }
-        Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: msg, showConfirmButton: false, timer: 2000 });
-    }
+         if (typeof google === 'undefined') {
+             if (!db.seragam) db.seragam = [];
+             newUserIds.forEach(userId => {
+                 db.seragam.push({ Seragam_ID: 'SRG-' + Date.now() + '-' + userId, User_ID: userId, Tanggal: tanggal, Nilai: nilai, Rincian: rincian });
+             });
+             finalizeSeragamSubmit(newUserIds.length, skippedUsers);
+         } else {
+             google.script.run
+                 .withSuccessHandler(res => {
+                     db = res;
+                     finalizeSeragamSubmit(newUserIds.length, skippedUsers);
+                 })
+                 .withFailureHandler(err => {
+                     console.error(err);
+                     setSeragamButtonProcessing(false);
+                     Swal.fire('Error', (err && err.message) || 'Gagal menyimpan penilaian kedisiplinan.', 'error');
+                 })
+                 .saveSeragam(sessionToken, { userIds: newUserIds, tanggal: tanggal, nilai: nilai, rincian: rincian });
+         }
+     }
+
+     function finalizeSeragamSubmit(savedCount, skippedUsers) {
+         const form = document.getElementById('formSeragam');
+         if (form) form.reset();
+         selectedSeragamUserIds = [];
+         selectedKedisiplinanItems = [];
+         document.querySelectorAll('.seragam-user-checkbox').forEach(cb => { cb.checked = false; });
+         document.querySelectorAll('.kedisiplinan-item-checkbox').forEach(cb => { cb.checked = false; });
+         updateSeragamUserSelectUI();
+         updateKedisiplinanItemSelectUI();
+         renderLeaderboardSeragam();
+         renderLeaderboardAkumulasi();
+         setSeragamButtonProcessing(false);
+
+         const isSingular = savedCount === 1;
+         let title = isSingular ? 'Penilaian kedisiplinan disimpan!' : `Penilaian kedisiplinan tersimpan untuk ${savedCount} karyawan!`;
+         let html = '';
+
+         if (skippedUsers.length > 0) {
+             const names = skippedUsers.map(u => u.nama);
+             const preview = names.slice(0, 5).join(', ') + (names.length > 5 ? ` +${names.length - 5} lainnya` : '');
+             html += `<div class="text-left text-sm text-wahdah-700 mt-2">`;
+             html += `<p>Yang sudah memiliki data di tanggal ini <strong>dilewati</strong>:</p>`;
+             html += `<p class="text-wahdah-600 mt-1">${preview}</p>`;
+             html += `<p class="text-wahdah-500 text-xs mt-2">Ubah nilai mereka melalui tombol Edit pada tabel Riwayat Inputan Kedisiplinan di bawah.</p>`;
+             html += `</div>`;
+         }
+
+         Swal.fire({
+             toast: skippedUsers.length === 0,
+             position: skippedUsers.length === 0 ? 'bottom-end' : 'center',
+             icon: 'success',
+             title: skippedUsers.length === 0 ? title : 'Penilaian kedisiplinan disimpan',
+             html: skippedUsers.length === 0 ? undefined : html,
+             showConfirmButton: skippedUsers.length === 0,
+             timer: skippedUsers.length === 0 ? 2000 : undefined,
+             confirmButtonColor: '#25906a'
+         });
+     }
 
     function resetSeragamFilter() {
         const startEl = document.getElementById('lsFilterStart');
@@ -4006,8 +4132,10 @@
         history.sort((a, b) => new Date(String(b.Tanggal || '').slice(0, 10)) - new Date(String(a.Tanggal || '').slice(0, 10)));
 
         if (history.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-wahdah-400">Belum ada riwayat inputan kedisiplinan untuk periode ini.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-wahdah-400">Belum ada riwayat inputan kedisiplinan untuk periode ini.</td></tr>`;
             document.getElementById('riwayatSeragam-pagination').innerHTML = '';
+            currentKedisiplinanIds = [];
+            updateKedisiplinanBulkActionUI();
             return;
         }
 
@@ -4015,6 +4143,11 @@
         if (paginationState.seragamHistory.page > totalPages) paginationState.seragamHistory.page = totalPages;
         const start = (paginationState.seragamHistory.page - 1) * paginationState.seragamHistory.pageSize;
         const pageData = history.slice(start, start + paginationState.seragamHistory.pageSize);
+
+        currentKedisiplinanIds = pageData.map(s => s.Seragam_ID);
+        kedisiplinanSelectedIds.forEach(id => {
+            if (!currentKedisiplinanIds.includes(id)) kedisiplinanSelectedIds.delete(id);
+        });
 
         tbody.innerHTML = pageData.map(s => {
             const poin = s.Nilai || 0;
@@ -4038,8 +4171,12 @@
                 penilaianBadge = '<span class="bg-gray-100 text-gray-500 text-[10px] px-2 py-1 rounded-full font-bold border border-gray-200 uppercase">Tidak Lengkap</span>';
             }
 
+            const isChecked = kedisiplinanSelectedIds.has(s.Seragam_ID) ? 'checked' : '';
             return `
             <tr class="hover:bg-wahdah-50/30 transition-colors">
+                <td class="px-3 py-4 text-center">
+                    <input type="checkbox" class="kedisiplinan-row-checkbox w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer" value="${s.Seragam_ID}" ${isChecked} onchange="toggleKedisiplinanRowSelection('${s.Seragam_ID}', this.checked)">
+                </td>
                 <td class="px-5 py-4 text-wahdah-600 text-xs whitespace-nowrap">${escapeHtml(String(s.Tanggal || '').slice(0, 10))}</td>
                 <td class="px-5 py-4 font-semibold text-wahdah-800">${escapeHtml(getUserName(s.User_ID))}</td>
                 <td class="px-5 py-4 text-center">${penilaianBadge}</td>
@@ -4058,6 +4195,7 @@
         }).join('');
 
         renderPagination('riwayatSeragam-pagination', paginationState.seragamHistory, totalPages, 'renderRiwayatSeragam');
+        updateKedisiplinanBulkActionUI();
     }
 
     function editSeragamPoin(id) {

@@ -60,6 +60,7 @@
         saveSeragam:           { rpc: 'kpi_save_seragam',        params: ['p_token', 'p_data'] },
         updateSeragamPoin:     { rpc: 'kpi_update_seragam_poin', params: ['p_token', 'p_data'] },
         deleteSeragam:         { rpc: 'kpi_delete_seragam',      params: ['p_token', 'p_id'] },
+        deleteMultipleSeragam: { rpc: 'kpi_delete_multiple_seragam', params: ['p_token', 'p_ids'] },
         // Fungsi tambahan (fitur baru, tidak ada di code.gs):
         getConfig:             { rpc: 'kpi_get_config',          params: ['p_token'] },
         setConfig:             { rpc: 'kpi_set_config',          params: ['p_token', 'p_key', 'p_value'] },
