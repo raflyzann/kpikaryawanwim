@@ -356,14 +356,7 @@
                                                 <i class="fa-solid fa-trash-can text-sm"></i>
                                             </button>
                             </div>
-                            <div class="flex-1 w-full">
-                                <div class="relative">
-                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-wahdah-400 text-xs"></i>
-                                    <input type="text" id="adminQueueFilterSearch" placeholder="Cari deskripsi laporan..." class="w-full rounded-lg border border-wahdah-200 pl-8 pr-8 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
-                                    <button type="button" onclick="document.getElementById('adminQueueFilterSearch').value=''; paginationState.adminQueue.page=1; adminQueueSelectedIds.clear(); renderAdminQueue(); toggleSearchClear('adminQueueFilterSearch')" class="absolute right-2 top-1/2 -translate-y-1/2 text-wahdah-400 hover:text-wahdah-600 text-xs hidden" id="adminQueueFilterSearchClear">&times;</button>
-                                </div>
-                            </div>
-                        </div>
+                                                            </div>
                                 </div>
                                 
                                 <div class="flex items-center justify-between mt-2">
@@ -522,6 +515,13 @@
                                 <select id="adminQueueFilterNama" class="w-full sm:w-48 text-xs border border-wahdah-200 rounded-lg px-2 py-1.5 focus:ring-1 focus:ring-wahdah-400 outline-none bg-white" onchange="paginationState.adminQueue.page = 1; adminQueueSelectedIds.clear(); renderAdminQueue()">
                                     <option value="ALL">Semua Karyawan</option>
                                 </select>
+                            </div>
+                            <div class="flex items-center gap-2 w-full sm:w-auto">
+                                <div class="relative w-full sm:w-48">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-wahdah-400 text-xs"></i>
+                                    <input type="text" id="adminQueueFilterSearch" placeholder="Cari deskripsi laporan..." class="w-full rounded-lg border border-wahdah-200 pl-8 pr-8 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
+                                    <button type="button" onclick="document.getElementById('adminQueueFilterSearch').value=''; paginationState.adminQueue.page=1; adminQueueSelectedIds.clear(); renderAdminQueue(); toggleSearchClear('adminQueueFilterSearch')" class="absolute right-2 top-1/2 -translate-y-1/2 text-wahdah-400 hover:text-wahdah-600 text-xs hidden" id="adminQueueFilterSearchClear">&times;</button>
+                                </div>
                             </div>
                         </div>
                     </div>
