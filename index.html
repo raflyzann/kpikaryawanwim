@@ -355,8 +355,15 @@
                                             <button type="button" class="hidden btn-hapus-tugas shrink-0 mt-1 w-8 h-8 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors" onclick="removeJobdeskInput(this)" title="Hapus baris ini">
                                                 <i class="fa-solid fa-trash-can text-sm"></i>
                                             </button>
-                                        </div>
-                                    </div>
+                            </div>
+                            <div class="flex-1 w-full">
+                                <div class="relative">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-wahdah-400 text-xs"></i>
+                                    <input type="text" id="adminQueueFilterSearch" placeholder="Cari deskripsi laporan..." class="w-full rounded-lg border border-wahdah-200 pl-8 pr-8 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
+                                    <button type="button" onclick="document.getElementById('adminQueueFilterSearch').value=''; paginationState.adminQueue.page=1; adminQueueSelectedIds.clear(); renderAdminQueue(); toggleSearchClear('adminQueueFilterSearch')" class="absolute right-2 top-1/2 -translate-y-1/2 text-wahdah-400 hover:text-wahdah-600 text-xs hidden" id="adminQueueFilterSearchClear">&times;</button>
+                                </div>
+                            </div>
+                        </div>
                                 </div>
                                 
                                 <div class="flex items-center justify-between mt-2">
@@ -421,6 +428,14 @@
                                     <option value="Task">Laporan Tugas</option>
                                     <option value="Piket">Laporan Piket</option>
                                 </select>
+                            </div>
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Cari Aktivitas</label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-wahdah-400 text-xs"></i>
+                                    <input type="text" id="uhFilterSearch" placeholder="Cari deskripsi laporan..." class="w-full rounded-lg border border-wahdah-200 pl-8 pr-8 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
+                                    <button type="button" onclick="document.getElementById('uhFilterSearch').value=''; paginationState.userHistory.page=1; renderUserHistory(); toggleSearchClear('uhFilterSearch')" class="absolute right-2 top-1/2 -translate-y-1/2 text-wahdah-400 hover:text-wahdah-600 text-xs hidden" id="uhFilterSearchClear">&times;</button>
+                                </div>
                             </div>
                             <div class="flex-1 w-full">
                                 <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Mulai Tanggal</label>
@@ -581,6 +596,14 @@
                                 </select>
                             </div>
                             <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Cari Aktivitas</label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-wahdah-400 text-xs"></i>
+                                    <input type="text" id="adminHistoryFilterSearch" placeholder="Cari deskripsi laporan..." class="w-full rounded-lg border border-wahdah-200 pl-8 pr-8 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
+                                    <button type="button" onclick="document.getElementById('adminHistoryFilterSearch').value=''; paginationState.adminHistory.page=1; renderAdminHistory(); toggleSearchClear('adminHistoryFilterSearch')" class="absolute right-2 top-1/2 -translate-y-1/2 text-wahdah-400 hover:text-wahdah-600 text-xs hidden" id="adminHistoryFilterSearchClear">&times;</button>
+                                </div>
+                            </div>
+                            <div class="flex-1 w-full">
                                 <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Mulai Tanggal</label>
                                 <input type="date" id="ahFilterStart" class="w-full rounded-lg border border-wahdah-200 px-3 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
                             </div>
@@ -733,6 +756,14 @@
                                     <option value="Selesai">Selesai</option>
                                     <option value="Belum Selesai">Belum Selesai</option>
                                 </select>
+                            </div>
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Cari Deskripsi Tugas</label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-wahdah-400 text-xs"></i>
+                                    <input type="text" id="penugasanHistoryFilterSearch" placeholder="Cari deskripsi tugas..." class="w-full rounded-lg border border-wahdah-200 pl-8 pr-8 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
+                                    <button type="button" onclick="document.getElementById('penugasanHistoryFilterSearch').value=''; paginationState.penugasanHistory.page=1; renderPenugasanHistory(); toggleSearchClear('penugasanHistoryFilterSearch')" class="absolute right-2 top-1/2 -translate-y-1/2 text-wahdah-400 hover:text-wahdah-600 text-xs hidden" id="penugasanHistoryFilterSearchClear">&times;</button>
+                                </div>
                             </div>
                             <div class="flex-1 w-full">
                                 <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Mulai Tanggal</label>
@@ -900,6 +931,12 @@
                             <i class="fa-solid fa-clock-rotate-left text-wahdah-600"></i> Riwayat Inputan Kedisiplinan
                         </h3>
                         <div class="flex flex-col md:flex-row gap-3 items-end">
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Nama Karyawan</label>
+                                <select id="shFilterNama" class="w-full rounded-lg border border-wahdah-200 px-2 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white" onchange="paginationState.seragamHistory.page = 1; renderRiwayatSeragam()">
+                                    <option value="ALL">Semua Karyawan</option>
+                                </select>
+                            </div>
                             <div class="flex-1 w-full">
                                 <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Mulai Tanggal</label>
                                 <input type="date" id="shFilterStart" class="w-full rounded-lg border border-wahdah-200 px-3 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
@@ -1345,6 +1382,14 @@
     let currentAdminQueueIds = [];
     let kedisiplinanSelectedIds = new Set();
     let currentKedisiplinanIds = [];
+
+    function debounce(fn, delay) {
+        let timer;
+        return function(...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn.apply(this, args), delay);
+        };
+    }
 
     window.addEventListener('DOMContentLoaded', loadData);
 
@@ -1798,20 +1843,13 @@
         } else if (currentUser.Role === 'Admin') {
             document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
             populateAdminFilter();
+            setupSearchListeners();
             document.getElementById('navAdminDashboard').click();
         } else if (currentUser.Role === 'Operator') {
-            // Operator hanya kebagian 3 menu: Antrean Persetujuan (khusus
-            // laporan Piket), Inputan & Nilai Kehadiran, dan Penilaian
-            // Kedisiplinan. Menu admin lainnya (Riwayat Kinerja, Catat Penugasan,
-            // Leaderboard, dll) tetap tersembunyi karena tidak diberi kelas
-            // "operator-only".
             document.querySelectorAll('.operator-only').forEach(el => el.classList.remove('hidden'));
             populateAdminFilter();
+            setupSearchListeners();
 
-            // Kunci filter "Jenis Laporan" di Antrean Persetujuan ke "Laporan
-            // Piket" saja dan nonaktifkan supaya Operator tidak bisa melihat
-            // ataupun menyetujui laporan Tugas - baik dari sisi tampilan
-            // maupun percobaan approve (yang tetap akan ditolak di server).
             const jenisFilterEl = document.getElementById('adminQueueFilterJenis');
             if (jenisFilterEl) {
                 jenisFilterEl.value = 'Piket';
@@ -1820,6 +1858,57 @@
 
             document.getElementById('navAdminDashboard').click();
         }
+    }
+
+    function setupSearchListeners() {
+        const uhSearch = document.getElementById('uhFilterSearch');
+        if (uhSearch) {
+            const debounced = debounce(() => {
+                paginationState.userHistory.page = 1;
+                renderUserHistory();
+                toggleSearchClear('uhFilterSearch');
+            }, 250);
+            uhSearch.addEventListener('input', debounced);
+        }
+
+        const adminQueueSearch = document.getElementById('adminQueueFilterSearch');
+        if (adminQueueSearch) {
+            const debounced = debounce(() => {
+                paginationState.adminQueue.page = 1;
+                adminQueueSelectedIds.clear();
+                renderAdminQueue();
+                toggleSearchClear('adminQueueFilterSearch');
+            }, 250);
+            adminQueueSearch.addEventListener('input', debounced);
+        }
+
+        const adminHistorySearch = document.getElementById('adminHistoryFilterSearch');
+        if (adminHistorySearch) {
+            const debounced = debounce(() => {
+                paginationState.adminHistory.page = 1;
+                renderAdminHistory();
+                toggleSearchClear('adminHistoryFilterSearch');
+            }, 250);
+            adminHistorySearch.addEventListener('input', debounced);
+        }
+
+        const penugasanSearch = document.getElementById('penugasanHistoryFilterSearch');
+        if (penugasanSearch) {
+            const debounced = debounce(() => {
+                paginationState.penugasanHistory.page = 1;
+                renderPenugasanHistory();
+                toggleSearchClear('penugasanHistoryFilterSearch');
+            }, 250);
+            penugasanSearch.addEventListener('input', debounced);
+        }
+    }
+
+    function toggleSearchClear(searchId) {
+        const input = document.getElementById(searchId);
+        const clearBtn = document.getElementById(searchId + 'Clear');
+        if (!input || !clearBtn) return;
+        if (input.value.trim()) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
     }
 
     function logout() {
@@ -2361,6 +2450,8 @@
         document.getElementById('uhFilterEnd').value = '';
         const filterJenisEl = document.getElementById('uhFilterJenis');
         if (filterJenisEl) filterJenisEl.value = 'ALL';
+        const searchEl = document.getElementById('uhFilterSearch');
+        if (searchEl) searchEl.value = '';
         paginationState.userHistory.page = 1;
         userHistorySelectedIds.clear();
         renderUserHistory();
@@ -2376,6 +2467,8 @@
         endDate.setHours(23, 59, 59, 999);
         const filterJenisEl = document.getElementById('uhFilterJenis');
         const filterJenis = filterJenisEl ? filterJenisEl.value : 'ALL';
+        const searchEl = document.getElementById('uhFilterSearch');
+        const searchText = searchEl ? searchEl.value.trim().toLowerCase() : '';
 
         let history = [];
         let _seq = 0;
@@ -2384,7 +2477,10 @@
             db.jobdesk.filter(t => t.User_ID === currentUser.User_ID).forEach(t => {
                 let itemDate = new Date(t.Tanggal);
                 if(itemDate >= startDate && itemDate <= endDate) {
-                    history.push({ type: 'Task', id: t.Task_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', catatan: t.Catatan_Admin || '', _seq: _seq++ });
+                    const desc = t.Deskripsi_Tugas || '';
+                    if (!searchText || desc.toLowerCase().includes(searchText)) {
+                        history.push({ type: 'Task', id: t.Task_ID, date: t.Tanggal, desc: desc, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', catatan: t.Catatan_Admin || '', _seq: _seq++ });
+                    }
                 }
             });
         }
@@ -2392,7 +2488,10 @@
             db.piket.filter(p => p.User_ID === currentUser.User_ID).forEach(p => {
                 let itemDate = new Date(p.Tanggal);
                 if(itemDate >= startDate && itemDate <= endDate) {
-                    history.push({ type: 'Piket', id: p.Schedule_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, status: p.Status, poin: p.Poin, statusKerja: p.Status_Kerja || 'Selesai', catatan: p.Catatan_Admin || '', _seq: _seq++ });
+                    const desc = `Piket: ${p.Jenis_Piket}`;
+                    if (!searchText || desc.toLowerCase().includes(searchText)) {
+                        history.push({ type: 'Piket', id: p.Schedule_ID, date: p.Tanggal, desc: desc, status: p.Status, poin: p.Poin, statusKerja: p.Status_Kerja || 'Selesai', catatan: p.Catatan_Admin || '', _seq: _seq++ });
+                    }
                 }
             });
         }
@@ -2603,6 +2702,7 @@
     function populateAdminFilter() {
         const selectHistory = document.getElementById('adminFilterNama');
         const selectQueue = document.getElementById('adminQueueFilterNama');
+        const selectSeragam = document.getElementById('shFilterNama');
         
         const users = db.users.filter(u => u.Role === 'User');
         const optionsHtml = `<option value="ALL">Semua Karyawan</option>` + 
@@ -2610,6 +2710,7 @@
             
         if (selectHistory) selectHistory.innerHTML = optionsHtml;
         if (selectQueue) selectQueue.innerHTML = optionsHtml;
+        if (selectSeragam) selectSeragam.innerHTML = optionsHtml;
 
         populateKehadiranUserDropdown();
         populateSeragamUserDropdown();
@@ -3056,6 +3157,8 @@
         const filterUserId = document.getElementById('adminQueueFilterNama').value;
         const filterProgresEl = document.getElementById('adminQueueFilterProgres');
         const filterProgres = filterProgresEl ? filterProgresEl.value : 'ALL';
+        const searchEl = document.getElementById('adminQueueFilterSearch');
+        const searchText = searchEl ? searchEl.value.trim().toLowerCase() : '';
 
         let queue = [];
         let _seq = 0;
@@ -3063,7 +3166,10 @@
         if (filterJenis === 'ALL' || filterJenis === 'Task') {
             db.jobdesk.filter(t => t.Status === 'Pending').forEach(t => {
                 if ((filterUserId === 'ALL' || t.User_ID === filterUserId) && (filterProgres === 'ALL' || (t.Status_Kerja || 'Selesai') === filterProgres)) {
-                    queue.push({ type: 'Task', id: t.Task_ID, userId: t.User_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, statusKerja: t.Status_Kerja || 'Selesai', catatan: t.Catatan_Admin || '', _seq: _seq++ });
+                    const desc = t.Deskripsi_Tugas || '';
+                    if (!searchText || desc.toLowerCase().includes(searchText)) {
+                        queue.push({ type: 'Task', id: t.Task_ID, userId: t.User_ID, date: t.Tanggal, desc: desc, statusKerja: t.Status_Kerja || 'Selesai', catatan: t.Catatan_Admin || '', _seq: _seq++ });
+                    }
                 }
             });
         }
@@ -3071,7 +3177,10 @@
         if (filterJenis === 'ALL' || filterJenis === 'Piket') {
             db.piket.filter(p => p.Status === 'Pending').forEach(p => {
                 if ((filterUserId === 'ALL' || p.User_ID === filterUserId) && (filterProgres === 'ALL' || (p.Status_Kerja || 'Selesai') === filterProgres)) {
-                    queue.push({ type: 'Piket', id: p.Schedule_ID, userId: p.User_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, statusKerja: p.Status_Kerja || 'Selesai', catatan: p.Catatan_Admin || '', _seq: _seq++ });
+                    const desc = `Piket: ${p.Jenis_Piket}`;
+                    if (!searchText || desc.toLowerCase().includes(searchText)) {
+                        queue.push({ type: 'Piket', id: p.Schedule_ID, userId: p.User_ID, date: p.Tanggal, desc: desc, statusKerja: p.Status_Kerja || 'Selesai', catatan: p.Catatan_Admin || '', _seq: _seq++ });
+                    }
                 }
             });
         }
@@ -3272,6 +3381,8 @@
         document.getElementById('adminFilterProgres').value = 'ALL';
         document.getElementById('ahFilterStart').value = '';
         document.getElementById('ahFilterEnd').value = '';
+        const searchEl = document.getElementById('adminHistoryFilterSearch');
+        if (searchEl) searchEl.value = '';
         paginationState.adminHistory.page = 1;
         renderAdminHistory();
     }
@@ -3285,6 +3396,8 @@
         const filterProgres = filterProgresEl ? filterProgresEl.value : 'ALL';
         const startDateStr = document.getElementById('ahFilterStart').value;
         const endDateStr = document.getElementById('ahFilterEnd').value;
+        const searchEl = document.getElementById('adminHistoryFilterSearch');
+        const searchText = searchEl ? searchEl.value.trim().toLowerCase() : '';
 
         let startDate = startDateStr ? new Date(startDateStr) : new Date('2000-01-01');
         let endDate = endDateStr ? new Date(endDateStr) : new Date('2100-01-01');
@@ -3298,7 +3411,10 @@
                 if(filterUserId === 'ALL' || t.User_ID === filterUserId) {
                     let itemDate = new Date(t.Tanggal);
                     if(itemDate >= startDate && itemDate <= endDate && (filterProgres === 'ALL' || (t.Status_Kerja || 'Selesai') === filterProgres)) {
-                        history.push({ id: t.Task_ID, type: 'Task', userId: t.User_ID, date: t.Tanggal, desc: t.Deskripsi_Tugas, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', catatan: t.Catatan_Admin || '', _seq: _seq++ });
+                        const desc = t.Deskripsi_Tugas || '';
+                        if (!searchText || desc.toLowerCase().includes(searchText)) {
+                            history.push({ id: t.Task_ID, type: 'Task', userId: t.User_ID, date: t.Tanggal, desc: desc, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', catatan: t.Catatan_Admin || '', _seq: _seq++ });
+                        }
                     }
                 }
             });
@@ -3308,7 +3424,10 @@
                 if(filterUserId === 'ALL' || p.User_ID === filterUserId) {
                     let itemDate = new Date(p.Tanggal);
                     if(itemDate >= startDate && itemDate <= endDate && (filterProgres === 'ALL' || (p.Status_Kerja || 'Selesai') === filterProgres)) {
-                        history.push({ id: p.Schedule_ID, type: 'Piket', userId: p.User_ID, date: p.Tanggal, desc: `Piket: ${p.Jenis_Piket}`, status: p.Status, poin: p.Poin, statusKerja: p.Status_Kerja || 'Selesai', catatan: p.Catatan_Admin || '', _seq: _seq++ });
+                        const desc = `Piket: ${p.Jenis_Piket}`;
+                        if (!searchText || desc.toLowerCase().includes(searchText)) {
+                            history.push({ id: p.Schedule_ID, type: 'Piket', userId: p.User_ID, date: p.Tanggal, desc: desc, status: p.Status, poin: p.Poin, statusKerja: p.Status_Kerja || 'Selesai', catatan: p.Catatan_Admin || '', _seq: _seq++ });
+                        }
                     }
                 }
             });
@@ -3392,6 +3511,8 @@
         const filterProgres = filterProgresEl ? filterProgresEl.value : 'ALL';
         const startDateStr = document.getElementById('phFilterStart').value;
         const endDateStr = document.getElementById('phFilterEnd').value;
+        const searchEl = document.getElementById('penugasanHistoryFilterSearch');
+        const searchText = searchEl ? searchEl.value.trim().toLowerCase() : '';
 
         let startDate = startDateStr ? new Date(startDateStr) : new Date('2000-01-01');
         let endDate = endDateStr ? new Date(endDateStr) : new Date('2100-01-01');
@@ -3406,7 +3527,10 @@
                 if (itemDate >= startDate && itemDate <= endDate && (filterProgres === 'ALL' || (t.Status_Kerja || 'Selesai') === filterProgres)) {
                     const parsed = formatTugasDeskripsi(t.Deskripsi_Tugas);
                     if (parsed.adminNama && parsed.adminNama === currentUser.Nama) {
-                        history.push({ id: t.Task_ID, userId: t.User_ID, date: t.Tanggal, desc: parsed.desc, adminNama: parsed.adminNama, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', catatan: t.Catatan_Admin || '', _seq: _seq++ });
+                        const desc = parsed.desc || '';
+                        if (!searchText || desc.toLowerCase().includes(searchText)) {
+                            history.push({ id: t.Task_ID, userId: t.User_ID, date: t.Tanggal, desc: parsed.desc, adminNama: parsed.adminNama, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', catatan: t.Catatan_Admin || '', _seq: _seq++ });
+                        }
                     }
                 }
             }
@@ -3458,6 +3582,8 @@
         document.getElementById('penugasanHistoryFilterProgres').value = 'ALL';
         document.getElementById('phFilterStart').value = '';
         document.getElementById('phFilterEnd').value = '';
+        const searchEl = document.getElementById('penugasanHistoryFilterSearch');
+        if (searchEl) searchEl.value = '';
         paginationState.penugasanHistory.page = 1;
         renderPenugasanHistory();
     }
@@ -4106,8 +4232,10 @@
     function resetRiwayatSeragamFilter() {
         const startEl = document.getElementById('shFilterStart');
         const endEl = document.getElementById('shFilterEnd');
+        const namaEl = document.getElementById('shFilterNama');
         if (startEl) startEl.value = '';
         if (endEl) endEl.value = '';
+        if (namaEl) namaEl.value = 'ALL';
         paginationState.seragamHistory.page = 1;
         renderRiwayatSeragam();
     }
@@ -4118,6 +4246,8 @@
 
         const startDateStr = document.getElementById('shFilterStart') ? document.getElementById('shFilterStart').value : '';
         const endDateStr = document.getElementById('shFilterEnd') ? document.getElementById('shFilterEnd').value : '';
+        const namaEl = document.getElementById('shFilterNama');
+        const filterUserId = namaEl ? namaEl.value : 'ALL';
         let startDate = startDateStr ? new Date(startDateStr) : new Date('2000-01-01');
         let endDate = endDateStr ? new Date(endDateStr) : new Date('2100-01-01');
         endDate.setHours(23, 59, 59, 999);
@@ -4125,7 +4255,9 @@
         const seragamData = db.seragam || [];
         let history = seragamData.filter(s => {
             const itemDate = new Date(String(s.Tanggal || '').slice(0, 10));
-            return itemDate >= startDate && itemDate <= endDate;
+            const dateOk = itemDate >= startDate && itemDate <= endDate;
+            const userOk = filterUserId === 'ALL' || s.User_ID === filterUserId;
+            return dateOk && userOk;
         });
 
         // Terbaru di atas.
