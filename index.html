@@ -423,6 +423,14 @@
                                 </select>
                             </div>
                             <div class="flex-1 w-full">
+                                <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Progres</label>
+                                <select id="uhFilterProgres" class="w-full rounded-lg border border-wahdah-200 px-3 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white" onchange="paginationState.userHistory.page = 1; renderUserHistory()">
+                                    <option value="ALL">Semua Progres</option>
+                                    <option value="Selesai">Selesai</option>
+                                    <option value="Belum Selesai">Belum Selesai</option>
+                                </select>
+                            </div>
+                            <div class="flex-1 w-full">
                                 <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Cari Aktivitas</label>
                                 <div class="relative">
                                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-wahdah-400 text-xs"></i>
@@ -2450,6 +2458,8 @@
         document.getElementById('uhFilterEnd').value = '';
         const filterJenisEl = document.getElementById('uhFilterJenis');
         if (filterJenisEl) filterJenisEl.value = 'ALL';
+        const filterProgresEl = document.getElementById('uhFilterProgres');
+        if (filterProgresEl) filterProgresEl.value = 'ALL';
         const searchEl = document.getElementById('uhFilterSearch');
         if (searchEl) searchEl.value = '';
         paginationState.userHistory.page = 1;
@@ -2467,6 +2477,8 @@
         endDate.setHours(23, 59, 59, 999);
         const filterJenisEl = document.getElementById('uhFilterJenis');
         const filterJenis = filterJenisEl ? filterJenisEl.value : 'ALL';
+        const filterProgresEl = document.getElementById('uhFilterProgres');
+        const filterProgres = filterProgresEl ? filterProgresEl.value : 'ALL';
         const searchEl = document.getElementById('uhFilterSearch');
         const searchText = searchEl ? searchEl.value.trim().toLowerCase() : '';
 
@@ -2478,8 +2490,9 @@
                 let itemDate = new Date(t.Tanggal);
                 if(itemDate >= startDate && itemDate <= endDate) {
                     const desc = t.Deskripsi_Tugas || '';
-                    if (!searchText || desc.toLowerCase().includes(searchText)) {
-                        history.push({ type: 'Task', id: t.Task_ID, date: t.Tanggal, desc: desc, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', catatan: t.Catatan_Admin || '', _seq: _seq++ });
+                    const statusKerja = t.Status_Kerja || 'Selesai';
+                    if ((filterProgres === 'ALL' || statusKerja === filterProgres) && (!searchText || desc.toLowerCase().includes(searchText))) {
+                        history.push({ type: 'Task', id: t.Task_ID, date: t.Tanggal, desc: desc, status: t.Status, poin: t.Poin, statusKerja: statusKerja, catatan: t.Catatan_Admin || '', _seq: _seq++ });
                     }
                 }
             });
@@ -2489,8 +2502,9 @@
                 let itemDate = new Date(p.Tanggal);
                 if(itemDate >= startDate && itemDate <= endDate) {
                     const desc = `Piket: ${p.Jenis_Piket}`;
-                    if (!searchText || desc.toLowerCase().includes(searchText)) {
-                        history.push({ type: 'Piket', id: p.Schedule_ID, date: p.Tanggal, desc: desc, status: p.Status, poin: p.Poin, statusKerja: p.Status_Kerja || 'Selesai', catatan: p.Catatan_Admin || '', _seq: _seq++ });
+                    const statusKerja = p.Status_Kerja || 'Selesai';
+                    if ((filterProgres === 'ALL' || statusKerja === filterProgres) && (!searchText || desc.toLowerCase().includes(searchText))) {
+                        history.push({ type: 'Piket', id: p.Schedule_ID, date: p.Tanggal, desc: desc, status: p.Status, poin: p.Poin, statusKerja: statusKerja, catatan: p.Catatan_Admin || '', _seq: _seq++ });
                     }
                 }
             });
@@ -2500,10 +2514,10 @@
         // lalu untuk tanggal yang sama, urutan input (_seq) terbaru menang.
         history.sort((a, b) => (new Date(b.date) - new Date(a.date)) || (b._seq - a._seq));
 
-        // Simpan seluruh ID yang BISA dicentang (status Pending) lintas
+        // Simpan seluruh ID yang BISA dicentang (Belum Selesai + belum Approved) lintas
         // halaman, supaya "select all" dan hitungan "dipilih" mencakup semua
         // halaman, bukan cuma yang sedang tampil.
-        currentUserHistoryIds = history.filter(h => h.status !== 'Approved').map(h => h.id);
+        currentUserHistoryIds = history.filter(h => h.statusKerja === 'Belum Selesai' && h.status !== 'Approved').map(h => h.id);
         userHistorySelectedIds.forEach(id => { if (!currentUserHistoryIds.includes(id)) userHistorySelectedIds.delete(id); });
 
         if(history.length === 0) {
@@ -2523,9 +2537,9 @@
             let kerjaBadge = h.statusKerja === 'Selesai' ? '<span class="bg-blue-100 text-blue-600 text-[10px] px-2 py-1 rounded-full font-bold border border-blue-200 uppercase">Selesai</span>' : '<span class="bg-gray-100 text-gray-500 text-[10px] px-2 py-1 rounded-full font-bold border border-gray-200 uppercase">Belum Selesai</span>';
             
             // Checkbox Update Completion
-            let disabledCb = h.status === 'Approved' ? 'disabled' : '';
+            let disabledCb = (h.statusKerja !== 'Belum Selesai' || h.status === 'Approved') ? 'disabled' : '';
             let isChecked = userHistorySelectedIds.has(h.id) ? 'checked' : '';
-            let cbHtml = `<input type="checkbox" class="row-checkbox w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer" value="${h.id}" ${isChecked} onchange="toggleUserRowSelection('${h.id}', this.checked)" ${disabledCb}>`;
+            let cbHtml = `<input type="checkbox" class="row-checkbox w-4 h-4 rounded border-wahdah-300 text-wahdah-600 focus:ring-wahdah-500 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed" value="${h.id}" ${isChecked} onchange="toggleUserRowSelection('${h.id}', this.checked)" ${disabledCb}>`;
             
             // Pisahkan label "Tugas dari: [Admin]" dari deskripsi asli (khusus Task)
             let assignedBadgeHtml = '';
