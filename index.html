@@ -135,6 +135,11 @@
                 <span>Leaderboard Total Poin</span>
             </button>
 
+            <button type="button" id="navAdminKelolaKaryawan" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewAdminKelolaKaryawan', this)">
+                <i class="fa-solid fa-users-gear w-5 text-center"></i>
+                <span>Kelola Karyawan</span>
+            </button>
+
             <button type="button" id="navAdminResetPin" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewAdminResetPin', this)">
                 <i class="fa-solid fa-key w-5 text-center"></i>
                 <span>Reset PIN Karyawan</span>
@@ -206,6 +211,9 @@
                                 <button type="button" id="btnToggleInpPinVisibility" tabindex="-1" onclick="toggleInpPinVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-wahdah-400 hover:text-wahdah-600 bg-transparent border-none cursor-pointer p-0 flex items-center justify-center">
                                     <i class="fa-regular fa-eye" id="inpPinEyeIcon"></i>
                                 </button>
+                            </div>
+                            <div class="text-right -mt-1">
+                                <button type="button" onclick="handleLupaPin()" class="text-xs font-semibold text-wahdah-600 hover:text-wahdah-800 hover:underline transition-colors">Lupa PIN?</button>
                             </div>
                         </div>
                         <button type="submit" id="btnLoginSubmit" class="w-full bg-wahdah-700 hover:bg-wahdah-800 text-white font-medium text-sm rounded-xl py-3 mt-2 shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
@@ -1192,6 +1200,62 @@
                 </div>
             </section>
 
+            <!-- ================= VIEW: ADMIN KELOLA KARYAWAN ================= -->
+            <section id="viewAdminKelolaKaryawan" class="view-section hidden view-fade max-w-4xl mx-auto space-y-6">
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5 md:p-6">
+                    <h3 class="text-sm font-bold text-wahdah-900 mb-4 flex items-center gap-2 border-b border-wahdah-50 pb-3">
+                        <div class="w-8 h-8 rounded-lg bg-wahdah-50 text-wahdah-600 flex items-center justify-center"><i class="fa-solid fa-user-plus"></i></div>
+                        Tambah Karyawan
+                    </h3>
+                    <form id="formAdminTambahKaryawan" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end" onsubmit="handleAdminTambahKaryawan(event)">
+                        <div>
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">Nama Karyawan</label>
+                            <input type="text" id="inpAdminTambahNama" required minlength="3" placeholder="Nama lengkap" class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">Email</label>
+                            <input type="email" id="inpAdminTambahEmail" required placeholder="user@email.com" class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">PIN Awal (6 Digit)</label>
+                            <input type="password" id="inpAdminTambahPin" required minlength="6" maxlength="6" inputmode="numeric" placeholder="••••••" oninput="sanitizePinInput(this)" class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white tracking-[0.3em] font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-wahdah-700 mb-1">Konfirmasi PIN</label>
+                            <input type="password" id="inpAdminTambahPinConfirm" required minlength="6" maxlength="6" inputmode="numeric" placeholder="••••••" oninput="sanitizePinInput(this)" class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white tracking-[0.3em] font-bold">
+                        </div>
+                        <div class="md:col-span-2">
+                            <button type="submit" id="btnAdminTambahKaryawan" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-sm rounded-xl px-6 py-2.5 transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
+                                <i class="fa-solid fa-user-plus"></i> <span>Tambah Karyawan</span>
+                            </button>
+                            <p class="text-[11px] text-wahdah-400 mt-2">Sampaikan PIN awal ke karyawan secara aman.</p>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5 md:p-6">
+                    <h3 class="text-sm font-bold text-wahdah-900 mb-4 flex items-center gap-2 border-b border-wahdah-50 pb-3">
+                        <div class="w-8 h-8 rounded-lg bg-wahdah-50 text-wahdah-600 flex items-center justify-center"><i class="fa-solid fa-users"></i></div>
+                        Daftar Karyawan
+                    </h3>
+                    <div class="overflow-x-auto min-h-[200px]">
+                        <table class="w-full text-sm">
+                            <thead class="bg-wahdah-50 border-b border-wahdah-100">
+                                <tr class="text-wahdah-700 text-xs uppercase tracking-wide">
+                                    <th class="text-left font-semibold px-3 py-3">Karyawan</th>
+                                    <th class="text-left font-semibold px-3 py-3">Email</th>
+                                    <th class="text-center font-semibold px-3 py-3 w-24">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="kelola-karyawan-tbody" class="divide-y divide-wahdah-50">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="kelola-karyawan-pagination" class="flex items-center justify-between px-5 py-3 border-t border-wahdah-100 bg-white"></div>
+                </div>
+            </section>
+
         </main>
     </div>
 
@@ -1218,7 +1282,8 @@
             { key: 'alas_kaki', label: 'Kerapian Penempatan Alas Kaki' }
         ],
         bobotPersen: { kinerja: 50, kehadiran: 30, seragam: 20 },
-        maxLoginAttempts: 5
+        maxLoginAttempts: 5,
+        waAdmin: '6282192225604'
     };
 
     /**
@@ -1383,7 +1448,8 @@
         seragamBoard: { page: 1, pageSize: 10 },
         seragamHistory: { page: 1, pageSize: 10 },
         akumulasiBoard: { page: 1, pageSize: 10 },
-        persentaseBoard: { page: 1, pageSize: 10 }
+        persentaseBoard: { page: 1, pageSize: 10 },
+        kelolaKaryawan: { page: 1, pageSize: 10 }
     };
 
     // Menyimpan ID baris yang dicentang lintas HALAMAN (pagination), karena
@@ -1692,6 +1758,200 @@
                 })
                 .withFailureHandler(err => handleApiError(err))
                 .changePin(sessionToken, result.value.lama, result.value.baru);
+        });
+    }
+
+    // ==========================================
+    // ADMIN: KELOLA KARYAWAN
+    // ==========================================
+    function renderKelolaKaryawan() {
+        const tbody = document.getElementById('kelola-karyawan-tbody');
+        if (!tbody) return;
+
+        const users = db.users.filter(u => u.Role === 'User').sort((a, b) => a.Nama.localeCompare(b.Nama));
+        const totalPages = Math.max(1, Math.ceil(users.length / paginationState.kelolaKaryawan.pageSize));
+        if (paginationState.kelolaKaryawan.page > totalPages) paginationState.kelolaKaryawan.page = totalPages;
+        const start = (paginationState.kelolaKaryawan.page - 1) * paginationState.kelolaKaryawan.pageSize;
+        const pageData = users.slice(start, start + paginationState.kelolaKaryawan.pageSize);
+
+        if (users.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-wahdah-400">Belum ada karyawan.</td></tr>`;
+            const pagContainer = document.getElementById('kelola-karyawan-pagination');
+            if (pagContainer) pagContainer.innerHTML = '';
+            return;
+        }
+
+        tbody.innerHTML = pageData.map(u => {
+            const escNama = escapeHtml(u.Nama);
+            const escEmail = escapeHtml(u.User_ID);
+            return `
+                <tr class="hover:bg-wahdah-50/50 transition-colors">
+                    <td class="px-3 py-3 font-medium text-wahdah-900">${escNama}</td>
+                    <td class="px-3 py-3 text-wahdah-600 text-xs">${escEmail}</td>
+                    <td class="px-3 py-3">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="editKaryawan('${escJsAttr(u.User_ID)}')" class="text-blue-500 hover:bg-blue-50 p-1.5 rounded-lg transition-colors" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteKaryawan('${escJsAttr(u.User_ID)}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors" title="Hapus"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        renderPagination('kelola-karyawan-pagination', paginationState.kelolaKaryawan, totalPages, 'renderKelolaKaryawan');
+    }
+
+    function handleAdminTambahKaryawan(e) {
+        e.preventDefault();
+        const nama = document.getElementById('inpAdminTambahNama').value.trim();
+        const email = document.getElementById('inpAdminTambahEmail').value.trim().toLowerCase();
+        const pin = document.getElementById('inpAdminTambahPin').value.trim();
+        const pinConfirm = document.getElementById('inpAdminTambahPinConfirm').value.trim();
+
+        if (!nama || nama.length < 3) return Swal.fire('Perhatian', 'Nama harus minimal 3 karakter.', 'warning');
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return Swal.fire('Perhatian', 'Format email tidak valid.', 'warning');
+        if (!/^\d{6}$/.test(pin)) return Swal.fire('Perhatian', 'PIN harus tepat 6 digit angka.', 'warning');
+        if (pin !== pinConfirm) return Swal.fire('Perhatian', 'Konfirmasi PIN tidak cocok.', 'warning');
+
+        const btn = document.getElementById('btnAdminTambahKaryawan');
+        if (btn) btn.disabled = true;
+
+        if (typeof google === 'undefined') {
+            if (btn) btn.disabled = false;
+            Swal.fire('Info', 'Fitur ini hanya bisa diuji saat terhubung ke backend Apps Script.', 'info');
+            return;
+        }
+
+        google.script.run
+            .withSuccessHandler(res => {
+                if (btn) btn.disabled = false;
+                if (res && res.error) { Swal.fire('Gagal', res.error, 'error'); return; }
+                Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Karyawan baru berhasil ditambahkan.', confirmButtonColor: '#177355' })
+                    .then(() => {
+                        const form = document.getElementById('formAdminTambahKaryawan');
+                        if (form) form.reset();
+                    });
+                db = res || db;
+                renderKelolaKaryawan();
+            })
+            .withFailureHandler(err => {
+                if (btn) btn.disabled = false;
+                handleApiError(err);
+            })
+            .adminAddUser(sessionToken, { nama, email, pin });
+    }
+
+    function editKaryawan(userId) {
+        const user = db.users.find(u => u.User_ID === userId);
+        if (!user || user.Role !== 'User') return;
+
+        Swal.fire({
+            title: 'Edit Karyawan',
+            width: 420,
+            html: `
+                <div class="text-left">
+                    <div class="mb-3">
+                        <label class="block text-xs font-semibold text-wahdah-700 mb-1">Nama Karyawan</label>
+                        <input id="swalEditNama" type="text" value="${escapeHtml(user.Nama)}" class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white" style="box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-wahdah-700 mb-1">Email</label>
+                        <input id="swalEditEmail" type="email" value="${escapeHtml(user.User_ID)}" class="w-full rounded-xl border border-wahdah-200 px-3 py-2.5 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none bg-white" style="box-sizing:border-box;">
+                    </div>
+                </div>
+            `,
+            confirmButtonText: 'Simpan',
+            confirmButtonColor: '#177355',
+            showCancelButton: true,
+            cancelButtonText: 'Batal',
+            focusConfirm: false,
+            preConfirm: () => {
+                const nama = (document.getElementById('swalEditNama').value || '').trim();
+                const email = (document.getElementById('swalEditEmail').value || '').trim().toLowerCase();
+                if (!nama || nama.length < 3) { Swal.showValidationMessage('Nama harus minimal 3 karakter.'); return false; }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { Swal.showValidationMessage('Format email tidak valid.'); return false; }
+                return { nama, email };
+            }
+        }).then(result => {
+            if (!result.isConfirmed || !result.value) return;
+            const { nama, email } = result.value;
+            if (nama === user.Nama && email === user.User_ID) return;
+
+            if (typeof google === 'undefined') {
+                Swal.fire('Info', 'Fitur ini hanya bisa diuji saat terhubung ke backend Apps Script.', 'info');
+                return;
+            }
+
+            google.script.run
+                .withSuccessHandler(res => {
+                    if (res && res.error) { Swal.fire('Gagal', res.error, 'error'); return; }
+                    Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Data karyawan berhasil diperbarui.', confirmButtonColor: '#177355' });
+                    db = res || db;
+                    renderKelolaKaryawan();
+                })
+                .withFailureHandler(err => handleApiError(err))
+                .adminUpdateUser(sessionToken, { userId: user.User_ID, nama, email });
+        });
+    }
+
+    function deleteKaryawan(userId) {
+        const user = db.users.find(u => u.User_ID === userId);
+        if (!user || user.Role !== 'User') return;
+
+        Swal.fire({
+            title: 'Hapus Karyawan?',
+            icon: 'warning',
+            html: `
+                <div class="text-left text-sm text-wahdah-700">
+                    <p class="mb-2">Anda akan menghapus karyawan <strong>${escapeHtml(user.Nama)}</strong> beserta SELURUH datanya:</p>
+                    <ul class="list-disc list-inside space-y-1 text-wahdah-600">
+                        <li>Laporan tugas harian</li>
+                        <li>Laporan piket kebersihan</li>
+                        <li>Data kehadiran bulanan</li>
+                        <li>Penilaian kedisiplinan</li>
+                        <li>Sesi login yang aktif</li>
+                    </ul>
+                    <p class="mt-2 font-semibold text-red-600">Tindakan ini PERMANEN dan tidak dapat dibatalkan. Poin di leaderboard akan ikut berubah.</p>
+                </div>
+            `,
+            confirmButtonText: 'Ya, Hapus Permanen',
+            confirmButtonColor: '#dc2625',
+            cancelButtonText: 'Batal',
+            showCancelButton: true,
+            focusConfirm: false
+        }).then(result => {
+            if (!result.isConfirmed) return;
+
+            if (typeof google === 'undefined') {
+                Swal.fire('Info', 'Fitur ini hanya bisa diuji saat terhubung ke backend Apps Script.', 'info');
+                return;
+            }
+
+            google.script.run
+                .withSuccessHandler(res => {
+                    if (res && res.error) { Swal.fire('Gagal', res.error, 'error'); return; }
+                    Swal.fire({ icon: 'success', title: 'Terhapus', text: 'Karyawan dan seluruh datanya berhasil dihapus.', confirmButtonColor: '#177355' });
+                    db = res || db;
+                    renderKelolaKaryawan();
+                })
+                .withFailureHandler(err => handleApiError(err))
+                .adminDeleteUser(sessionToken, userId);
+        });
+    }
+
+    function handleLupaPin() {
+        Swal.fire({
+            icon: 'info',
+            title: 'Lupa PIN?',
+            text: 'Untuk mereset PIN, silakan hubungi Admin melalui WhatsApp.',
+            confirmButtonText: 'Hubungi Admin',
+            confirmButtonColor: '#177355',
+            showCancelButton: true,
+            cancelButtonText: 'Tutup'
+        }).then(result => {
+            if (result.isConfirmed) {
+                window.open('https://wa.me/' + APP_CONFIG.waAdmin, '_blank', 'noopener');
+            }
         });
     }
 
@@ -2059,6 +2319,11 @@
         if(viewId === 'viewAdminResetPin') {
             populateAdminResetPinDropdown();
         }
+        if(viewId === 'viewAdminKelolaKaryawan') {
+            renderKelolaKaryawan();
+            const formTambah = document.getElementById('formAdminTambahKaryawan');
+            if (formTambah) formTambah.reset();
+        }
     }
 
     // Render ulang view yang sedang aktif TANPA mereset filter/halaman yang
@@ -2095,6 +2360,9 @@
                 break;
             case 'viewLeaderboardTotal':
                 renderLeaderboardAkumulasi();
+                break;
+            case 'viewAdminKelolaKaryawan':
+                renderKelolaKaryawan();
                 break;
         }
     }

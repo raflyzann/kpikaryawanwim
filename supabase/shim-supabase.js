@@ -66,7 +66,10 @@
         setConfig:             { rpc: 'kpi_set_config',          params: ['p_token', 'p_key', 'p_value'] },
         setUserRole:           { rpc: 'kpi_set_user_role',       params: ['p_token', 'p_email', 'p_role'] },
         setUserActive:         { rpc: 'kpi_set_user_active',     params: ['p_token', 'p_email', 'p_active'] },
-        getActivityLog:        { rpc: 'kpi_get_activity_log',    params: ['p_token', 'p_limit'] }
+        getActivityLog:        { rpc: 'kpi_get_activity_log',    params: ['p_token', 'p_limit'] },
+        adminAddUser:          { rpc: 'kpi_admin_add_user',      params: ['p_token', 'p_data'] },
+        adminUpdateUser:       { rpc: 'kpi_admin_update_user',   params: ['p_token', 'p_data'] },
+        adminDeleteUser:       { rpc: 'kpi_admin_delete_user',   params: ['p_token', 'p_id'] }
     };
 
     /** Panggil RPC PostgREST dan normalisasi balasan error-nya. */
