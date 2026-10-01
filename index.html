@@ -135,6 +135,11 @@
                 <span>Leaderboard Total Poin</span>
             </button>
 
+            <button type="button" id="navLeaderboardPersen" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only operator-only hidden" onclick="switchView('viewLeaderboardPersen', this)">
+                <i class="fa-solid fa-percent w-5 text-center"></i>
+                <span>Leaderboard Total Nilai</span>
+            </button>
+
             <button type="button" id="navAdminKelolaKaryawan" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-wahdah-100 hover:bg-white/10 transition-colors admin-only hidden" onclick="switchView('viewAdminKelolaKaryawan', this)">
                 <i class="fa-solid fa-users-gear w-5 text-center"></i>
                 <span>Kelola Karyawan</span>
@@ -429,9 +434,10 @@
                         <div class="flex flex-col md:flex-row gap-3 items-end">
                             <div class="flex-1 w-full">
                                 <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Laporan</label>
-                                <select id="uhFilterJenis" class="w-full rounded-lg border border-wahdah-200 px-3 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
+                                <select id="uhFilterJenis" onchange="paginationState.userHistory.page = 1; renderUserHistory()" class="w-full rounded-lg border border-wahdah-200 px-3 py-1.5 text-xs focus:ring-1 focus:ring-wahdah-400 outline-none bg-white">
                                     <option value="ALL">Semua Laporan</option>
                                     <option value="Task">Laporan Tugas</option>
+                                    <option value="Penugasan">Laporan Penugasan</option>
                                     <option value="Piket">Laporan Piket</option>
                                 </select>
                             </div>
@@ -522,6 +528,7 @@
                                 <select id="adminQueueFilterJenis" class="w-full sm:w-40 text-xs border border-wahdah-200 rounded-lg px-2 py-1.5 focus:ring-1 focus:ring-wahdah-400 outline-none bg-white" onchange="paginationState.adminQueue.page = 1; adminQueueSelectedIds.clear(); renderAdminQueue()">
                                     <option value="ALL">Semua Laporan</option>
                                     <option value="Task">Laporan Tugas</option>
+                                    <option value="Penugasan">Laporan Penugasan</option>
                                     <option value="Piket">Laporan Piket</option>
                                 </select>
                             </div>
@@ -605,6 +612,7 @@
                                 <select id="adminFilterJenis" class="w-full text-xs border border-wahdah-200 rounded-lg px-2 py-2 focus:ring-1 focus:ring-wahdah-400 outline-none bg-white" onchange="paginationState.adminHistory.page = 1; renderAdminHistory()">
                                     <option value="ALL">Semua Laporan</option>
                                     <option value="Task">Laporan Tugas</option>
+                                    <option value="Penugasan">Laporan Penugasan</option>
                                     <option value="Piket">Laporan Piket</option>
                                 </select>
                             </div>
@@ -1064,39 +1072,11 @@
                     </button>
                 </div>
 
-                <!-- Summary: Karyawan dengan Poin Tertinggi (Persen) -->
-                <div id="ltTopSummaryCard" class="bg-gradient-to-br from-wahdah-900 via-wahdah-800 to-wahdah-950 rounded-2xl shadow-soft p-6 text-white pattern-bg">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div>
-                            <p class="text-wahdah-200 text-xs font-semibold mb-1 flex items-center gap-1.5">
-                                <i class="fa-solid fa-crown text-gold-400"></i> Karyawan dengan Poin Tertinggi (Persen)
-                            </p>
-                            <p id="ltTopSummaryName" class="text-xl font-bold break-words">-</p>
-                            <p id="ltTopSummaryPeriod" class="text-[11px] text-wahdah-300 mt-1">Semua periode</p>
-                        </div>
-                        <div class="flex flex-col items-start md:items-end gap-3">
-                            <div class="flex items-baseline gap-2">
-                                <span id="ltTopSummaryPersen" class="text-4xl font-bold">0</span>
-                                <span class="text-sm text-wahdah-300">%</span>
-                            </div>
-                            <div id="ltTopSummaryBreakdown" class="flex items-center gap-2 text-[11px] font-semibold flex-wrap"></div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Grafik Peringkat Karyawan -->
                 <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5">
                     <h3 class="text-sm font-bold text-wahdah-900 mb-4">Grafik Peringkat Karyawan</h3>
                     <div class="relative h-64 md:h-80">
                         <canvas id="leaderboardTotalChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Grafik Peringkat Karyawan (Persen) -->
-                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5">
-                    <h3 class="text-sm font-bold text-wahdah-900 mb-4">Grafik Peringkat Karyawan (Persen)</h3>
-                    <div class="relative h-64 md:h-80">
-                        <canvas id="leaderboardPersenChart"></canvas>
                     </div>
                 </div>
 
@@ -1127,8 +1107,57 @@
                     </div>
                     <div id="leaderboardAkumulasi-pagination" class="flex items-center justify-between px-5 py-3 border-t border-wahdah-100 bg-white"></div>
                 </div>
+            </section>
 
-                <!-- Leaderboard Presentasi Persen (Kinerja 50% + Kehadiran 30% + Kedisiplinan 20%) -->
+            <!-- ================= VIEW: LEADERBOARD TOTAL NILAI ================= -->
+            <section id="viewLeaderboardPersen" class="view-section hidden view-fade max-w-6xl mx-auto space-y-6">
+                <!-- Filter Rentang Tanggal -->
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-4 flex flex-col md:flex-row gap-4 items-end">
+                    <div class="flex-1 w-full">
+                        <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Mulai Tanggal</label>
+                        <input type="date" id="lpFilterStart" class="w-full rounded-xl border border-wahdah-200 px-3 py-2 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none">
+                    </div>
+                    <div class="flex-1 w-full">
+                        <label class="block text-xs font-semibold text-wahdah-700 mb-1.5">Sampai Tanggal</label>
+                        <input type="date" id="lpFilterEnd" class="w-full rounded-xl border border-wahdah-200 px-3 py-2 text-sm focus:ring-2 focus:ring-wahdah-400 outline-none">
+                    </div>
+                    <button type="button" class="w-full md:w-auto bg-wahdah-600 hover:bg-wahdah-700 text-white font-medium text-sm rounded-xl px-4 py-2 transition-colors shadow-sm" onclick="paginationState.persentaseBoard.page = 1; renderLeaderboardPersentase()">
+                        Terapkan
+                    </button>
+                    <button type="button" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-sm rounded-xl px-4 py-2 transition-colors border border-gray-200" onclick="resetLeaderboardPersenFilter()">
+                        Reset
+                    </button>
+                </div>
+
+                <!-- Summary: Karyawan dengan Poin Tertinggi (Persen) -->
+                <div id="ltTopSummaryCard" class="bg-gradient-to-br from-wahdah-900 via-wahdah-800 to-wahdah-950 rounded-2xl shadow-soft p-6 text-white pattern-bg">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <p class="text-wahdah-200 text-xs font-semibold mb-1 flex items-center gap-1.5">
+                                <i class="fa-solid fa-crown text-gold-400"></i> Karyawan dengan Poin Tertinggi (Persen)
+                            </p>
+                            <p id="ltTopSummaryName" class="text-xl font-bold break-words">-</p>
+                            <p id="ltTopSummaryPeriod" class="text-[11px] text-wahdah-300 mt-1">Semua periode</p>
+                        </div>
+                        <div class="flex flex-col items-start md:items-end gap-3">
+                            <div class="flex items-baseline gap-2">
+                                <span id="ltTopSummaryPersen" class="text-4xl font-bold">0</span>
+                                <span class="text-sm text-wahdah-300">%</span>
+                            </div>
+                            <div id="ltTopSummaryBreakdown" class="flex items-center gap-2 text-[11px] font-semibold flex-wrap"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grafik Peringkat Karyawan (Persen) -->
+                <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 p-5">
+                    <h3 class="text-sm font-bold text-wahdah-900 mb-4">Grafik Peringkat Karyawan (Persen)</h3>
+                    <div class="relative h-64 md:h-80">
+                        <canvas id="leaderboardPersenChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Leaderboard Total Nilai (Kinerja 50% + Kehadiran 30% + Kedisiplinan 20%) -->
                 <div class="bg-white rounded-2xl shadow-soft border border-wahdah-100 overflow-hidden">
                     <div class="px-5 py-4 border-b border-wahdah-100 bg-wahdah-50/50">
                         <h3 class="text-sm font-bold text-wahdah-900 flex items-center gap-2">
@@ -1142,20 +1171,20 @@
                                 <tr class="text-wahdah-700 text-xs uppercase tracking-wide">
                                     <th class="text-center font-semibold px-5 py-4 w-20">Peringkat</th>
                                     <th class="text-left font-semibold px-5 py-4">Nama Karyawan</th>
-                                    <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Poin Kinerja</th>
-                                    <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Poin Kedisiplinan</th>
-                                    <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Poin Kehadiran</th>
-                                    <th class="text-right font-semibold px-5 py-4 w-40">Total Poin Keseluruhan</th>
+                                    <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Nilai Kinerja</th>
+                                    <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Nilai Kedisiplinan</th>
+                                    <th class="text-right font-semibold px-5 py-4 whitespace-nowrap">Nilai Kehadiran</th>
+                                    <th class="text-right font-semibold px-5 py-4 w-40">Total Nilai Keseluruhan</th>
                                  </tr>
                              </thead>
                              <tbody id="leaderboardPersentase-tbody" class="divide-y divide-wahdah-50">
-                                <!-- Injected via JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                    <div id="leaderboardPersentase-pagination" class="flex items-center justify-between px-5 py-3 border-t border-wahdah-100 bg-white"></div>
-                </div>
-            </section>
+                                 <!-- Injected via JS -->
+                             </tbody>
+                         </table>
+                     </div>
+                     <div id="leaderboardPersentase-pagination" class="flex items-center justify-between px-5 py-3 border-t border-wahdah-100 bg-white"></div>
+                 </div>
+             </section>
 
             <!-- ================= VIEW: ADMIN (RESET PIN KARYAWAN) ================= -->
             <section id="viewAdminResetPin" class="view-section hidden view-fade max-w-3xl mx-auto space-y-6">
@@ -2316,6 +2345,9 @@
         if(viewId === 'viewLeaderboardTotal') {
             resetLeaderboardTotalFilter();
         }
+        if(viewId === 'viewLeaderboardPersen') {
+            resetLeaderboardPersenFilter();
+        }
         if(viewId === 'viewAdminResetPin') {
             populateAdminResetPinDropdown();
         }
@@ -2360,6 +2392,9 @@
                 break;
             case 'viewLeaderboardTotal':
                 renderLeaderboardAkumulasi();
+                break;
+            case 'viewLeaderboardPersen':
+                renderLeaderboardPersentase();
                 break;
             case 'viewAdminKelolaKaryawan':
                 renderKelolaKaryawan();
@@ -2775,11 +2810,13 @@
         let history = [];
         let _seq = 0;
 
-        if (filterJenis === 'ALL' || filterJenis === 'Task') {
+        if (filterJenis === 'ALL' || filterJenis === 'Task' || filterJenis === 'Penugasan') {
             db.jobdesk.filter(t => t.User_ID === currentUser.User_ID).forEach(t => {
                 let itemDate = new Date(t.Tanggal);
                 if(itemDate >= startDate && itemDate <= endDate) {
                     const desc = t.Deskripsi_Tugas || '';
+                    const parsedPenugasan = formatTugasDeskripsi(desc);
+                    if (filterJenis === 'Penugasan' && !parsedPenugasan.adminNama) return;
                     const statusKerja = t.Status_Kerja || 'Selesai';
                     if ((filterProgres === 'ALL' || statusKerja === filterProgres) && (!searchText || desc.toLowerCase().includes(searchText))) {
                         history.push({ type: 'Task', id: t.Task_ID, date: t.Tanggal, desc: desc, status: t.Status, poin: t.Poin, statusKerja: statusKerja, catatan: t.Catatan_Admin || '', _seq: _seq++ });
@@ -3451,6 +3488,7 @@
         renderRiwayatSeragam();
         renderLeaderboardSeragam();
         renderLeaderboardAkumulasi();
+        if (document.getElementById('leaderboardPersentase-tbody')) renderLeaderboardPersentase();
         Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: msg, showConfirmButton: false, timer: 1500});
     }
 
@@ -3467,10 +3505,12 @@
         let queue = [];
         let _seq = 0;
 
-        if (filterJenis === 'ALL' || filterJenis === 'Task') {
+        if (filterJenis === 'ALL' || filterJenis === 'Task' || filterJenis === 'Penugasan') {
             db.jobdesk.filter(t => t.Status === 'Pending').forEach(t => {
                 if ((filterUserId === 'ALL' || t.User_ID === filterUserId) && (filterProgres === 'ALL' || (t.Status_Kerja || 'Selesai') === filterProgres)) {
                     const desc = t.Deskripsi_Tugas || '';
+                    const parsedPenugasan = formatTugasDeskripsi(desc);
+                    if (filterJenis === 'Penugasan' && !parsedPenugasan.adminNama) return;
                     if (!searchText || desc.toLowerCase().includes(searchText)) {
                         queue.push({ type: 'Task', id: t.Task_ID, userId: t.User_ID, date: t.Tanggal, desc: desc, statusKerja: t.Status_Kerja || 'Selesai', catatan: t.Catatan_Admin || '', _seq: _seq++ });
                     }
@@ -3710,12 +3750,14 @@
         let history = [];
         let _seq = 0;
 
-        if (filterJenis === 'ALL' || filterJenis === 'Task') {
+        if (filterJenis === 'ALL' || filterJenis === 'Task' || filterJenis === 'Penugasan') {
             db.jobdesk.forEach(t => {
                 if(filterUserId === 'ALL' || t.User_ID === filterUserId) {
                     let itemDate = new Date(t.Tanggal);
                     if(itemDate >= startDate && itemDate <= endDate && (filterProgres === 'ALL' || (t.Status_Kerja || 'Selesai') === filterProgres)) {
                         const desc = t.Deskripsi_Tugas || '';
+                        const parsedPenugasan = formatTugasDeskripsi(desc);
+                        if (filterJenis === 'Penugasan' && !parsedPenugasan.adminNama) return;
                         if (!searchText || desc.toLowerCase().includes(searchText)) {
                             history.push({ id: t.Task_ID, type: 'Task', userId: t.User_ID, date: t.Tanggal, desc: desc, status: t.Status, poin: t.Poin, statusKerja: t.Status_Kerja || 'Selesai', catatan: t.Catatan_Admin || '', _seq: _seq++ });
                         }
@@ -4288,6 +4330,7 @@
         document.getElementById('formKehadiran').reset();
         renderLeaderboardKehadiran();
         renderLeaderboardAkumulasi();
+        if (document.getElementById('leaderboardPersentase-tbody')) renderLeaderboardPersentase();
         setKehadiranButtonProcessing(false);
 
         Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: isUpdate ? 'Nilai kehadiran diperbarui!' : 'Nilai kehadiran disimpan!', showConfirmButton: false, timer: 1500 });
@@ -4432,10 +4475,11 @@
          document.querySelectorAll('.seragam-user-checkbox').forEach(cb => { cb.checked = false; });
          document.querySelectorAll('.kedisiplinan-item-checkbox').forEach(cb => { cb.checked = false; });
          updateSeragamUserSelectUI();
-         updateKedisiplinanItemSelectUI();
-         renderLeaderboardSeragam();
-         renderLeaderboardAkumulasi();
-         setSeragamButtonProcessing(false);
+          updateKedisiplinanItemSelectUI();
+          renderLeaderboardSeragam();
+          renderLeaderboardAkumulasi();
+          if (document.getElementById('leaderboardPersentase-tbody')) renderLeaderboardPersentase();
+          setSeragamButtonProcessing(false);
 
          const isSingular = savedCount === 1;
          let title = isSingular ? 'Penilaian kedisiplinan disimpan!' : `Penilaian kedisiplinan tersimpan untuk ${savedCount} karyawan!`;
@@ -4687,6 +4731,7 @@
                 }
                 renderLeaderboardSeragam();
                 renderLeaderboardAkumulasi();
+                if (document.getElementById('leaderboardPersentase-tbody')) renderLeaderboardPersentase();
                 Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Poin kedisiplinan diperbarui', showConfirmButton: false, timer: 1500 });
                 return;
             }
@@ -4695,6 +4740,7 @@
                 db = res;
                 renderLeaderboardSeragam();
                 renderLeaderboardAkumulasi();
+                if (document.getElementById('leaderboardPersentase-tbody')) renderLeaderboardPersentase();
                 Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Poin kedisiplinan diperbarui', showConfirmButton: false, timer: 1500 });
             }).withFailureHandler(err => {
                 console.error(err);
@@ -4719,6 +4765,7 @@
                 db.seragam = db.seragam.filter(s => s.Seragam_ID !== id);
                 renderLeaderboardSeragam();
                 renderLeaderboardAkumulasi();
+                if (document.getElementById('leaderboardPersentase-tbody')) renderLeaderboardPersentase();
                 Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Inputan kedisiplinan dihapus', showConfirmButton: false, timer: 1500 });
                 return;
             }
@@ -4727,6 +4774,7 @@
                 db = res;
                 renderLeaderboardSeragam();
                 renderLeaderboardAkumulasi();
+                if (document.getElementById('leaderboardPersentase-tbody')) renderLeaderboardPersentase();
                 Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Inputan kedisiplinan dihapus', showConfirmButton: false, timer: 1500 });
             }).withFailureHandler(err => {
                 console.error(err);
@@ -4740,6 +4788,13 @@
         document.getElementById('ltFilterEnd').value = '';
         paginationState.akumulasiBoard.page = 1;
         renderLeaderboardAkumulasi();
+    }
+
+    function resetLeaderboardPersenFilter() {
+        document.getElementById('lpFilterStart').value = '';
+        document.getElementById('lpFilterEnd').value = '';
+        paginationState.persentaseBoard.page = 1;
+        renderLeaderboardPersentase();
     }
 
     function renderLeaderboardAkumulasi() {
@@ -4834,15 +4889,14 @@
         }).join('');
 
         renderPagination('leaderboardAkumulasi-pagination', paginationState.akumulasiBoard, totalPages, 'renderLeaderboardAkumulasi');
-        renderLeaderboardPersentase();
     }
 
     function renderLeaderboardPersentase() {
         const boardBody = document.getElementById('leaderboardPersentase-tbody');
         if (!boardBody) return;
 
-        const startDateStr = document.getElementById('ltFilterStart') ? document.getElementById('ltFilterStart').value : '';
-        const endDateStr = document.getElementById('ltFilterEnd') ? document.getElementById('ltFilterEnd').value : '';
+        const startDateStr = document.getElementById('lpFilterStart') ? document.getElementById('lpFilterStart').value : '';
+        const endDateStr = document.getElementById('lpFilterEnd') ? document.getElementById('lpFilterEnd').value : '';
         let startDate = startDateStr ? new Date(startDateStr) : new Date('2000-01-01');
         let endDate = endDateStr ? new Date(endDateStr) : new Date('2100-01-01');
         endDate.setHours(23, 59, 59, 999);
