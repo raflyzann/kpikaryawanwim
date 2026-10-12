@@ -480,8 +480,9 @@
                     <p
                         class="text-xs text-gray-500 flex items-start sm:items-center gap-1.5 pt-1 border-t border-wahdah-50">
                         <i class="fa-solid fa-circle-info text-wahdah-600 mt-0.5 sm:mt-0"></i>
-                        <span>Nilai Kinerja &amp; Kedisiplinan dihitung dari target mingguan (6 hari kerja). Isi Mulai
-                            &amp; Sampai Tanggal untuk melihat persentasenya.</span>
+                        <span>Nilai Kinerja = (poin laporan yang sudah disetujui admin) / (jumlah laporan yang diinput x
+                            2) x 50%. Nilai Kedisiplinan tetap memakai target mingguan (18 poin per 6 hari kerja) -- isi
+                            Mulai &amp; Sampai Tanggal untuk melihat kedua persentase ini.</span>
                     </p>
                 </div>
             </section>
@@ -495,7 +496,8 @@
                             class="text-sm font-bold text-wahdah-900 mb-4 flex items-center gap-2 border-b border-wahdah-50 pb-3">
                             <div
                                 class="w-8 h-8 rounded-lg bg-wahdah-50 text-wahdah-600 flex items-center justify-center">
-                                <i class="fa-solid fa-keyboard"></i></div>
+                                <i class="fa-solid fa-keyboard"></i>
+                            </div>
                             Catat Tugas Harian
                         </h3>
                         <form id="formJobdesk" class="flex-1 flex flex-col space-y-4" onsubmit="submitJobdesk(event)">
@@ -1470,8 +1472,9 @@
                     <p
                         class="text-xs text-gray-500 flex items-start sm:items-center gap-1.5 pt-1 border-t border-wahdah-50">
                         <i class="fa-solid fa-circle-info text-wahdah-600 mt-0.5 sm:mt-0"></i>
-                        <span>Nilai Kinerja &amp; Kedisiplinan dihitung dari target mingguan (6 hari kerja). Isi Mulai &amp; Sampai Tanggal untuk melihat
-                            persentasenya.</span>
+                        <span>Nilai Kinerja = (poin laporan yang sudah disetujui admin) / (jumlah laporan yang diinput x
+                            2) x 50%. Nilai Kedisiplinan tetap memakai target mingguan (18 poin per 6 hari kerja) -- isi
+                            Mulai &amp; Sampai Tanggal untuk melihat kedua persentase ini.</span>
                     </p>
                 </div>
 
@@ -1692,6 +1695,7 @@
                 { key: 'alas_kaki', label: 'Kerapian Penempatan Alas Kaki' }
             ],
             bobotPersen: { kinerja: 50, kehadiran: 30, seragam: 20 },
+            poinStandarPerLaporanKinerja: 2, // sama dengan nilai "Mudah", dipakai sebagai baseline penyebut
             targetMingguan: { kinerja: 50, kedisiplinan: 18 },
             maxLoginAttempts: 5,
             waAdmin: '6282192225604'
@@ -3000,6 +3004,13 @@
             myJobs.forEach(t => total += (t.Poin || 0));
             myPikets.forEach(p => total += (p.Poin || 0));
 
+            // Jumlah SELURUH laporan Kinerja (Task + Piket) milik user dalam rentang tanggal,
+            // TANPA filter Status (Approved maupun Pending dihitung semua).
+            // Dipakai sebagai penyebut (potensi) persen Kinerja yang baru.
+            const myJobsSemua = db.jobdesk.filter(t => t.User_ID === currentUser.User_ID && new Date(t.Tanggal) >= startDate && new Date(t.Tanggal) <= endDate);
+            const myPiketsSemua = db.piket.filter(p => p.User_ID === currentUser.User_ID && new Date(p.Tanggal) >= startDate && new Date(p.Tanggal) <= endDate);
+            const jumlahLaporanKinerjaUser = myJobsSemua.length + myPiketsSemua.length;
+
             document.getElementById('userTotalPoin').textContent = total;
 
             // Total Poin Kehadiran: jumlahkan nilai kehadiran milik user yang
@@ -3030,11 +3041,13 @@
             const totalSeragamEl = document.getElementById('userTotalPoinSeragam');
             if (totalSeragamEl) totalSeragamEl.textContent = totalSeragam;
 
-            // Presentasi Persen gabungan, memakai bobot & target mingguan dari APP_CONFIG
-            // (default: Kinerja 50% [target 50/minggu] + Kehadiran 30% + Kedisiplinan 20% [target 18/minggu]).
+            // Presentasi Persen gabungan, memakai bobot dari APP_CONFIG.
+            // Kinerja: (poin laporan yang sudah Approved) / (jumlah laporan x poin standar per laporan) x bobot,
+            // dibatasi maksimal bobot (50%). Kehadiran & Kedisiplinan (seragam) tetap memakai rumus sebelumnya.
             const bobot = APP_CONFIG.bobotPersen;
-            const { targetKinerja, targetKedisiplinan } = hitungTargetPeriode(startDateStr, endDateStr);
-            const persenKinerjaUser = targetKinerja > 0 ? Math.max(0, Math.min((total / targetKinerja) * bobot.kinerja, bobot.kinerja)) : 0;
+            const { targetKedisiplinan } = hitungTargetPeriode(startDateStr, endDateStr);
+            const penyebutKinerjaUser = jumlahLaporanKinerjaUser * APP_CONFIG.poinStandarPerLaporanKinerja;
+            const persenKinerjaUser = penyebutKinerjaUser > 0 ? Math.max(0, Math.min((total / penyebutKinerjaUser) * bobot.kinerja, bobot.kinerja)) : 0;
             const persenKehadiranUser = Math.max(0, Math.min(totalKehadiran * (bobot.kehadiran / 100), bobot.kehadiran));
             const persenSeragamUser = targetKedisiplinan > 0 ? Math.max(0, Math.min((totalSeragam / targetKedisiplinan) * bobot.seragam, bobot.seragam)) : 0;
             const persentase = persenKinerjaUser + persenKehadiranUser + persenSeragamUser;
@@ -5290,7 +5303,7 @@
             const scores = {};
 
             db.users.filter(u => u.Role === 'User').forEach(u => {
-                scores[u.User_ID] = { userId: u.User_ID, nama: u.Nama, poinKinerja: 0, poinSeragam: 0, poinKehadiran: 0, totalPersen: 0 };
+                scores[u.User_ID] = { userId: u.User_ID, nama: u.Nama, poinKinerja: 0, poinSeragam: 0, poinKehadiran: 0, jumlahLaporanKinerja: 0, totalPersen: 0 };
             });
 
             const addKinerja = (dataArray) => {
@@ -5303,6 +5316,20 @@
             };
             addKinerja(db.jobdesk);
             addKinerja(db.piket);
+
+            // Jumlah SELURUH laporan Kinerja (Task + Piket) yang diinput karyawan dalam
+            // rentang tanggal, TANPA filter Status (Approved maupun Pending dihitung semua).
+            // Dipakai sebagai penyebut (potensi) persen Kinerja yang baru.
+            const hitungJumlahLaporan = (dataArray) => {
+                dataArray.forEach(item => {
+                    const itemDate = new Date(item.Tanggal);
+                    if (scores[item.User_ID] && itemDate >= startDate && itemDate <= endDate) {
+                        scores[item.User_ID].jumlahLaporanKinerja += 1;
+                    }
+                });
+            };
+            hitungJumlahLaporan(db.jobdesk);
+            hitungJumlahLaporan(db.piket);
 
             seragamData.forEach(s => {
                 if (!scores[s.User_ID]) return;
@@ -5322,12 +5349,15 @@
                 }
             });
 
-            // Presentasi Persen, memakai bobot & target mingguan dari APP_CONFIG
-            // (default: Kinerja 50% [target 50/minggu] + Kehadiran 30% + Kedisiplinan 20% [target 18/minggu]).
+            // Presentasi Persen, memakai bobot dari APP_CONFIG.
+            // Kinerja: (poin laporan yang sudah Approved) / (jumlah laporan x poin standar per laporan) x bobot,
+            // dibatasi maksimal bobot (50%) karena poin aktual Approved bisa lebih tinggi dari asumsi standar.
+            // Kehadiran & Kedisiplinan (seragam) tetap memakai rumus sebelumnya.
             const bobot = APP_CONFIG.bobotPersen;
-            const { targetKinerja, targetKedisiplinan } = hitungTargetPeriode(startDateStr, endDateStr);
+            const { targetKedisiplinan } = hitungTargetPeriode(startDateStr, endDateStr);
             Object.values(scores).forEach(s => {
-                s.persenKinerja = targetKinerja > 0 ? Math.max(0, Math.min((s.poinKinerja / targetKinerja) * bobot.kinerja, bobot.kinerja)) : 0;
+                const penyebutKinerja = s.jumlahLaporanKinerja * APP_CONFIG.poinStandarPerLaporanKinerja;
+                s.persenKinerja = penyebutKinerja > 0 ? Math.max(0, Math.min((s.poinKinerja / penyebutKinerja) * bobot.kinerja, bobot.kinerja)) : 0;
                 s.persenKehadiran = Math.max(0, Math.min(s.poinKehadiran * (bobot.kehadiran / 100), bobot.kehadiran));
                 s.persenSeragam = targetKedisiplinan > 0 ? Math.max(0, Math.min((s.poinSeragam / targetKedisiplinan) * bobot.seragam, bobot.seragam)) : 0;
                 s.totalPersen = s.persenKinerja + s.persenKehadiran + s.persenSeragam;
