@@ -2191,8 +2191,7 @@
 
             if (users.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-wahdah-400">Belum ada karyawan.</td></tr>`;
-                const pagContainer = document.getElementById('kelola-karyawan-pagination');
-                if (pagContainer) pagContainer.innerHTML = '';
+                renderPagination('kelola-karyawan-pagination', paginationState.kelolaKaryawan, 1, 'renderKelolaKaryawan');
                 return;
             }
 
@@ -3246,7 +3245,7 @@
 
             if (history.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-wahdah-400">Belum ada riwayat aktivitas.</td></tr>`;
-                document.getElementById('user-history-pagination').innerHTML = '';
+                renderPagination('user-history-pagination', paginationState.userHistory, 1, 'renderUserHistory');
                 updateBulkActionUI();
                 return;
             }
@@ -3942,7 +3941,7 @@
 
             if (queue.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-wahdah-400">Tidak ada antrean persetujuan saat ini.</td></tr>`;
-                document.getElementById('admin-queue-pagination').innerHTML = '';
+                renderPagination('admin-queue-pagination', paginationState.adminQueue, 1, 'renderAdminQueue');
                 updateAdminBulkActionUI();
                 return;
             }
@@ -4182,7 +4181,7 @@
 
             if (history.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-wahdah-400">Belum ada riwayat aktivitas.</td></tr>`;
-                document.getElementById('admin-history-pagination').innerHTML = '';
+                renderPagination('admin-history-pagination', paginationState.adminHistory, 1, 'renderAdminHistory');
                 return;
             }
 
@@ -4283,7 +4282,7 @@
 
             if (history.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-wahdah-400">Belum ada riwayat penugasan yang Anda buat.</td></tr>`;
-                document.getElementById('penugasan-history-pagination').innerHTML = '';
+                renderPagination('penugasan-history-pagination', paginationState.penugasanHistory, 1, 'renderPenugasanHistory');
                 return;
             }
 
@@ -4521,7 +4520,7 @@
 
             if (sortedBoard.length === 0) {
                 boardBody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-wahdah-400">Belum ada data untuk periode ini.</td></tr>`;
-                document.getElementById('leaderboard-pagination').innerHTML = '';
+                renderPagination('leaderboard-pagination', paginationState.leaderboard, 1, 'renderLeaderboard');
                 return;
             }
 
@@ -4766,7 +4765,7 @@
 
             if (sortedBoard.length === 0) {
                 boardBody.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-wahdah-400">Belum ada data kehadiran untuk periode ini.</td></tr>`;
-                document.getElementById('leaderboardKehadiran-pagination').innerHTML = '';
+                renderPagination('leaderboardKehadiran-pagination', paginationState.kehadiranBoard, 1, 'renderLeaderboardKehadiran');
                 return;
             }
 
@@ -4942,7 +4941,7 @@
 
             if (sortedBoard.length === 0) {
                 boardBody.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-wahdah-400">Belum ada data kedisiplinan untuk periode ini.</td></tr>`;
-                document.getElementById('leaderboardSeragam-pagination').innerHTML = '';
+                renderPagination('leaderboardSeragam-pagination', paginationState.seragamBoard, 1, 'renderLeaderboardSeragam');
                 return;
             }
 
@@ -5010,7 +5009,7 @@
 
             if (history.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-wahdah-400">Belum ada riwayat inputan kedisiplinan untuk periode ini.</td></tr>`;
-                document.getElementById('riwayatSeragam-pagination').innerHTML = '';
+                renderPagination('riwayatSeragam-pagination', paginationState.seragamHistory, 1, 'renderRiwayatSeragam');
                 currentKedisiplinanIds = [];
                 updateKedisiplinanBulkActionUI();
                 return;
@@ -5254,7 +5253,7 @@
 
             if (sortedBoard.length === 0) {
                 boardBody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-wahdah-400">Belum ada data untuk ditampilkan.</td></tr>`;
-                document.getElementById('leaderboardAkumulasi-pagination').innerHTML = '';
+                renderPagination('leaderboardAkumulasi-pagination', paginationState.akumulasiBoard, 1, 'renderLeaderboardAkumulasi');
                 return;
             }
 
@@ -5373,7 +5372,7 @@
 
             if (sortedBoard.length === 0) {
                 boardBody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-wahdah-400">Belum ada data untuk ditampilkan.</td></tr>`;
-                document.getElementById('leaderboardPersentase-pagination').innerHTML = '';
+                renderPagination('leaderboardPersentase-pagination', paginationState.persentaseBoard, 1, 'renderLeaderboardPersentase');
                 return;
             }
 
@@ -5801,25 +5800,51 @@
             const container = document.getElementById(containerId);
             if (!container) return;
 
-            if (totalPages <= 1) {
-                container.innerHTML = `<span class="text-wahdah-400 text-xs font-medium">Menampilkan halaman 1 dari 1</span>`;
-                return;
-            }
-
-            container.innerHTML = `
-            <span class="text-wahdah-500 text-xs font-medium">Menampilkan halaman ${stateObj.page} dari ${totalPages}</span>
+            // Grup KIRI: dropdown "Item per halaman" (10/25/50/100).
+            // Selector memakai class generik (bukan id per-container) supaya aman
+            // meskipun containerId mengandung karakter yang tidak valid untuk CSS selector.
+            const currentPageSize = stateObj.pageSize || 10;
+            const pageSizeOptions = [10, 25, 50, 100]
+                .map(size => `<option value="${size}"${size === currentPageSize ? ' selected' : ''}>${size}</option>`)
+                .join('');
+            const leftGroup = `
             <div class="flex items-center gap-2">
-                <button type="button" class="w-8 h-8 rounded-lg border border-wahdah-200 text-wahdah-600 hover:bg-wahdah-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-colors btn-prev" ${stateObj.page <= 1 ? 'disabled' : ''}>
-                    <i class="fa-solid fa-chevron-left text-xs"></i>
-                </button>
-                <button type="button" class="w-8 h-8 rounded-lg border border-wahdah-200 text-wahdah-600 hover:bg-wahdah-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-colors btn-next" ${stateObj.page >= totalPages ? 'disabled' : ''}>
-                    <i class="fa-solid fa-chevron-right text-xs"></i>
-                </button>
-            </div>
-        `;
+                <span class="text-wahdah-500 text-xs font-medium whitespace-nowrap">Item per halaman</span>
+                <select class="page-size-select rounded-lg border border-wahdah-200 px-2 py-1 text-xs bg-white text-wahdah-600 cursor-pointer focus:ring-1 focus:ring-wahdah-400 outline-none">
+                    ${pageSizeOptions}
+                </select>
+            </div>`;
+
+            // Grup KANAN: teks "Halaman X dari Y" + tombol navigasi bulat.
+            // Tombol AKTIF: bulat penuh, latar wahdah solid, ikon putih, hover lebih gelap.
+            // Tombol NONAKTIF (disabled): bulat penuh, latar abu-abu muda, ikon abu-abu, tanpa hover.
+            const infoLabel = totalPages > 1 ? `Halaman ${stateObj.page} dari ${totalPages}` : 'Halaman 1 dari 1';
+            const prevClass = stateObj.page <= 1
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-wahdah-600 text-white hover:bg-wahdah-700';
+            const nextClass = stateObj.page >= totalPages
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-wahdah-600 text-white hover:bg-wahdah-700';
+            const rightGroup = `
+            <div class="flex items-center gap-3">
+                <span class="text-wahdah-500 text-xs font-medium whitespace-nowrap">${infoLabel}</span>
+                <div class="flex items-center gap-2">
+                    <button type="button" class="w-8 h-8 rounded-full flex items-center justify-center transition-colors btn-prev ${prevClass}" ${stateObj.page <= 1 ? 'disabled' : ''}>
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                    </button>
+                    <button type="button" class="w-8 h-8 rounded-full flex items-center justify-center transition-colors btn-next ${nextClass}" ${stateObj.page >= totalPages ? 'disabled' : ''}>
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+            </div>`;
+
+            // Grup kiri/kanan SAMA PERSIS di kedua kondisi (totalPages <= 1 maupun > 1)
+            // supaya posisi dropdown page-size tidak berpindah saat jumlah halaman berubah.
+            container.innerHTML = `${leftGroup}${rightGroup}`;
 
             const btnPrev = container.querySelector('.btn-prev');
             const btnNext = container.querySelector('.btn-next');
+            const selectPageSize = container.querySelector('select.page-size-select');
 
             if (btnPrev) {
                 btnPrev.addEventListener('click', () => {
@@ -5836,6 +5861,14 @@
                         stateObj.page++;
                         window[renderFunction]();
                     }
+                });
+            }
+
+            if (selectPageSize) {
+                selectPageSize.addEventListener('change', () => {
+                    stateObj.pageSize = parseInt(selectPageSize.value, 10);
+                    stateObj.page = 1;
+                    window[renderFunction]();
                 });
             }
         }
